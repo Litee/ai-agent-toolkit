@@ -1,0 +1,271 @@
+.specify/scripts/bash/check-task-prerequisites.sh
+.specify/scripts/bash/create-new-feature.sh
+.specify/scripts/bash/setup-plan.sh
+.venv/bin/pip install
+.venv/bin/pytest
+awk
+aws --version
+aws apigateway get-rest-apis
+aws athena get-query-execution
+aws athena get-table-metadata
+aws athena list-data-catalogs
+aws athena list-databases
+aws athena list-query-executions
+aws athena list-table-metadata
+aws autoscaling describe-auto-scaling-groups
+aws cloudformation describe-stacks
+aws cloudformation list-stacks
+aws cloudfront get-distribution
+aws cloudfront list-distributions
+aws cloudtrail describe-trails
+aws cloudtrail lookup-events
+aws cloudwatch describe-alarms
+aws cloudwatch describe-insight-rules
+aws cloudwatch get-dashboard
+aws cloudwatch get-metrics-statistics
+aws cloudwatch list-dashboards
+aws cloudwatch list-metrics
+aws configure get
+aws dynamodb describe-table
+aws dynamodb get-item
+aws dynamodb list-tables
+aws ec2 describe-images
+aws ec2 describe-instance-attribute
+aws ec2 describe-instance-status
+aws ec2 describe-instances
+aws ec2 describe-internet-gateways
+aws ec2 describe-key-pairs
+aws ec2 describe-network-acls
+aws ec2 describe-network-interfaces
+aws ec2 describe-route-tables
+aws ec2 describe-security-groups
+aws ec2 describe-snapshots
+aws ec2 describe-subnets
+aws ec2 describe-vpcs
+aws ec2 wait
+aws ecr describe-images
+aws ecr describe-repositories
+aws ecr list-images
+aws ecs describe-clusters
+aws ecs describe-services
+aws ecs describe-tasks
+aws ecs list-clusters
+aws ecs list-services
+aws ecs list-tasks
+aws elasticache describe-cache-clusters
+aws elasticache describe-replication-groups
+aws elb describe-load-balancers
+aws elbv2 describe-load-balancers
+aws elbv2 describe-target-groups
+aws emr list-clusters
+aws events describe-rule
+aws events list-rules
+aws firehose list-delivery-streams
+aws glue get-databases
+aws glue get-job-run
+aws glue get-jobs
+aws glue get-table
+aws glue get-tables
+aws iam get-policy
+aws iam get-role
+aws iam get-role-policy
+aws iam get-user
+aws iam list-attached-role-policies
+aws iam list-policies
+aws iam list-role-policies
+aws iam list-roles
+aws iam list-users
+aws kinesis list-streams
+aws lambda get-function
+aws lambda get-layer-version
+aws lambda list-functions
+aws lambda list-layers
+aws logs describe-destinations
+aws logs describe-export-tasks
+aws logs describe-insights
+aws logs describe-log-groups
+aws logs describe-log-streams
+aws logs describe-metric-filters
+aws logs describe-queries
+aws logs filter-log-events
+aws logs get-query-results
+aws logs start-query
+aws logs tail
+aws route53 list-hosted-zones
+aws route53 list-resource-record-sets
+aws s3 ls
+aws s3api get-bucket-lifecycle-configuration
+aws secretsmanager describe-secret
+aws secretsmanager list-secrets
+aws service-quotas
+aws sns list-topics
+aws sqs get-queue-attributes
+aws sqs list-queues
+aws sqs receive-message
+aws ssm describe-parameters
+aws ssm get-command-invocation
+aws ssm get-parameter
+aws ssm list-commands
+aws states describe-state-machine
+aws states list-state-machines
+aws stepfunctions describe-execution
+aws stepfunctions describe-state-machine
+aws stepfunctions get-execution-history
+aws sts get-caller-identity
+base64
+basename
+bc
+brazil ws show
+brazil-build
+brazil-context
+brazil-path
+brazil-recursive-cmd
+brazil-runtime-exec
+cargo check
+cargo fmt
+cargo test
+cat
+cd
+chmod
+comm
+cp
+curl
+cut
+date
+df
+diff
+dirname
+docker diff
+docker history
+docker images
+docker info
+docker inspect
+docker logs
+docker network ls
+docker ps
+docker version
+docker volume ls
+du
+echo
+env
+ffmpeg
+ffprobe
+file
+find
+free
+gcc --version
+git --version
+git blame
+git branch -a
+git branch -r
+git config --get
+git config --list
+git diff
+git fetch
+git log
+git ls-files
+git reflog
+git remote -v
+git rev-parse
+git show
+git status
+git tag
+gradle --version
+grep
+gunzip
+gzip
+head
+hexdump
+history
+hostname
+jar tf
+java --version
+jq
+less
+locale
+ls
+lsof
+make --version
+maven --version
+mcurl
+md5sum
+mkdir
+mktemp -d
+more
+mvn help:describe
+netstat
+node --version
+npm --version
+npm audit
+npm list
+npm outdated
+npm run build
+npm run format
+npm run lint
+npm run test
+npm show
+npm test
+npm view
+nslookup
+openspec archive
+openspec list
+openspec show
+openspec validate
+pgrep
+ping
+pip --version
+pip check
+pip freeze
+pip list
+pip show
+poetry --version
+printenv
+ps
+pwd
+python --version
+python -m pip list
+python -m pytest
+python3 -m py_compile
+rg
+scp
+sed
+shuf
+sleep
+sort
+source .venv/bin/activate
+split
+stat
+swift --help
+swift --version
+swift build
+swift package describe
+swift package show-dependencies
+swift test
+tail
+tar -tjf
+tar -tzf
+tee
+test
+timeout
+touch
+tr
+tree
+true
+tsc
+type
+ulimit -a
+uname
+uniq
+uptime
+wait
+wc
+whereis
+which
+whoami
+xcodebuild -version
+xcodebuild test
+yq
+yum info
+yum list
+yum search
+zip -sf
