@@ -13,7 +13,9 @@ aws athena list-databases
 aws athena list-query-executions
 aws athena list-table-metadata
 aws autoscaling describe-auto-scaling-groups
+aws cloudformation describe-stack-resources
 aws cloudformation describe-stacks
+aws cloudformation list-stack-resources
 aws cloudformation list-stacks
 aws cloudfront get-distribution
 aws cloudfront list-distributions
@@ -41,6 +43,7 @@ aws ec2 describe-route-tables
 aws ec2 describe-security-groups
 aws ec2 describe-snapshots
 aws ec2 describe-subnets
+aws ec2 describe-vpc-endpoints
 aws ec2 describe-vpcs
 aws ec2 wait
 aws ecr describe-images
@@ -61,11 +64,22 @@ aws emr list-clusters
 aws events describe-rule
 aws events list-rules
 aws firehose list-delivery-streams
+aws glue get-connection
 aws glue get-databases
+aws glue get-job
 aws glue get-job-run
+aws glue get-job-runs
 aws glue get-jobs
+aws glue get-partitions
 aws glue get-table
 aws glue get-tables
+aws glue get-trigger
+aws glue get-triggers
+aws glue get-workflow
+aws glue get-workflow-run
+aws glue list-jobs
+aws glue list-triggers
+aws glue list-workflows
 aws iam get-policy
 aws iam get-role
 aws iam get-role-policy
@@ -88,6 +102,7 @@ aws logs describe-log-streams
 aws logs describe-metric-filters
 aws logs describe-queries
 aws logs filter-log-events
+aws logs get-log-events
 aws logs get-query-results
 aws logs start-query
 aws logs tail
@@ -95,6 +110,7 @@ aws route53 list-hosted-zones
 aws route53 list-resource-record-sets
 aws s3 ls
 aws s3api get-bucket-lifecycle-configuration
+aws s3api get-bucket-policy
 aws secretsmanager describe-secret
 aws secretsmanager list-secrets
 aws service-quotas
@@ -115,12 +131,6 @@ aws sts get-caller-identity
 base64
 basename
 bc
-brazil ws show
-brazil-build
-brazil-context
-brazil-path
-brazil-recursive-cmd
-brazil-runtime-exec
 cargo check
 cargo fmt
 cargo test
@@ -218,6 +228,11 @@ pip check
 pip freeze
 pip list
 pip show
+pip3 --version
+pip3 check
+pip3 freeze
+pip3 list
+pip3 show
 poetry --version
 printenv
 ps
@@ -226,6 +241,7 @@ python --version
 python -m pip list
 python -m pytest
 python3 -m py_compile
+readlink
 rg
 scp
 sed
