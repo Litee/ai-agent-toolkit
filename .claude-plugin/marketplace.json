@@ -6,7 +6,7 @@
   "metadata": {
     "description": "Collection of AI agent skills for Anki flashcard management and safe terminal command registration",
     "version": "1.0.0",
-    "homepage": "https://github.com/andreyli/ai-agent-toolkit"
+    "homepage": "https://github.com/Litee/ai-agent-toolkit"
   },
   "plugins": [
     {
