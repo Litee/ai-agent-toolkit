@@ -1,6 +1,9 @@
 ---
 name: query-cloudwatch-logs
 description: This skill should be used when querying AWS CloudWatch Log Insights, including executing queries, monitoring query progress with real-time updates, handling different time formats, and saving results in various output formats. Use when analyzing CloudWatch logs, investigating errors or patterns, or generating reports from log data.
+dependencies:
+  - python3
+  - boto3
 ---
 
 # Query CloudWatch Logs
