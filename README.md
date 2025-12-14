@@ -2,6 +2,39 @@
 
 A repository with prompts, skills, and configuration tools for AI agents.
 
+## Installing as Claude Code Plugins
+
+These skills can be installed as plugins in Claude Code.
+
+### Step 1: Register the Marketplace
+
+```bash
+/plugin marketplace add Litee/ai-agent-toolkit
+```
+
+### Step 2: Install Plugins
+
+**Interactive installation:**
+1. Run `/plugin` and select `Browse and install plugins`
+2. Select `litee-claude-code-plugins`
+3. Choose the plugin you want to install
+4. Select `Install now`
+
+**Direct installation:**
+```bash
+/plugin install manage-anki-flashcards@litee-claude-code-plugins
+/plugin install register-safe-terminal-commands@litee-claude-code-plugins
+```
+
+### Available Plugins
+
+| Plugin | Category | Description |
+|--------|----------|-------------|
+| `manage-anki-flashcards` | productivity | Anki flashcard management through AnkiConnect API |
+| `register-safe-terminal-commands` | developer-tools | Safe terminal command configuration for Claude Code |
+
+**Note:** Each plugin may have additional dependencies. Check the individual skill documentation for prerequisites.
+
 ## Available Skills
 
 ### [manage-anki-flashcards](skills/manage-anki-flashcards/)
