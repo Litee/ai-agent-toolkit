@@ -20,6 +20,16 @@
       "skills": ["./skills/manage-anki-flashcards"]
     },
     {
+      "name": "query-aws-athena",
+      "description": "This skill should be used when working with AWS Athena queries, including executing queries, downloading results, optimizing query performance, or structuring complex queries. Use when querying data in Athena, handling large result sets, running parallel queries, or using Common Table Expressions (CTEs) for query optimization.",
+      "source": "./",
+      "strict": false,
+      "version": "1.0.0",
+      "category": "developer-tools",
+      "keywords": ["aws", "athena", "sql", "query", "s3", "cte"],
+      "skills": ["./skills/query-aws-athena"]
+    },
+    {
       "name": "register-safe-terminal-commands",
       "description": "This skill should be used when registering or syncing safe terminal commands to Claude Code settings. Use when the user wants to configure which bash commands Claude Code can execute without requiring approval, or when they need to register/update their safe commands list from the reference file.",
       "source": "./",
