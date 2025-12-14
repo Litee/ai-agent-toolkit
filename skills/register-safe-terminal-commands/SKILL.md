@@ -1,7 +1,6 @@
 ---
 name: register-safe-terminal-commands
 description: This skill should be used when registering or syncing safe terminal commands to Claude Code settings. Use when the user wants to configure which bash commands Claude Code can execute without requiring approval, or when they need to register/update their safe commands list from the reference file.
-version: 1.0.0
 dependencies:
   - python3
 ---
