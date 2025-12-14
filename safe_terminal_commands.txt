@@ -8,10 +8,12 @@ aws --version
 aws apigateway get-rest-apis
 aws athena get-query-execution
 aws athena get-table-metadata
+aws athena get-work-group
 aws athena list-data-catalogs
 aws athena list-databases
 aws athena list-query-executions
 aws athena list-table-metadata
+aws athena list-work-groups
 aws autoscaling describe-auto-scaling-groups
 aws cloudformation describe-stack-resources
 aws cloudformation describe-stacks
