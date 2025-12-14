@@ -23,8 +23,9 @@ These skills can be installed as plugins in Claude Code.
 **Direct installation:**
 ```bash
 /plugin install manage-anki-flashcards@litee-claude-code-plugins
-/plugin install register-safe-terminal-commands@litee-claude-code-plugins
 /plugin install query-aws-athena@litee-claude-code-plugins
+/plugin install query-cloudwatch-logs@litee-claude-code-plugins
+/plugin install register-safe-terminal-commands@litee-claude-code-plugins
 ```
 
 ### Available Plugins
@@ -35,6 +36,7 @@ Each plugin installs a skill that extends Claude's capabilities:
 |--------|----------|-------------|
 | `manage-anki-flashcards` | productivity | Anki flashcard management through AnkiConnect API |
 | `query-aws-athena` | developer-tools | AWS Athena query execution and optimization |
+| `query-cloudwatch-logs` | developer-tools | CloudWatch Log Insights queries with real-time progress tracking |
 | `register-safe-terminal-commands` | developer-tools | Safe terminal command configuration for Claude Code |
 
 **Note:** Each plugin may have additional dependencies. Check the individual [skill documentation](skills/) for prerequisites and detailed usage instructions.
