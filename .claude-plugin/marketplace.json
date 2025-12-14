@@ -1,0 +1,33 @@
+{
+  "name": "litee-claude-code-plugins",
+  "owner": {
+    "name": "litee"
+  },
+  "metadata": {
+    "description": "Collection of AI agent skills for Anki flashcard management and safe terminal command registration",
+    "version": "1.0.0",
+    "homepage": "https://github.com/andreyli/ai-agent-toolkit"
+  },
+  "plugins": [
+    {
+      "name": "manage-anki-flashcards",
+      "description": "This skill should be used when working with Anki flashcard software through the AnkiConnect API. Use for creating flashcards, managing decks, searching notes/cards, syncing collections, controlling review sessions, or any Anki automation tasks.",
+      "source": "./",
+      "strict": false,
+      "version": "1.0.0",
+      "category": "productivity",
+      "keywords": ["anki", "flashcards", "spaced-repetition", "learning"],
+      "skills": ["./skills/manage-anki-flashcards"]
+    },
+    {
+      "name": "register-safe-terminal-commands",
+      "description": "This skill should be used when registering or syncing safe terminal commands to Claude Code settings. Use when the user wants to configure which bash commands Claude Code can execute without requiring approval, or when they need to register/update their safe commands list from the reference file.",
+      "source": "./",
+      "strict": false,
+      "version": "1.0.0",
+      "category": "developer-tools",
+      "keywords": ["terminal", "bash", "permissions", "safety"],
+      "skills": ["./skills/register-safe-terminal-commands"]
+    }
+  ]
+}
