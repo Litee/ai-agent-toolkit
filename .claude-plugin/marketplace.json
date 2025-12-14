@@ -10,6 +10,16 @@
   },
   "plugins": [
     {
+      "name": "convert-audio",
+      "description": "Convert audio files between formats using ffmpeg. Use when converting audio formats (MP3, WAV, AAC, FLAC, Opus, OGG), adjusting bitrate/quality, changing sample rate/channels, or modifying playback speed.",
+      "source": "./",
+      "strict": false,
+      "version": "1.0.0",
+      "category": "user",
+      "keywords": ["ffmpeg", "audio", "conversion", "mp3", "wav", "flac"],
+      "skills": ["./skills/convert-audio"]
+    },
+    {
       "name": "manage-anki-flashcards",
       "description": "This skill should be used when working with Anki flashcard software through the AnkiConnect API. Use for creating flashcards, managing decks, searching notes/cards, syncing collections, controlling review sessions, or any Anki automation tasks.",
       "source": "./",
@@ -34,7 +44,7 @@
       "description": "This skill should be used when querying AWS CloudWatch Log Insights, including executing queries, monitoring query progress with real-time updates, handling different time formats, and saving results in various output formats. Use when analyzing CloudWatch logs, investigating errors or patterns, or generating reports from log data.",
       "source": "./",
       "strict": false,
-      "version": "1.0.0",
+      "version": "1.0.1",
       "category": "developer-tools",
       "keywords": ["aws", "cloudwatch", "logs", "log-insights", "monitoring"],
       "skills": ["./skills/query-cloudwatch-logs"]

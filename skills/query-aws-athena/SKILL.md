@@ -1,6 +1,7 @@
 ---
 name: query-aws-athena
 description: This skill should be used when working with AWS Athena queries, including executing queries, downloading results, optimizing query performance, or structuring complex queries. Use when querying data in Athena, handling large result sets, running parallel queries, or using Common Table Expressions (CTEs) for query optimization.
+version: 1.0.0
 dependencies:
   - python3
   - boto3
