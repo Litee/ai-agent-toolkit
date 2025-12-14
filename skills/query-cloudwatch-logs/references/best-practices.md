@@ -91,6 +91,59 @@ filter @message =~ /^.*ERROR.*$/
 filter level = "ERROR"
 ```
 
+**Case-insensitive matching**:
+```
+filter @message like /(?i)error/  # Matches ERROR, Error, error, etc.
+```
+
+Use the `(?i)` flag for case-insensitive regex matching when log data has inconsistent casing.
+
+### 6. Use Pattern Analysis for Root Cause Investigation
+
+The `pattern` keyword automatically groups similar log entries, replacing variable fields with `<*>` placeholders:
+
+**Good - Finding recurring errors**:
+```
+fields @timestamp, @message
+| filter @message like /(?i)error/
+| pattern @message
+```
+
+**Output fields generated**:
+- `@pattern`: Shared text structure with `<*>` for variable parts (e.g., request IDs, timestamps)
+- `@ratio`: Proportion of matching events (0.50 = 50% of filtered logs match this pattern)
+- `@sampleCount`: Count of events matching this pattern
+- `@severityLabel`: Log level classification (Error, Warning, Info, Debug)
+
+**Benefits**:
+- Reduces thousands of similar log lines into recognizable patterns
+- Surfaces meaningful error messages by filtering out noise
+- Accelerates root cause analysis during production incidents
+
+### 7. Structure Queries for Time-Series Analysis
+
+When analyzing trends over time, structure queries with proper binning:
+
+**Good - Time-series with appropriate binning**:
+```
+filter @message like /ERROR/
+| stats count() as errorCount by bin(5m)
+| sort @timestamp desc
+```
+
+**Good - Composition analysis**:
+```
+stats count() as events by bin(15m), level
+| sort @timestamp desc
+```
+
+**Best Practices**:
+- Use appropriate time bins (5m, 15m, 1h) based on your time range
+- Shorter time ranges (< 1 hour) → 1m or 5m bins
+- Medium time ranges (1-24 hours) → 15m or 1h bins
+- Longer time ranges (> 1 day) → 1h or 1d bins
+- Always sort results for consistent output
+
 ## Time Range Selection Guidance
 
 ### Principle: Smaller is Better
@@ -180,11 +233,37 @@ Wildcards are powerful but can query more data than needed:
 --log-groups '/aws/lambda/prod-*'  # All production functions
 ```
 
-### 3. CloudWatch Limits
+### 3. CloudWatch Service Limits
 
-- Maximum 20 log groups per query
-- The script automatically limits to first 20 if more are matched
-- Use specific patterns to stay under this limit
+CloudWatch Logs Insights has several important service limits to consider:
+
+**Query Limits**:
+- **Maximum 20 log groups per query**
+  - The script automatically limits to first 20 if more are matched
+  - Use specific patterns to stay under this limit
+- **Maximum 10 concurrent queries per account** (includes dashboard queries)
+  - If you hit this limit, wait for queries to complete or cancel unneeded queries
+  - Consider scheduling queries to avoid concurrent execution
+
+**Query Results**:
+- Default limit: 10,000 records returned
+- Use `limit` clause to reduce further
+- Results cached for fast re-query within a time window
+
+**Saved Queries**:
+- **Maximum 1,000 saved queries per region per account**
+- Each query can be up to 10,000 characters
+- Regularly clean up unused queries to stay within limit
+
+**Subscription Filters**:
+- Maximum 2 subscription filters per log group
+- Use for real-time streaming to Lambda, Kinesis, or Firehose
+
+**Best Practices for Limits**:
+- Monitor query usage across your team
+- Cancel long-running queries that are no longer needed
+- Use specific log group patterns to stay under 20 log groups
+- Clean up saved queries periodically
 
 ### 4. Separate Queries for Different Services
 
@@ -208,7 +287,26 @@ Separate queries are easier to optimize and understand.
 
 ## Cost Optimization Tips
 
-CloudWatch Log Insights charges $0.005 per GB of log data scanned.
+### Understanding CloudWatch Costs
+
+CloudWatch charges apply at multiple levels:
+
+**Log Insights Query Charges**: $0.005 per GB of log data scanned
+- Failed queries: Partial or no charges
+- Manually cancelled queries: Only charged for data scanned before cancellation
+- This encourages experimentation and query refinement
+
+**Log Storage Classes**:
+- **Standard class**: $0.50/GB ingested, $0.03/GB/month stored
+  - Full feature access (subscription filters, Contributor Insights)
+  - Best for frequently queried logs
+- **Infrequent-Access class**: $0.285/GB ingested, $0.01/GB/month stored
+  - Limited features (no subscription filters, query via Log Insights only)
+  - Best for logs accessed less than once per month
+  - Can reduce storage costs by ~50%
+
+**Data Analysis**:
+- CloudWatch Contributor Insights: $0.30 per GB analyzed
 
 ### 1. Reduce Data Scanned
 
@@ -241,25 +339,24 @@ For repetitive analysis:
 - Reuse results for multiple analyses
 - Build dashboards instead of repeated queries
 
-### 4. Use CloudWatch Alarms for Monitoring
+### 4. Write Aggregation Queries for Large Datasets
 
-Instead of periodic queries, set up CloudWatch Alarms with metric filters for automatic monitoring. This is more cost-effective for continuous monitoring.
+When analyzing large datasets, use aggregation queries instead of fetching raw records:
 
-### 5. Aggregate Before Exporting
-
-When exporting data, aggregate first to reduce data volume:
-
-**Expensive**:
+**Inefficient** (returns thousands of records, processes all data):
 ```
 fields @timestamp, @message, level, requestId
+| filter level = "ERROR"
 ```
 
-**More Efficient**:
+**Efficient** (returns compact summary, reduces data transfer):
 ```
-stats count() by bin(1h), level
+filter level = "ERROR"
+| stats count() as errorCount by bin(1h), requestId
+| sort errorCount desc
 ```
 
-The aggregated version returns much less data.
+The aggregated query processes the same data but returns far fewer records, reducing query time and data transfer costs.
 
 ## Query Syntax Reference
 
@@ -337,6 +434,124 @@ fields @timestamp, duration / 1000 as durationSeconds
 fields @timestamp, user.id, user.email, request.headers.userAgent
 ```
 
+### Service-Specific Query Patterns
+
+#### Lambda-Specific Patterns
+
+**Find Expensive Invocations**:
+```
+filter @type = "REPORT"
+| fields @requestId, @billedDuration
+| sort @billedDuration desc
+| limit 20
+```
+
+**Latency Percentiles**:
+```
+filter @type = "REPORT"
+| stats avg(@duration) as avgDuration,
+        pct(@duration, 50) as p50,
+        pct(@duration, 95) as p95,
+        pct(@duration, 99) as p99
+  by bin(5m)
+```
+
+**Cold Start Analysis**:
+```
+filter @type = "REPORT"
+| filter @message like /Init Duration/
+| parse @message /Init Duration: (?<initDuration>[\d.]+) ms/
+| stats count() as coldStarts,
+        avg(initDuration) as avgInitMs,
+        max(initDuration) as maxInitMs
+```
+
+**Cold Start Percentage Over Time**:
+```
+filter @type = "REPORT"
+| stats sum(strcontains(@message, "Init Duration")) / count(*) * 100
+  as coldStartPercentage,
+  avg(@duration) as avgDuration
+  by bin(5m)
+```
+
+**Memory Utilization Analysis**:
+```
+filter @type = "REPORT"
+| stats max(@memorySize / 1048576) as provisionedMB,
+        avg(@maxMemoryUsed / 1048576) as avgUsedMB,
+        max(@maxMemoryUsed / 1048576) as peakUsedMB,
+        provisionedMB - peakUsedMB as overProvisionedMB
+```
+
+**Detect Over-Provisioned Memory**:
+```
+filter @type = "REPORT"
+| stats max(@memorySize / 1024 / 1024) as provisonedMemoryMB,
+        min(@maxMemoryUsed / 1024 / 1024) as smallestMemoryRequestMB,
+        avg(@maxMemoryUsed / 1024 / 1024) as avgMemoryUsedMB,
+        max(@maxMemoryUsed / 1024 / 1024) as maxMemoryUsedMB,
+        provisonedMemoryMB - maxMemoryUsedMB as overProvisionedMB
+```
+
+#### API Gateway Patterns
+
+**Non-2xx Response Tracking**:
+```
+fields @timestamp, @message, @requestId, @duration, @xrayTraceId
+| filter @message like /tatus: 4/ or @message like /tatus: 5/
+| sort @timestamp desc
+| limit 100
+```
+
+**Response Status Code Distribution**:
+```
+filter @message like /tatus:/
+| parse @message /tatus: (?<statusCode>\d+)/
+| stats count() as requestCount by statusCode
+| sort requestCount desc
+```
+
+**Top Traffic Sources by IP**:
+```
+stats count() as requestCount by ip
+| sort requestCount desc
+| limit 10
+```
+
+**Latency Analysis by Endpoint**:
+```
+parse @message /(?<method>\w+) (?<path>\/\S+)/
+| stats avg(@duration) as avgLatency,
+        pct(@duration, 95) as p95Latency,
+        count() as requests
+  by method, path
+| sort avgLatency desc
+```
+
+#### String Functions Reference
+
+**strcontains**: Boolean check for substring
+```
+filter strcontains(@message, "ERROR")
+| stats count() as errorCount
+```
+
+**strlen**: String length
+```
+fields @timestamp, @message, strlen(@message) as messageLength
+| filter messageLength > 1000
+```
+
+**Using strcontains in aggregations**:
+```
+filter @type = "REPORT"
+| stats count() as total,
+        sum(strcontains(@message, "Init Duration")) as coldStarts,
+        coldStarts / total * 100 as coldStartPercent
+  by bin(1h)
+```
+
 ## Performance Tuning
 
 ### Query Execution Patterns
@@ -380,6 +595,147 @@ fields @timestamp, user.id, user.email, request.headers.userAgent
 - Check time range includes relevant data
 - Verify filter conditions match actual log format
 - Use `describe_log_groups` to confirm log group existence
+
+## Common Anti-Patterns and Mistakes
+
+Understanding what NOT to do is just as important as knowing best practices. Here are common mistakes to avoid:
+
+### 1. Using Wrong Null Check Syntax
+
+**Mistake**:
+```
+filter myField is not null  # WRONG - doesn't work as expected in CloudWatch Logs Insights
+```
+
+**Correct**:
+```
+filter myField != ''
+filter ispresent(myField)
+```
+
+The `is not null` syntax doesn't work in CloudWatch Logs Insights. Use `!= ''` for empty string checks or `ispresent()` to verify field existence.
+
+### 2. Not Filtering Before Aggregation
+
+**Mistake** (processes all data before filtering):
+```
+fields @timestamp, @message
+| stats count() by bin(5m)
+| filter @message like /ERROR/  # Filter AFTER stats - inefficient!
+```
+
+**Correct** (filters first, reducing computation):
+```
+fields @timestamp, @message
+| filter @message like /ERROR/
+| stats count() by bin(5m)
+```
+
+Always filter data as early as possible to reduce the amount of data processed by subsequent operations.
+
+### 3. Overly Broad Regex Patterns
+
+**Mistake**:
+```
+filter @message =~ /^.*ERROR.*$/  # Unnecessary anchors and wildcards
+```
+
+**Correct**:
+```
+filter @message like /ERROR/
+```
+
+Simple patterns are faster and more readable. Only use complex regex when necessary.
+
+### 4. Querying All Fields When Not Needed
+
+**Mistake**:
+```
+fields @*  # Selects everything - slow and expensive
+```
+
+**Correct**:
+```
+fields @timestamp, requestId, duration, statusCode  # Only what's needed
+```
+
+Selecting all fields with `@*` increases data transfer and processing time. Be explicit about which fields you need.
+
+### 5. Missing Limit on Exploratory Queries
+
+**Mistake** (may return 10,000 records):
+```
+fields @timestamp, @message
+| filter level = "ERROR"
+```
+
+**Better** (test with small sample first):
+```
+fields @timestamp, @message
+| filter level = "ERROR"
+| limit 10
+```
+
+During exploration, use `limit` to quickly verify your query works before processing large result sets.
+
+### 6. Inconsistent Naming in Filters
+
+**Mistake**: Using case-sensitive filters on inconsistent log data:
+```
+filter level = "ERROR"  # Misses "Error", "error", "ERR"
+```
+
+**Correct**: Use case-insensitive patterns:
+```
+filter @message like /(?i)error/
+```
+
+Log data often has inconsistent casing. Use case-insensitive regex patterns with `(?i)` when needed.
+
+### 7. Querying Too Many Log Groups
+
+**Mistake**:
+```bash
+--log-groups '/aws/lambda/*'  # Queries ALL Lambda functions!
+```
+
+**Correct**:
+```bash
+--log-groups '/aws/lambda/prod-api-*'  # Specific prefix
+```
+
+Broad wildcards scan more data than necessary, increasing costs and query time. Be as specific as possible.
+
+### 8. Not Using Aggregations for Large Datasets
+
+**Mistake** (returns thousands of raw records):
+```
+fields @timestamp, errorType
+| filter level = "ERROR"
+```
+
+**Correct** (returns compact summary):
+```
+stats count() as errorCount by errorType
+| sort errorCount desc
+```
+
+When analyzing patterns or trends, aggregations return compact, actionable results instead of overwhelming raw data.
+
+### 9. Ignoring Query Timeout Warnings
+
+**Mistake**: Running the same slow query repeatedly without optimization.
+
+**Correct**: If a query times out:
+- Reduce the time range significantly
+- Add more specific filters
+- Query fewer log groups
+- Break into smaller time chunks
+- Simplify complex regex patterns
+
+### 10. Forgetting to Account for Failed Queries in Cost Estimates
+
+**Good News**: Failed queries in CloudWatch Logs Insights incur partial or no charges. Manually cancelled queries only charge for data scanned up to the cancellation point. This encourages experimentation and query refinement.
 
 ## Error Troubleshooting
 
