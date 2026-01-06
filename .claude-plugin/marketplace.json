@@ -10,8 +10,18 @@
   },
   "plugins": [
     {
+      "name": "analyze-mcp",
+      "description": "This plugin contains a skill for introspecting MCP servers and testing MCP tool calls via CLI. Use for discovering tools/resources/prompts an MCP server provides or making test calls to MCP servers.",
+      "source": "./analyze-mcp",
+      "strict": false,
+      "version": "1.0.0",
+      "category": "developer-tools",
+      "keywords": ["mcp", "introspection", "testing", "mcptools"],
+      "skills": ["./skills/analyze-mcp"]
+    },
+    {
       "name": "convert-audio",
-      "description": "Convert audio files between formats using ffmpeg. Use when converting audio formats (MP3, WAV, AAC, FLAC, Opus, OGG), adjusting bitrate/quality, changing sample rate/channels, or modifying playback speed.",
+      "description": "This plugin contains a skill for converting audio files between formats using ffmpeg (MP3, WAV, AAC, FLAC, Opus, OGG), adjusting bitrate/quality, changing sample rate/channels, or modifying playback speed.",
       "source": "./convert-audio",
       "strict": false,
       "version": "1.0.1",
@@ -21,7 +31,7 @@
     },
     {
       "name": "manage-anki-flashcards",
-      "description": "This skill should be used when working with Anki flashcard software through the AnkiConnect API. Use for creating flashcards, managing decks, searching notes/cards, syncing collections, controlling review sessions, or any Anki automation tasks.",
+      "description": "This plugin contains a skill for working with Anki flashcard software through the AnkiConnect API. Use for creating flashcards, managing decks, searching notes/cards, syncing collections, controlling review sessions, or any Anki automation tasks.",
       "source": "./manage-anki-flashcards",
       "strict": false,
       "version": "1.0.1",
@@ -31,7 +41,7 @@
     },
     {
       "name": "query-aws-athena",
-      "description": "This skill should be used when working with AWS Athena queries or CloudWatch Log Insights, including executing queries, downloading results, optimizing query performance, monitoring query progress, or structuring complex queries. Use when querying data in Athena, analyzing CloudWatch logs, investigating errors or patterns, handling large result sets, or generating reports.",
+      "description": "This plugin contains a skill for working with AWS Athena queries, including executing queries, downloading results, optimizing query performance, monitoring query progress, or structuring complex queries. Use when querying data in Athena, handling large result sets, or generating reports.",
       "source": "./query-aws-athena",
       "strict": false,
       "version": "1.0.1",
@@ -41,7 +51,7 @@
     },
     {
       "name": "query-cloudwatch-logs",
-      "description": "This skill should be used when working with AWS Athena queries or CloudWatch Log Insights, including executing queries, downloading results, optimizing query performance, monitoring query progress, or structuring complex queries. Use when querying data in Athena, analyzing CloudWatch logs, investigating errors or patterns, handling large result sets, or generating reports.",
+      "description": "This plugin contains a skill for working with AWS CloudWatch Log Insights, including executing queries, downloading results, optimizing query performance, monitoring query progress with real-time updates. Use when analyzing CloudWatch logs, investigating errors or patterns, or generating reports from log data.",
       "source": "./query-cloudwatch-logs",
       "strict": false,
       "version": "1.0.1",
@@ -51,7 +61,7 @@
     },
     {
       "name": "register-safe-terminal-commands",
-      "description": "This skill should be used when registering or syncing safe terminal commands to Claude Code settings. Use when the user wants to configure which bash commands Claude Code can execute without requiring approval, or when they need to register/update their safe commands list from the reference file.",
+      "description": "This plugin contains a skill for registering or syncing safe terminal commands to Claude Code settings. Use when configuring which bash commands Claude Code can execute without requiring approval, or when registering/updating the safe commands list from the reference file.",
       "source": "./register-safe-terminal-commands",
       "strict": false,
       "version": "1.0.1",
