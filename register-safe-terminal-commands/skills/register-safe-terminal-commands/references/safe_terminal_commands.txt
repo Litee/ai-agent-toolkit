@@ -141,6 +141,8 @@ cd
 chmod
 comm
 cp
+csvlook
+csvstat
 curl
 cut
 date

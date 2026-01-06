@@ -35,10 +35,10 @@ Each plugin installs a skill that extends Claude's capabilities:
 
 | Plugin (Skill) | Category | Description |
 |--------|----------|-------------|
+| `convert-audio` | user | Audio format conversion using ffmpeg (MP3, WAV, AAC, FLAC, Opus, OGG) |
 | `manage-anki-flashcards` | productivity | Anki flashcard management through AnkiConnect API |
-| `query-aws-athena` | developer-tools | AWS Athena query execution and optimization |
+| `query-aws-athena` | developer-tools | AWS Athena queries and CloudWatch Log Insights with query optimization and real-time progress tracking |
 | `query-cloudwatch-logs` | developer-tools | CloudWatch Log Insights queries with real-time progress tracking |
 | `register-safe-terminal-commands` | developer-tools | Safe terminal command configuration for Claude Code |
-| `convert-audio` | user | Audio format conversion using ffmpeg (MP3, WAV, AAC, FLAC, Opus, OGG) |
 
 **Note:** Each plugin may have additional dependencies. Check the individual [skill documentation](skills/) for prerequisites and detailed usage instructions.
