@@ -4,17 +4,17 @@
     "name": "litee"
   },
   "metadata": {
-    "description": "Collection of AI agent skills for Anki flashcard management and safe terminal command registration",
-    "version": "1.0.0",
+    "description": "Collection of AI agent skills for AWS querying (Athena, CloudWatch), Anki flashcard management, audio conversion, and safe terminal command registration",
+    "version": "1.0.1",
     "homepage": "https://github.com/Litee/ai-agent-toolkit"
   },
   "plugins": [
     {
       "name": "convert-audio",
       "description": "Convert audio files between formats using ffmpeg. Use when converting audio formats (MP3, WAV, AAC, FLAC, Opus, OGG), adjusting bitrate/quality, changing sample rate/channels, or modifying playback speed.",
-      "source": "./",
+      "source": "./convert-audio",
       "strict": false,
-      "version": "1.0.0",
+      "version": "1.0.1",
       "category": "user",
       "keywords": ["ffmpeg", "audio", "conversion", "mp3", "wav", "flac"],
       "skills": ["./skills/convert-audio"]
@@ -22,39 +22,39 @@
     {
       "name": "manage-anki-flashcards",
       "description": "This skill should be used when working with Anki flashcard software through the AnkiConnect API. Use for creating flashcards, managing decks, searching notes/cards, syncing collections, controlling review sessions, or any Anki automation tasks.",
-      "source": "./",
+      "source": "./manage-anki-flashcards",
       "strict": false,
-      "version": "1.0.0",
+      "version": "1.0.1",
       "category": "productivity",
       "keywords": ["anki", "flashcards", "spaced-repetition", "learning"],
       "skills": ["./skills/manage-anki-flashcards"]
     },
     {
       "name": "query-aws-athena",
-      "description": "This skill should be used when working with AWS Athena queries, including executing queries, downloading results, optimizing query performance, or structuring complex queries. Use when querying data in Athena, handling large result sets, running parallel queries, or using Common Table Expressions (CTEs) for query optimization.",
-      "source": "./",
+      "description": "This skill should be used when working with AWS Athena queries or CloudWatch Log Insights, including executing queries, downloading results, optimizing query performance, monitoring query progress, or structuring complex queries. Use when querying data in Athena, analyzing CloudWatch logs, investigating errors or patterns, handling large result sets, or generating reports.",
+      "source": "./query-aws-athena",
       "strict": false,
-      "version": "1.0.0",
+      "version": "1.0.1",
       "category": "developer-tools",
-      "keywords": ["aws", "athena", "sql", "query", "s3", "cte"],
+      "keywords": ["aws", "athena", "sql", "query", "s3", "cloudwatch", "logs", "log-insights", "monitoring"],
       "skills": ["./skills/query-aws-athena"]
     },
     {
       "name": "query-cloudwatch-logs",
-      "description": "This skill should be used when querying AWS CloudWatch Log Insights, including executing queries, monitoring query progress with real-time updates, handling different time formats, and saving results in various output formats. Use when analyzing CloudWatch logs, investigating errors or patterns, or generating reports from log data.",
-      "source": "./",
+      "description": "This skill should be used when working with AWS Athena queries or CloudWatch Log Insights, including executing queries, downloading results, optimizing query performance, monitoring query progress, or structuring complex queries. Use when querying data in Athena, analyzing CloudWatch logs, investigating errors or patterns, handling large result sets, or generating reports.",
+      "source": "./query-cloudwatch-logs",
       "strict": false,
       "version": "1.0.1",
       "category": "developer-tools",
-      "keywords": ["aws", "cloudwatch", "logs", "log-insights", "monitoring"],
+      "keywords": ["aws", "athena", "sql", "query", "s3", "cloudwatch", "logs", "log-insights", "monitoring"],
       "skills": ["./skills/query-cloudwatch-logs"]
     },
     {
       "name": "register-safe-terminal-commands",
       "description": "This skill should be used when registering or syncing safe terminal commands to Claude Code settings. Use when the user wants to configure which bash commands Claude Code can execute without requiring approval, or when they need to register/update their safe commands list from the reference file.",
-      "source": "./",
+      "source": "./register-safe-terminal-commands",
       "strict": false,
-      "version": "1.0.0",
+      "version": "1.0.1",
       "category": "developer-tools",
       "keywords": ["terminal", "bash", "permissions", "safety"],
       "skills": ["./skills/register-safe-terminal-commands"]
