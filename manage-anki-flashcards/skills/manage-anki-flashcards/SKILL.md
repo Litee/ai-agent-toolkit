@@ -31,7 +31,7 @@ Before using this skill, ensure:
 First, verify AnkiConnect is accessible:
 
 ```bash
-python3 scripts/anki_connect.py deck-names
+./scripts/anki_connect.py deck-names
 ```
 
 This should list all your Anki decks. If it fails, ensure Anki is running and AnkiConnect is installed.
@@ -39,7 +39,7 @@ This should list all your Anki decks. If it fails, ensure Anki is running and An
 ### Create a Simple Flashcard
 
 ```bash
-python3 scripts/anki_connect.py add-note \
+./scripts/anki_connect.py add-note \
     --deck "Default" \
     --model "Basic" \
     --fields '{"Front":"What is Python?","Back":"A programming language"}' \
@@ -49,14 +49,14 @@ python3 scripts/anki_connect.py add-note \
 ### Search for Notes
 
 ```bash
-python3 scripts/anki_connect.py find-notes --query "deck:Default tag:python"
+./scripts/anki_connect.py find-notes --query "deck:Default tag:python"
 ```
 
 ### List All Decks and Note Types
 
 ```bash
-python3 scripts/anki_connect.py deck-names
-python3 scripts/anki_connect.py model-names
+./scripts/anki_connect.py deck-names
+./scripts/anki_connect.py model-names
 ```
 
 ## Best Practices
@@ -69,11 +69,11 @@ When performing bulk operations (adding many cards, updating tags, moving cards 
 
 1. **CLI with JSON files** (Preferred for bulk operations)
    - Create a temporary JSON file with your data
-   - Use the CLI command to process the file: `python3 scripts/anki_connect.py add-notes --json-file data.json`
+   - Use the CLI command to process the file: `./scripts/anki_connect.py add-notes --json-file data.json`
    - This is safer, easier to debug, and less error-prone
 
 2. **CLI invoke command** (For operations without dedicated commands)
-   - Use `python3 scripts/anki_connect.py invoke --action <action> --params <params>`
+   - Use `./scripts/anki_connect.py invoke --action <action> --params <params>`
    - Keeps logic simple and leverages the tested CLI tool
 
 3. **Python library** (Use sparingly and with caution)
@@ -89,8 +89,8 @@ When you have content to convert into flashcards:
 
 1. **Identify the deck and note type**
    ```bash
-   python3 scripts/anki_connect.py deck-names
-   python3 scripts/anki_connect.py model-names
+   ./scripts/anki_connect.py deck-names
+   ./scripts/anki_connect.py model-names
    ```
 
 2. **Check fields for the note type**
@@ -103,7 +103,7 @@ When you have content to convert into flashcards:
 3. **Create notes**
    - Single note:
      ```bash
-     python3 scripts/anki_connect.py add-note \
+     ./scripts/anki_connect.py add-note \
          --deck "My Deck" \
          --model "Basic" \
          --fields '{"Front":"Question","Back":"Answer"}' \
@@ -127,7 +127,7 @@ When you have content to convert into flashcards:
      ]
      ```
      ```bash
-     python3 scripts/anki_connect.py add-notes --json-file notes.json
+     ./scripts/anki_connect.py add-notes --json-file notes.json
      ```
 
 ### Workflow 2: Bulk Importing Flashcards
@@ -162,7 +162,7 @@ For bulk operations, create a temporary JSON file with your data and use the CLI
 **Step 2: Import using the CLI:**
 
 ```bash
-python3 scripts/anki_connect.py add-notes --json-file bulk_notes.json
+./scripts/anki_connect.py add-notes --json-file bulk_notes.json
 ```
 
 This approach is safer and less error-prone than writing custom Python scripts.
@@ -181,31 +181,31 @@ Search using Anki's query syntax:
 
 **Example: Find all due Python cards**
 ```bash
-python3 scripts/anki_connect.py find-cards --query "deck:Programming tag:python is:due"
+./scripts/anki_connect.py find-cards --query "deck:Programming tag:python is:due"
 ```
 
 **Example: Get information about specific notes**
 ```bash
 # First find notes
-python3 scripts/anki_connect.py find-notes --query "deck:Default"
+./scripts/anki_connect.py find-notes --query "deck:Default"
 
 # Then get detailed info (all fields)
-python3 scripts/anki_connect.py notes-info --note-ids 1234567890 9876543210
+./scripts/anki_connect.py notes-info --note-ids 1234567890 9876543210
 
 # Get only specific fields
-python3 scripts/anki_connect.py notes-info --note-ids 1234567890 --fields "Front,Back"
+./scripts/anki_connect.py notes-info --note-ids 1234567890 --fields "Front,Back"
 ```
 
 ### Workflow 4: Managing Decks and Organization
 
 **Create a new deck:**
 ```bash
-python3 scripts/anki_connect.py create-deck --deck "Python::Advanced Concepts"
+./scripts/anki_connect.py create-deck --deck "Python::Advanced Concepts"
 ```
 
 **Get deck statistics:**
 ```bash
-python3 scripts/anki_connect.py invoke \
+./scripts/anki_connect.py invoke \
     --action "getDeckStats" \
     --params '{"decks": ["Default", "Programming"]}'
 ```
@@ -214,13 +214,13 @@ python3 scripts/anki_connect.py invoke \
 
 First, find the cards you want to move:
 ```bash
-python3 scripts/anki_connect.py find-cards --query "deck:OldDeck tag:python"
+./scripts/anki_connect.py find-cards --query "deck:OldDeck tag:python"
 # Example output: [1234567890, 9876543210, ...]
 ```
 
 Then move them using the `changeDeck` action:
 ```bash
-python3 scripts/anki_connect.py invoke \
+./scripts/anki_connect.py invoke \
     --action "changeDeck" \
     --params '{"cards": [1234567890, 9876543210], "deck": "NewDeck"}'
 ```
@@ -231,20 +231,20 @@ python3 scripts/anki_connect.py invoke \
 
 First, find the notes you want to tag:
 ```bash
-python3 scripts/anki_connect.py find-notes --query "deck:Programming -tag:reviewed"
+./scripts/anki_connect.py find-notes --query "deck:Programming -tag:reviewed"
 # Example output: [1234567890, 9876543210, ...]
 ```
 
 Then add the tags:
 ```bash
-python3 scripts/anki_connect.py invoke \
+./scripts/anki_connect.py invoke \
     --action "addTags" \
     --params '{"notes": [1234567890, 9876543210], "tags": "reviewed"}'
 ```
 
 **List all tags:**
 ```bash
-python3 scripts/anki_connect.py invoke \
+./scripts/anki_connect.py invoke \
     --action "getTags" \
     --params '{}'
 ```
@@ -276,7 +276,7 @@ if current:
 ### Workflow 7: Syncing with AnkiWeb
 
 ```bash
-python3 scripts/anki_connect.py sync
+./scripts/anki_connect.py sync
 ```
 
 Or programmatically:
@@ -309,16 +309,16 @@ Available commands:
 **CLI Examples:**
 ```bash
 # Get help
-python3 scripts/anki_connect.py --help
-python3 scripts/anki_connect.py add-note --help
+./scripts/anki_connect.py --help
+./scripts/anki_connect.py add-note --help
 
 # Raw API call
-python3 scripts/anki_connect.py invoke \
+./scripts/anki_connect.py invoke \
     --action "deckNames" \
     --params '{}'
 
 # Search with complex query
-python3 scripts/anki_connect.py find-notes \
+./scripts/anki_connect.py find-notes \
     --query "deck:Default (tag:python OR tag:javascript) -is:suspended"
 ```
 
@@ -610,8 +610,8 @@ AnkiConnect error: Cannot create note because it is a duplicate
 
 2. **Verify deck and model names**:
    ```bash
-   python3 scripts/anki_connect.py deck-names
-   python3 scripts/anki_connect.py model-names
+   ./scripts/anki_connect.py deck-names
+   ./scripts/anki_connect.py model-names
    ```
 
 3. **Check field names for a model**:
@@ -624,7 +624,7 @@ AnkiConnect error: Cannot create note because it is a duplicate
 
 4. **Use raw invoke for debugging**:
    ```bash
-   python3 scripts/anki_connect.py invoke \
+   ./scripts/anki_connect.py invoke \
        --action "version" \
        --params '{}'
    ```

@@ -34,7 +34,7 @@
       "description": "This plugin contains a skill for working with Anki flashcard software through the AnkiConnect API. Use for creating flashcards, managing decks, searching notes/cards, syncing collections, controlling review sessions, or any Anki automation tasks.",
       "source": "./manage-anki-flashcards",
       "strict": false,
-      "version": "1.0.1",
+      "version": "1.0.2",
       "category": "productivity",
       "keywords": ["anki", "flashcards", "spaced-repetition", "learning"],
       "skills": ["./skills/manage-anki-flashcards"]
@@ -44,7 +44,7 @@
       "description": "This plugin contains a skill for working with AWS Athena queries, including executing queries, downloading results, optimizing query performance, monitoring query progress, or structuring complex queries. Use when querying data in Athena, handling large result sets, or generating reports.",
       "source": "./query-aws-athena",
       "strict": false,
-      "version": "1.0.1",
+      "version": "1.0.2",
       "category": "developer-tools",
       "keywords": ["aws", "athena", "sql", "query", "s3", "cloudwatch", "logs", "log-insights", "monitoring"],
       "skills": ["./skills/query-aws-athena"]
@@ -54,7 +54,7 @@
       "description": "This plugin contains a skill for working with AWS CloudWatch Log Insights, including executing queries, downloading results, optimizing query performance, monitoring query progress with real-time updates. Use when analyzing CloudWatch logs, investigating errors or patterns, or generating reports from log data.",
       "source": "./query-cloudwatch-logs",
       "strict": false,
-      "version": "1.0.1",
+      "version": "1.0.2",
       "category": "developer-tools",
       "keywords": ["aws", "athena", "sql", "query", "s3", "cloudwatch", "logs", "log-insights", "monitoring"],
       "skills": ["./skills/query-cloudwatch-logs"]
@@ -64,7 +64,7 @@
       "description": "This plugin contains a skill for registering or syncing safe terminal commands to Claude Code settings. Use when configuring which bash commands Claude Code can execute without requiring approval, or when registering/updating the safe commands list from the reference file.",
       "source": "./register-safe-terminal-commands",
       "strict": false,
-      "version": "1.0.1",
+      "version": "1.0.2",
       "category": "developer-tools",
       "keywords": ["terminal", "bash", "permissions", "safety"],
       "skills": ["./skills/register-safe-terminal-commands"]

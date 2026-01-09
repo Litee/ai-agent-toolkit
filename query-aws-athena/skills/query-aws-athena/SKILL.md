@@ -30,7 +30,7 @@ For detailed explanations and implementation guidance, read the `references/best
 Use the provided script to execute Athena queries and automatically download results from S3:
 
 ```bash
-python3 scripts/query_athena.py \
+./scripts/query_athena.py \
     --query "SELECT * FROM my_table LIMIT 100" \
     --database my_database \
     --output-location s3://my-bucket/athena-results/
@@ -47,7 +47,7 @@ The script automatically:
 For complex queries, store them in a file and reference it:
 
 ```bash
-python3 scripts/query_athena.py \
+./scripts/query_athena.py \
     --query-file query.sql \
     --database my_database \
     --output-location s3://my-bucket/athena-results/ \
@@ -59,7 +59,7 @@ python3 scripts/query_athena.py \
 To only execute the query without downloading results:
 
 ```bash
-python3 scripts/query_athena.py \
+./scripts/query_athena.py \
     --query "SELECT * FROM my_table" \
     --database my_database \
     --output-location s3://my-bucket/athena-results/ \
@@ -71,7 +71,7 @@ python3 scripts/query_athena.py \
 Use the `--profile` parameter to specify which AWS credentials profile to use:
 
 ```bash
-python3 scripts/query_athena.py \
+./scripts/query_athena.py \
     --query "SELECT * FROM my_table LIMIT 100" \
     --database my_database \
     --output-location s3://my-bucket/athena-results/ \

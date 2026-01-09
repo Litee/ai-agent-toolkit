@@ -15,7 +15,7 @@ fields @timestamp, @message
 
 **Usage**:
 ```bash
-python scripts/query_cloudwatch_logs.py \
+./scripts/query_cloudwatch_logs.py \
   --query 'fields @timestamp, @message | filter @message like /ERROR/' \
   --log-groups '/aws/lambda/my-function' \
   --start-time '1h' \
@@ -84,7 +84,7 @@ filter @type = "REPORT"
 
 **Usage**:
 ```bash
-python scripts/query_cloudwatch_logs.py \
+./scripts/query_cloudwatch_logs.py \
   --query 'filter @type = "REPORT" | parse @message "Duration: * ms" as duration | stats pct(duration, 50) as p50, pct(duration, 99) as p99' \
   --log-groups '/aws/lambda/api-function' \
   --start-time 'last-24h' \
@@ -171,7 +171,7 @@ fields @timestamp, @message, srcIp, username
 
 **Usage**:
 ```bash
-python scripts/query_cloudwatch_logs.py \
+./scripts/query_cloudwatch_logs.py \
   --query 'fields @timestamp, @message, srcIp | filter @message like /failed/ | stats count() by srcIp | sort count() desc' \
   --log-groups '/aws/ecs/auth-service' \
   --start-time 'last-hour' \
@@ -373,7 +373,7 @@ fields @timestamp, @log, level
 
 **Usage**:
 ```bash
-python scripts/query_cloudwatch_logs.py \
+./scripts/query_cloudwatch_logs.py \
   --query 'fields @timestamp, @log | filter @message like /ERROR/ | stats count() by @log' \
   --log-groups '/aws/lambda/service-a,/aws/lambda/service-b,/aws/lambda/service-c' \
   --start-time '1h' \
@@ -694,7 +694,7 @@ fields @timestamp, @message, level, requestId
 
 **Usage**:
 ```bash
-python scripts/query_cloudwatch_logs.py \
+./scripts/query_cloudwatch_logs.py \
   --query-file 'error_analysis.txt' \
   --log-groups '/aws/lambda/my-function' \
   --start-time 'last-24h' \
