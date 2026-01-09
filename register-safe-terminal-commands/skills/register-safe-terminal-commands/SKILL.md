@@ -48,7 +48,7 @@ The `scripts/sync_safe_commands.py` script syncs commands from the reference fil
 #### Basic Usage
 
 ```bash
-python scripts/sync_safe_commands.py
+./scripts/sync_safe_commands.py
 ```
 
 This will:
@@ -63,15 +63,15 @@ This will:
 
 ```bash
 # Preview changes without modifying settings (dry-run mode)
-python scripts/sync_safe_commands.py --dry-run
-python scripts/sync_safe_commands.py -n
+./scripts/sync_safe_commands.py --dry-run
+./scripts/sync_safe_commands.py -n
 
 # Show all commands including unchanged ones (verbose mode)
-python scripts/sync_safe_commands.py --verbose
-python scripts/sync_safe_commands.py -v
+./scripts/sync_safe_commands.py --verbose
+./scripts/sync_safe_commands.py -v
 
 # Combine options
-python scripts/sync_safe_commands.py -n -v
+./scripts/sync_safe_commands.py -n -v
 ```
 
 #### Command-line Options
@@ -102,7 +102,7 @@ The `Bash(command:*)` format tells Claude Code to automatically approve any bash
 When a user requests to sync safe commands:
 
 1. **Locate the sync script**: Navigate to this skill's `scripts/` directory
-2. **Run the sync script**: Execute `python scripts/sync_safe_commands.py`
+2. **Run the sync script**: Execute `./scripts/sync_safe_commands.py`
 3. **Use options as needed**: Add `--dry-run` to preview or `--verbose` for detailed output
 4. **Verify the output**: Review the sync report showing added/unchanged commands
 5. **Confirm completion**: The script will report total changes made and create a backup
