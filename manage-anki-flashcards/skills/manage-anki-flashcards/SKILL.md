@@ -387,6 +387,42 @@ A: 420m below sea level
 - **DON'T**: Create cards that look nearly identical
 - **Why**: Interference is "probably the single greatest cause of forgetting"
 
+#### 6. Include Sufficient Context for Future Recall
+- **DO**: Ensure the question is self-contained and makes sense months later
+- **DO**: Include domain/topic context in the question itself (e.g., language name for programming cards)
+- **DON'T**: Assume you'll remember the context when reviewing
+- **Why**: Cards are reviewed in random order across topics; without context, similar questions become confusing
+
+**Bad Example:**
+```
+Q: What method converts a string to uppercase?
+A: upper()
+```
+
+**Good Example:**
+```
+Q: In Python, what string method converts text to uppercase?
+A: upper()
+```
+
+#### 7. Avoid Revealing the Answer in the Question
+- **DO**: Write questions that test recall, not recognition
+- **DON'T**: Include the answer or strong hints in the question text
+- **DON'T**: Ask "What does X do?" while mentioning X by name when X is the answer
+- **Why**: Questions that hint at answers test pattern matching, not true recall
+
+**Bad Example:**
+```
+Q: What Python method splits strings? How does split() work?
+A: split()
+```
+
+**Good Example:**
+```
+Q: In Python, what string method divides a string into a list using a delimiter?
+A: split()
+```
+
 ### Card Formulation Techniques
 
 #### Use Imagery
@@ -417,6 +453,8 @@ A: 420m below sea level
 | Identical-looking cards | Causes chronic interference | Add distinguishing context |
 | Skipping basics | Forgetting basics creates cascading problems | Start with fundamentals |
 | Verbose answers | Hard to recall consistently | Keep answers brief (ideally 1-5 words) |
+| Missing context | Question becomes ambiguous over time | Include topic/domain in the question |
+| Answer in question | Tests recognition instead of recall | Describe functionality without naming the answer |
 
 ### Effective Note Types
 
