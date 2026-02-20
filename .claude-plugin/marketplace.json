@@ -4,8 +4,8 @@
     "name": "litee"
   },
   "metadata": {
-    "description": "Collection of AI agent skills for AWS querying (Athena, CloudWatch), Anki flashcard management, audio conversion, and safe terminal command registration",
-    "version": "1.0.1",
+    "description": "Collection of AI agent skills for AWS querying (Athena, CloudWatch), Anki flashcard management, audio conversion, safe terminal command registration, and image generation",
+    "version": "1.0.2",
     "homepage": "https://github.com/Litee/ai-agent-toolkit"
   },
   "plugins": [
@@ -78,6 +78,16 @@
       "category": "user",
       "keywords": ["podcast", "script", "tts", "audio", "conversation", "text-to-speech"],
       "skills": ["./skills/podcast-script-generator"]
+    },
+    {
+      "name": "generate-image",
+      "description": "This plugin contains a skill for generating images using Amazon Nova Canvas on AWS Bedrock. Use when creating images, AI art, text-to-image generation, or visual content.",
+      "source": "./generate-image",
+      "strict": false,
+      "version": "1.0.0",
+      "category": "user",
+      "keywords": ["aws", "bedrock", "nova-canvas", "image-generation", "text-to-image", "ai-art"],
+      "skills": ["./skills/generate-image"]
     }
   ]
 }

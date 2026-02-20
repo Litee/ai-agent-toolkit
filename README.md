@@ -23,12 +23,13 @@ These skills can be installed as plugins in Claude Code.
 **Direct installation:**
 ```bash
 /plugin install analyze-mcp@litee-claude-code-plugins
+/plugin install convert-audio@litee-claude-code-plugins
+/plugin install generate-image@litee-claude-code-plugins
 /plugin install manage-anki-flashcards@litee-claude-code-plugins
+/plugin install podcast-script-generator@litee-claude-code-plugins
 /plugin install query-aws-athena@litee-claude-code-plugins
 /plugin install query-cloudwatch-logs@litee-claude-code-plugins
 /plugin install register-safe-terminal-commands@litee-claude-code-plugins
-/plugin install convert-audio@litee-claude-code-plugins
-/plugin install podcast-script-generator@litee-claude-code-plugins
 ```
 
 ### Available Plugins
@@ -39,6 +40,7 @@ Each plugin installs a skill that extends Claude's capabilities:
 |--------|----------|-------------|
 | `analyze-mcp` | developer-tools | MCP server introspection and tool testing via CLI |
 | `convert-audio` | user | Audio format conversion using ffmpeg (MP3, WAV, AAC, FLAC, Opus, OGG) |
+| `generate-image` | user | Image generation using Amazon Nova Canvas on AWS Bedrock |
 | `manage-anki-flashcards` | productivity | Anki flashcard management through AnkiConnect API |
 | `podcast-script-generator` | user | AI-powered podcast script generation with natural conversation flow |
 | `query-aws-athena` | developer-tools | AWS Athena queries and CloudWatch Log Insights with query optimization and real-time progress tracking |
