@@ -209,6 +209,8 @@ aws dynamodb transact-get-items
 aws ec2 describe-images
 aws ec2 describe-instance-attribute
 aws ec2 describe-instance-status
+aws ec2 describe-instance-type-offerings
+aws ec2 describe-instance-types
 aws ec2 describe-instances
 aws ec2 describe-internet-gateways
 aws ec2 describe-key-pairs
@@ -673,11 +675,9 @@ aws s3api list-parts
 aws secretsmanager describe-secret
 aws secretsmanager get-random-password
 aws secretsmanager get-resource-policy
-aws secretsmanager get-secret-value
 aws secretsmanager list-secret-version-ids
 aws secretsmanager list-secrets
 aws secretsmanager validate-resource-policy
-aws service-quotas
 aws sns check-if-phone-number-is-opted-out
 aws sns get-data-protection-policy
 aws sns get-endpoint-attributes
@@ -701,7 +701,6 @@ aws sqs list-dead-letter-source-queues
 aws sqs list-message-move-tasks
 aws sqs list-queue-tags
 aws sqs list-queues
-aws sqs receive-message
 aws ssm describe-activations
 aws ssm describe-association
 aws ssm describe-association-execution-targets
@@ -907,7 +906,6 @@ python -m pytest
 python3 -m py_compile
 readlink
 rg
-scp
 sed
 shuf
 sleep
@@ -942,6 +940,13 @@ wc
 whereis
 which
 whoami
+xargs cat
+xargs file
+xargs head
+xargs ls
+xargs stat
+xargs tail
+xargs wc
 xcodebuild -version
 xcodebuild test
 yq
