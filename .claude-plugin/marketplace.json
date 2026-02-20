@@ -68,6 +68,16 @@
       "category": "developer-tools",
       "keywords": ["terminal", "bash", "permissions", "safety"],
       "skills": ["./skills/register-safe-terminal-commands"]
+    },
+    {
+      "name": "podcast-script-generator",
+      "description": "This plugin contains a skill for generating AI-powered podcast scripts with natural conversation flow. Use when creating podcast scripts, multi-speaker dialogue, or conversational content for audio production.",
+      "source": "./podcast-script-generator",
+      "strict": false,
+      "version": "1.0.0",
+      "category": "user",
+      "keywords": ["podcast", "script", "tts", "audio", "conversation", "text-to-speech"],
+      "skills": ["./skills/podcast-script-generator"]
     }
   ]
 }
