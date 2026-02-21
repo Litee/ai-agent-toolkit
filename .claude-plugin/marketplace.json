@@ -24,7 +24,7 @@
       "description": "This plugin contains a skill for converting audio files between formats using ffmpeg (MP3, WAV, AAC, FLAC, Opus, OGG), adjusting bitrate/quality, changing sample rate/channels, or modifying playback speed.",
       "source": "./convert-audio",
       "strict": false,
-      "version": "1.0.1",
+      "version": "1.0.2",
       "category": "user",
       "keywords": ["ffmpeg", "audio", "conversion", "mp3", "wav", "flac"],
       "skills": ["./skills/convert-audio"]
