@@ -1,8 +1,6 @@
 ---
 name: analyze-mcp
 description: This skill should be used when introspecting MCP servers and testing MCP tool calls via CLI. Use this skill to discover what tools/resources/prompts an MCP server provides or to make test calls to MCP servers.
-version: 0.1.0
-dependencies: mcptools
 ---
 
 # MCP Introspection
@@ -15,6 +13,24 @@ This skill guides introspection of MCP (Model Context Protocol) servers and test
 - Inspect MCP server capabilities before using them
 - Make test calls to MCP tools to understand their behavior
 - Explore available MCP servers and their functionality
+
+## Prerequisites
+
+This skill requires the `mcptools` CLI to be installed.
+
+**Install with Go:**
+
+```bash
+go install github.com/f/mcptools/cmd/mcptools@latest
+```
+
+The binary is placed at `~/go/bin/mcptools`. Ensure `~/go/bin` is on your `PATH`:
+
+```bash
+export PATH="$HOME/go/bin:$PATH"
+```
+
+See https://github.com/f/mcptools for more details.
 
 ## Core Operations
 
