@@ -1,5 +1,5 @@
 ---
-name: podcast-audio-generator
+name: generate-podcast-audio
 description: Convert podcast scripts into high-quality audio using text-to-speech synthesis on AWS. Use when generating podcast audio, voice content, or converting scripts to speech.
 ---
 
@@ -144,4 +144,4 @@ word_count=$(python scripts/calculate_podcast_metrics.py count-words --file scri
 
 ## Related Skills
 
-- **podcast-script-generator** - Generate AI-powered podcast scripts
+- **generate-podcast-script** - Generate AI-powered podcast scripts
