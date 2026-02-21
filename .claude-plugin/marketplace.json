@@ -4,8 +4,8 @@
     "name": "litee"
   },
   "metadata": {
-    "description": "Collection of AI agent skills for AWS querying (Athena, CloudWatch), Anki flashcard management, audio conversion, safe terminal command registration, and image generation",
-    "version": "1.0.2",
+    "description": "Collection of AI agent skills for AWS querying (Athena, CloudWatch), Anki flashcard management, audio conversion, safe terminal command registration, image generation, and ML system design interviews",
+    "version": "1.0.3",
     "homepage": "https://github.com/Litee/ai-agent-toolkit"
   },
   "plugins": [
@@ -88,6 +88,16 @@
       "category": "user",
       "keywords": ["aws", "bedrock", "nova-canvas", "image-generation", "text-to-image", "ai-art"],
       "skills": ["./skills/generate-image"]
+    },
+    {
+      "name": "ml-system-design-interviewer",
+      "description": "This plugin contains a skill for conducting and evaluating ML System Design interviews for Principal-level engineering candidates. Use when preparing, running, or assessing ML system design interviews with structured rubrics and evaluation frameworks.",
+      "source": "./ml-system-design-interviewer",
+      "strict": false,
+      "version": "1.0.0",
+      "category": "productivity",
+      "keywords": ["ml", "machine-learning", "interview", "system-design", "hiring", "evaluation"],
+      "skills": ["./skills/ml-system-design-interviewer"]
     }
   ]
 }
