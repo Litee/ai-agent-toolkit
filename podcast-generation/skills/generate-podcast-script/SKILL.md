@@ -1,5 +1,5 @@
 ---
-name: podcast-script-generator
+name: generate-podcast-script
 description: Generate AI-powered podcast scripts with natural conversation flow. Use when creating podcast scripts, multi-speaker dialogue, or conversational content for audio production.
 ---
 
@@ -28,7 +28,7 @@ You MUST ask for these parameters upfront in a single prompt if not provided:
 
 2. **target_duration** (required): Duration for the podcast (e.g., "5 minutes", "10 minutes", "15 minutes")
    - **Recommended Maximum**: 60 minutes
-   - **Important**: The podcast-audio-generator skill does not support generating audio files longer than 60 minutes
+   - **Important**: The generate-podcast-audio skill does not support generating audio files longer than 60 minutes
 
 3. **content_topic** (required): Subject matter for the podcast
 
@@ -64,7 +64,7 @@ You MUST ask for these parameters upfront in a single prompt if not provided:
    - If any required parameter is missing, ask the user to provide it
 2. **Validate duration** - Check if target_duration exceeds 60 minutes
    - If duration > 60 minutes, ask for user confirmation with the following warning:
-     - "⚠️ The requested duration exceeds 60 minutes. The podcast-audio-generator skill does not support generating audio files longer than 60 minutes. You can still generate the script, but you won't be able to convert it to audio using the audio generation skill. Do you want to proceed?"
+     - "⚠️ The requested duration exceeds 60 minutes. The generate-podcast-audio skill does not support generating audio files longer than 60 minutes. You can still generate the script, but you won't be able to convert it to audio using the audio generation skill. Do you want to proceed?"
    - Do NOT proceed with generation unless user explicitly confirms
 3. **Read reference guide** - Study the complete generation instructions
 4. **Generate script** - Create script using your own capabilities (do NOT use external APIs)
@@ -82,7 +82,7 @@ After generating the script, inform the user:
 - **Estimated audio generation time** using formula: `20 + (word_count / 125)` minutes
   - Example: 2,625 words ≈ 41 minutes (20 + 2625/125)
   - Note: "First-run with cold cache may add 5-10 minutes"
-- Next steps: "When using podcast-audio-generator, remember the speech tempo used (XXX WPM) for tempo analysis"
+- Next steps: "When using generate-podcast-audio, remember the speech tempo used (XXX WPM) for tempo analysis"
 
 ## Bundled Resources
 
@@ -93,9 +93,9 @@ After generating the script, inform the user:
 
 After generating a script:
 1. Review and edit the script as needed
-2. Use the **podcast-audio-generator** skill to convert script to audio
+2. Use the **generate-podcast-audio** skill to convert script to audio
 3. Or regenerate with different parameters if needed
 
 ## Related Skills
 
-- **podcast-audio-generator** - Convert formatted scripts into high-quality audio using text-to-speech synthesis
+- **generate-podcast-audio** - Convert formatted scripts into high-quality audio using text-to-speech synthesis

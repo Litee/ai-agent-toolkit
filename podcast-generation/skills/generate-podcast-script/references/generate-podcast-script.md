@@ -713,7 +713,7 @@ Using formula: Execution time ≈ 20 + (word_count / 125) minutes
 
 Next Steps:
 1. Review/edit script before audio generation
-2. When using podcast-audio-generator, remember the speech tempo used (175 WPM) for tempo analysis
+2. When using generate-podcast-audio, remember the speech tempo used (175 WPM) for tempo analysis
 3. Regenerate with different focus or expertise level if needed
 
 ## Self-Improvement: Documenting Execution Lessons
