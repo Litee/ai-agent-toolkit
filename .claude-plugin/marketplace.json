@@ -4,8 +4,8 @@
     "name": "litee"
   },
   "metadata": {
-    "description": "Collection of AI agent skills for AWS querying (Athena, CloudWatch), Anki flashcard management, audio conversion, safe terminal command registration, image generation, and ML system design interviews",
-    "version": "1.0.3",
+    "description": "Collection of AI agent skills for AWS CDK development, AWS documentation search, AWS querying (Athena, CloudWatch), Anki flashcard management, audio conversion, safe terminal command registration, image generation, and ML system design interviews",
+    "version": "1.0.4",
     "homepage": "https://github.com/Litee/ai-agent-toolkit"
   },
   "plugins": [
@@ -18,6 +18,16 @@
       "category": "developer-tools",
       "keywords": ["mcp", "introspection", "testing", "mcptools"],
       "skills": ["./skills/analyze-mcp"]
+    },
+    {
+      "name": "aws-documentation",
+      "description": "This plugin contains skills for AWS CDK infrastructure development and searching official AWS documentation. Use for CDK guidance, architecture patterns, GenAI constructs, Bedrock agent schemas, CDK Nag rules, documentation search, and AWS architecture recommendations.",
+      "source": "./aws-documentation",
+      "strict": false,
+      "version": "1.0.0",
+      "category": "developer-tools",
+      "keywords": ["aws", "cdk", "documentation", "architecture", "mcp", "bedrock", "infrastructure"],
+      "skills": ["./skills/aws-cdk-expert", "./skills/search-aws-documentation"]
     },
     {
       "name": "convert-audio",
