@@ -4,8 +4,8 @@
     "name": "litee"
   },
   "metadata": {
-    "description": "Collection of AI agent skills for AWS CDK development, AWS documentation search, AWS querying (Athena, CloudWatch), Anki flashcard management, audio conversion, safe terminal command registration, image generation, and ML system design interviews",
-    "version": "1.0.4",
+    "description": "Collection of AI agent skills for AWS CDK development, AWS documentation search, AWS querying (Athena, CloudWatch), Anki flashcard management, audio conversion, podcast generation, safe terminal command registration, image generation, and ML system design interviews",
+    "version": "1.0.5",
     "homepage": "https://github.com/Litee/ai-agent-toolkit"
   },
   "plugins": [
@@ -80,14 +80,14 @@
       "skills": ["./skills/register-safe-terminal-commands"]
     },
     {
-      "name": "podcast-script-generator",
-      "description": "This plugin contains a skill for generating AI-powered podcast scripts with natural conversation flow. Use when creating podcast scripts, multi-speaker dialogue, or conversational content for audio production.",
-      "source": "./podcast-script-generator",
+      "name": "podcast-generation",
+      "description": "This plugin contains skills for AI-powered podcast production: generating podcast scripts with natural conversation flow and converting scripts into high-quality audio using text-to-speech synthesis on AWS. Use when creating podcast scripts, multi-speaker dialogue, or generating podcast audio from scripts.",
+      "source": "./podcast-generation",
       "strict": false,
-      "version": "1.0.0",
+      "version": "1.0.1",
       "category": "user",
-      "keywords": ["podcast", "script", "tts", "audio", "conversation", "text-to-speech"],
-      "skills": ["./skills/podcast-script-generator"]
+      "keywords": ["podcast", "script", "tts", "audio", "conversation", "text-to-speech", "audio-generation", "voice", "aws", "ec2"],
+      "skills": ["./skills/podcast-script-generator", "./skills/podcast-audio-generator"]
     },
     {
       "name": "generate-image",

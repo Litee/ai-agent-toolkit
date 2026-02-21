@@ -28,7 +28,7 @@ These skills can be installed as plugins in Claude Code.
 /plugin install generate-image@litee-claude-code-plugins
 /plugin install manage-anki-flashcards@litee-claude-code-plugins
 /plugin install ml-system-design-interviewer@litee-claude-code-plugins
-/plugin install podcast-script-generator@litee-claude-code-plugins
+/plugin install podcast-generation@litee-claude-code-plugins
 /plugin install query-aws-athena@litee-claude-code-plugins
 /plugin install query-cloudwatch-logs@litee-claude-code-plugins
 /plugin install register-safe-terminal-commands@litee-claude-code-plugins
@@ -46,7 +46,7 @@ Each plugin installs a skill that extends Claude's capabilities:
 | `generate-image` | user | Image generation using Amazon Nova Canvas on AWS Bedrock |
 | `manage-anki-flashcards` | productivity | Anki flashcard management through AnkiConnect API |
 | `ml-system-design-interviewer` | productivity | ML System Design interview framework for Principal-level candidates |
-| `podcast-script-generator` | user | AI-powered podcast script generation with natural conversation flow |
+| `podcast-generation` | user | AI-powered podcast script generation and audio synthesis using AWS TTS |
 | `query-aws-athena` | developer-tools | AWS Athena queries and CloudWatch Log Insights with query optimization and real-time progress tracking |
 | `query-cloudwatch-logs` | developer-tools | CloudWatch Log Insights queries with real-time progress tracking |
 | `register-safe-terminal-commands` | developer-tools | Safe terminal command configuration for Claude Code |
