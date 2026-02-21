@@ -1,7 +1,6 @@
 ---
 name: convert-audio
 description: Convert audio files between formats using ffmpeg. Use when converting audio formats (MP3, WAV, AAC, FLAC, Opus, OGG), adjusting bitrate/quality, changing sample rate/channels, or modifying playback speed.
-dependencies: ffmpeg
 ---
 
 # Audio Conversion Skill
