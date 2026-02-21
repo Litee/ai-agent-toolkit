@@ -14,7 +14,7 @@
       "description": "This plugin contains a skill for introspecting MCP servers and testing MCP tool calls via CLI. Use for discovering tools/resources/prompts an MCP server provides or making test calls to MCP servers.",
       "source": "./analyze-mcp",
       "strict": false,
-      "version": "1.0.0",
+      "version": "1.0.1",
       "category": "developer-tools",
       "keywords": ["mcp", "introspection", "testing", "mcptools"],
       "skills": ["./skills/analyze-mcp"]
