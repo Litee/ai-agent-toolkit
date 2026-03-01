@@ -127,7 +127,6 @@ aws cloudformation list-resource-scan-resources
 aws cloudformation list-resource-scans
 aws cloudformation list-stack-instance-resource-drifts
 aws cloudformation list-stack-instances
-aws cloudformation list-stack-refactor-drifts
 aws cloudformation list-stack-resources
 aws cloudformation list-stack-set-auto-deployment-targets
 aws cloudformation list-stack-set-operation-results
@@ -771,8 +770,6 @@ aws ssm list-ops-metadata
 aws ssm list-resource-compliance-summaries
 aws ssm list-resource-data-sync
 aws ssm list-tags-for-resource
-aws states describe-state-machine
-aws states list-state-machines
 aws stepfunctions describe-activity
 aws stepfunctions describe-execution
 aws stepfunctions describe-map-run
