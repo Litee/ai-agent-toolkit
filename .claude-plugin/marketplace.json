@@ -64,7 +64,7 @@
       "description": "This plugin contains a skill for registering or syncing safe terminal commands to Claude Code settings. Use when configuring which bash commands Claude Code can execute without requiring approval, or when registering/updating the safe commands list from the reference file.",
       "source": "./register-safe-terminal-commands",
       "strict": false,
-      "version": "1.0.2",
+      "version": "1.0.3",
       "category": "developer-tools",
       "keywords": ["terminal", "bash", "permissions", "safety"],
       "skills": ["./skills/register-safe-terminal-commands"]
