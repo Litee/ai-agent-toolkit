@@ -4,8 +4,8 @@
     "name": "litee"
   },
   "metadata": {
-    "description": "Collection of AI agent skills for AWS CDK development, AWS documentation search, AWS querying (Athena, CloudWatch), Anki flashcard management, audio conversion, podcast generation, safe terminal command registration, image generation, and ML system design interviews",
-    "version": "1.0.7",
+    "description": "Collection of AI agent skills for AWS CDK development, AWS documentation search, AWS querying (Athena, CloudWatch), Anki flashcard management, Obsidian vault management, audio conversion, podcast generation, safe terminal command registration, image generation, and ML system design interviews",
+    "version": "1.0.8",
     "homepage": "https://github.com/Litee/ai-agent-toolkit"
   },
   "plugins": [
@@ -48,6 +48,16 @@
       "category": "productivity",
       "keywords": ["anki", "flashcards", "spaced-repetition", "learning"],
       "skills": ["./skills/manage-anki-flashcards"]
+    },
+    {
+      "name": "manage-obsidian-vault",
+      "description": "This plugin contains a skill for managing Obsidian vault notes via the Obsidian CLI. Use for creating notes, linking, tagging, searching, organizing into folders, backlink analysis, properties management, daily notes, templates, task management, and vault health analysis.",
+      "source": "./manage-obsidian-vault",
+      "strict": false,
+      "version": "1.0.0",
+      "category": "productivity",
+      "keywords": ["obsidian", "notes", "knowledge-management", "vault", "zettelkasten", "markdown"],
+      "skills": ["./skills/manage-obsidian-vault"]
     },
     {
       "name": "aws-query-tools",

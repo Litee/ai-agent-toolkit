@@ -27,6 +27,7 @@ These skills can be installed as plugins in Claude Code.
 /plugin install convert-audio@litee-claude-code-plugins
 /plugin install generate-image@litee-claude-code-plugins
 /plugin install manage-anki-flashcards@litee-claude-code-plugins
+/plugin install manage-obsidian-vault@litee-claude-code-plugins
 /plugin install ml-system-design-interviewer@litee-claude-code-plugins
 /plugin install podcast-generation@litee-claude-code-plugins
 /plugin install aws-query-tools@litee-claude-code-plugins
@@ -45,6 +46,7 @@ Each plugin installs a skill that extends Claude's capabilities:
 | `convert-audio` | user | Audio format conversion using ffmpeg (MP3, WAV, AAC, FLAC, Opus, OGG) |
 | `generate-image` | user | Image generation using Amazon Nova Canvas on AWS Bedrock |
 | `manage-anki-flashcards` | productivity | Anki flashcard management through AnkiConnect API |
+| `manage-obsidian-vault` | productivity | Obsidian vault note management via CLI for knowledge management workflows |
 | `ml-system-design-interviewer` | productivity | ML System Design interview framework for Principal-level candidates |
 | `podcast-generation` | user | AI-powered podcast script generation and audio synthesis using AWS TTS |
 | `register-safe-terminal-commands` | developer-tools | Safe terminal command configuration for Claude Code |
