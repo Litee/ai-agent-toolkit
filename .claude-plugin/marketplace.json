@@ -5,16 +5,16 @@
   },
   "metadata": {
     "description": "Collection of AI agent skills for AWS CDK development, AWS documentation search, AWS querying (Athena, CloudWatch), Anki flashcard management, Obsidian vault management, audio conversion, podcast generation, safe terminal command registration, image generation, and ML system design interviews",
-    "version": "1.1.0",
+    "version": "1.1.2",
     "homepage": "https://github.com/Litee/ai-agent-toolkit"
   },
   "plugins": [
     {
       "name": "analyze-mcp",
       "description": "This plugin contains a skill for introspecting MCP servers and testing MCP tool calls via CLI. Use for discovering tools/resources/prompts an MCP server provides or making test calls to MCP servers.",
-      "source": "./analyze-mcp",
+      "source": "./plugins/analyze-mcp",
       "strict": false,
-      "version": "1.0.2",
+      "version": "1.0.3",
       "category": "developer-tools",
       "keywords": ["mcp", "introspection", "testing", "mcptools"],
       "skills": ["./skills/analyze-mcp"]
@@ -22,9 +22,9 @@
     {
       "name": "aws-documentation",
       "description": "This plugin contains skills for AWS CDK infrastructure development and searching official AWS documentation. Use for CDK guidance, architecture patterns, GenAI constructs, Bedrock agent schemas, CDK Nag rules, documentation search, and AWS architecture recommendations.",
-      "source": "./aws-documentation",
+      "source": "./plugins/aws-documentation",
       "strict": false,
-      "version": "1.0.1",
+      "version": "1.0.2",
       "category": "developer-tools",
       "keywords": ["aws", "cdk", "documentation", "architecture", "mcp", "bedrock", "infrastructure"],
       "skills": ["./skills/aws-cdk-expert", "./skills/search-aws-documentation"]
@@ -32,9 +32,9 @@
     {
       "name": "convert-audio",
       "description": "This plugin contains a skill for converting audio files between formats using ffmpeg (MP3, WAV, AAC, FLAC, Opus, OGG), adjusting bitrate/quality, changing sample rate/channels, or modifying playback speed.",
-      "source": "./convert-audio",
+      "source": "./plugins/convert-audio",
       "strict": false,
-      "version": "1.0.3",
+      "version": "1.0.4",
       "category": "user",
       "keywords": ["ffmpeg", "audio", "conversion", "mp3", "wav", "flac"],
       "skills": ["./skills/convert-audio"]
@@ -42,9 +42,9 @@
     {
       "name": "manage-anki-flashcards",
       "description": "This plugin contains a skill for working with Anki flashcard software through the AnkiConnect API. Use for creating flashcards, managing decks, searching notes/cards, syncing collections, controlling review sessions, or any Anki automation tasks.",
-      "source": "./manage-anki-flashcards",
+      "source": "./plugins/manage-anki-flashcards",
       "strict": false,
-      "version": "1.0.4",
+      "version": "1.0.5",
       "category": "productivity",
       "keywords": ["anki", "flashcards", "spaced-repetition", "learning"],
       "skills": ["./skills/manage-anki-flashcards"]
@@ -52,9 +52,9 @@
     {
       "name": "manage-obsidian-vault",
       "description": "This plugin contains a skill for managing Obsidian vault notes via the Obsidian CLI. Use for creating notes, linking, tagging, searching, organizing into folders, backlink analysis, properties management, daily notes, templates, task management, and vault health analysis.",
-      "source": "./manage-obsidian-vault",
+      "source": "./plugins/manage-obsidian-vault",
       "strict": false,
-      "version": "1.0.1",
+      "version": "1.0.2",
       "category": "productivity",
       "keywords": ["obsidian", "notes", "knowledge-management", "vault", "zettelkasten", "markdown"],
       "skills": ["./skills/manage-obsidian-vault"]
@@ -62,19 +62,28 @@
     {
       "name": "aws-query-tools",
       "description": "This plugin contains skills for querying AWS data sources including Athena SQL queries with S3 result download, parallel execution, and CTE optimization, as well as CloudWatch Log Insights queries with real-time progress tracking and flexible time handling.",
-      "source": "./aws-query-tools",
+      "source": "./plugins/aws-query-tools",
       "strict": false,
-      "version": "1.0.1",
+      "version": "1.0.2",
       "category": "developer-tools",
       "keywords": ["aws", "athena", "sql", "query", "s3", "cloudwatch", "logs", "log-insights", "monitoring"],
       "skills": ["./skills/query-aws-athena", "./skills/query-aws-cloudwatch-logs-insights"]
     },
     {
+      "name": "protect-file-system-access",
+      "description": "This plugin contains a hook that blocks direct editing of protected system files including AWS credentials, SSH keys, shell profiles, and package lockfiles. Use to prevent accidental corruption of critical configuration files.",
+      "source": "./plugins/protect-file-system-access",
+      "strict": false,
+      "version": "1.0.1",
+      "category": "developer-tools",
+      "keywords": ["security", "hooks", "file-protection", "aws", "ssh"]
+    },
+    {
       "name": "register-safe-terminal-commands",
       "description": "This plugin contains a skill for registering or syncing safe terminal commands to Claude Code settings. Use when configuring which bash commands Claude Code can execute without requiring approval, or when registering/updating the safe commands list from the reference file.",
-      "source": "./register-safe-terminal-commands",
+      "source": "./plugins/register-safe-terminal-commands",
       "strict": false,
-      "version": "1.0.4",
+      "version": "1.0.5",
       "category": "developer-tools",
       "keywords": ["terminal", "bash", "permissions", "safety"],
       "skills": ["./skills/register-safe-terminal-commands"]
@@ -82,9 +91,9 @@
     {
       "name": "podcast-generation",
       "description": "This plugin contains skills for AI-powered podcast production: generating podcast scripts with natural conversation flow and converting scripts into high-quality audio using text-to-speech synthesis on AWS. Use when creating podcast scripts, multi-speaker dialogue, or generating podcast audio from scripts.",
-      "source": "./podcast-generation",
+      "source": "./plugins/podcast-generation",
       "strict": false,
-      "version": "1.0.4",
+      "version": "1.0.5",
       "category": "user",
       "keywords": ["podcast", "script", "tts", "audio", "conversation", "text-to-speech", "audio-generation", "voice", "aws", "ec2"],
       "skills": ["./skills/generate-podcast-script", "./skills/generate-podcast-audio"]
@@ -92,9 +101,9 @@
     {
       "name": "generate-image",
       "description": "This plugin contains a skill for generating images using Amazon Nova Canvas on AWS Bedrock. Use when creating images, illustrations, AI art, text-to-image generation, or visual content.",
-      "source": "./generate-image",
+      "source": "./plugins/generate-image",
       "strict": false,
-      "version": "1.0.1",
+      "version": "1.0.2",
       "category": "user",
       "keywords": ["aws", "bedrock", "nova-canvas", "image-generation", "text-to-image", "ai-art"],
       "skills": ["./skills/generate-image"]
@@ -102,9 +111,9 @@
     {
       "name": "ml-system-design-interviewer",
       "description": "This plugin contains a skill for conducting, evaluating, or preparing for ML System Design interviews for Principal-level engineering candidates. Use when running mock interviews, preparing questions, or assessing candidates with structured rubrics.",
-      "source": "./ml-system-design-interviewer",
+      "source": "./plugins/ml-system-design-interviewer",
       "strict": false,
-      "version": "1.0.1",
+      "version": "1.0.2",
       "category": "productivity",
       "keywords": ["ml", "machine-learning", "interview", "system-design", "hiring", "evaluation"],
       "skills": ["./skills/ml-system-design-interviewer"]
