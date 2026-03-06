@@ -1,6 +1,6 @@
 ---
 name: analyze-mcp
-description: This skill should be used when introspecting MCP servers and testing MCP tool calls via CLI. Use this skill to discover what tools/resources/prompts an MCP server provides or to make test calls to MCP servers.
+description: Introspect MCP servers and test MCP tool calls via CLI. Use to discover what tools, resources, or prompts an MCP server provides, or to make test calls to verify MCP server behavior.
 ---
 
 # MCP Introspection
@@ -209,176 +209,25 @@ Analyze the output to understand:
 
 ## Common Examples
 
-### Example 1: Discover Tools on a Local Server
+See `references/mcp-operations.md` for full examples. Quick reference:
 
 ```bash
+# Local server
 mcptools tools builder-mcp
-```
+mcptools call InternalSearch --params '{"query":"hello"}' builder-mcp
 
-### Example 2: Test Search Tool
-
-```bash
-mcptools call InternalSearch --params '{"query":"authentication best practices"}' builder-mcp
-```
-
-### Example 3: Discover Tools on uvx-Based Server
-
-```bash
+# uvx-based server
 mcptools tools uvx awslabs.aws-documentation-mcp-server@latest
-```
+mcptools call search_documentation --params '{"search_phrase":"S3","limit":5}' uvx awslabs.aws-documentation-mcp-server@latest
 
-### Example 4: Test Documentation Search
-
-```bash
-mcptools call search_documentation --params '{"search_phrase":"S3 bucket policies","limit":5}' uvx awslabs.aws-documentation-mcp-server@latest
-```
-
-### Example 5: Test Documentation Read with Optional Parameters
-
-```bash
-mcptools call read_documentation --params '{"url":"https://docs.aws.amazon.com/s3/index.html","max_length":10000}' uvx awslabs.aws-documentation-mcp-server@latest
-```
-
-### Example 6: Test Tool with Single Parameter
-
-```bash
-mcptools call recommend --params '{"url":"https://docs.aws.amazon.com/lambda/latest/dg/welcome.html"}' uvx awslabs.aws-documentation-mcp-server@latest
-```
-
-### Example 7: Discover Tools on npx-Based Server
-
-```bash
+# npx-based server
 mcptools tools npx -y @modelcontextprotocol/server-filesystem ~
 ```
 
-### Example 8: Test npx-Based Server Tool
+## Reference Documentation
 
-```bash
-mcptools call read_file --params '{"path":"~/Documents/file.txt"}' npx -y @modelcontextprotocol/server-filesystem ~
-```
-
-## Error Handling
-
-### Common Errors
-
-1. **mcptools not found**
-   - Error: `command not found: mcptools`
-   - Solution: mcptools is typically installed at `~/go/bin/mcptools`. Either:
-     - Add `~/go/bin` to your PATH: `export PATH="$HOME/go/bin:$PATH"`
-     - Use the full path: `~/go/bin/mcptools tools <server-name>`
-     - If not installed, refer to https://github.com/f/mcptools for installation instructions
-
-2. **Server not found**
-   - Error: Server name not recognized
-   - Solution: Verify the server name is correct and the server is properly configured
-
-3. **Invalid JSON parameters**
-   - Error: JSON parsing error
-   - Solution: Ensure JSON is properly formatted with correct quotes and escaping
-
-4. **Missing required parameters**
-   - Error: Tool execution fails due to missing parameters
-   - Solution: Review the tool's parameter requirements and include all required fields
-
-5. **Tool not found**
-   - Error: Tool name not recognized by the server
-   - Solution: Use `mcptools tools <server-name>` to list available tools
-
-6. **uvx server not accessible**
-   - Error: Package not found or version not available
-   - Solution: Verify the package name and version are correct
-
-7. **npx server not accessible**
-   - Error: Package not found or version not available
-   - Solution: Verify the npm package name and version are correct
-
-## JSON Parameter Formatting Guidelines
-
-### Basic Format
-
-Parameters must be valid JSON enclosed in single quotes:
-
-```bash
---params '{"key":"value"}'
-```
-
-### Multiple Parameters
-
-Separate parameters with commas:
-
-```bash
---params '{"param1":"value1","param2":"value2","param3":123}'
-```
-
-### String Values
-
-Use double quotes for string values:
-
-```bash
---params '{"query":"search term","limit":10}'
-```
-
-### Numeric Values
-
-Do not quote numeric values:
-
-```bash
---params '{"max_length":5000,"start_index":0}'
-```
-
-### Boolean Values
-
-Use lowercase true/false without quotes:
-
-```bash
---params '{"include_metadata":true,"verbose":false}'
-```
-
-### Special Characters in Strings
-
-Escape special characters within string values:
-
-```bash
---params '{"query":"testing \"quoted\" text"}'
-```
-
-## Output Format Options
-
-mcptools supports multiple output formats for different use cases:
-
-### Available Formats
-
-- **table** (default): Colorized, human-readable tabular format
-- **json**: Compact JSON output for programmatic parsing
-- **pretty**: Pretty-printed JSON with indentation for readability
-
-### Usage
-
-Add the `--format` flag to any command:
-
-```bash
-# List tools in JSON format
-mcptools tools --format json builder-mcp
-
-# List tools in pretty JSON format
-mcptools tools --format pretty builder-mcp
-
-# Call a tool and get JSON output
-mcptools call search_documentation --params '{"search_phrase":"S3"}' --format json uvx awslabs.aws-documentation-mcp-server@latest
-```
-
-### When to Use Each Format
-
-- **table**: Best for interactive terminal use and human readability
-- **json**: Best for scripts and automation that need to parse output
-- **pretty**: Best for debugging and understanding complex JSON structures
-
-## Summary
-
-- Use `mcptools tools <server-name>` to discover available tools
-- Use `mcptools call <tool-name> --params '<json>' <server-name>` to test tools
-- Ensure JSON parameters are properly formatted and enclosed in single quotes
-- MCP servers can be local/named, uvx-based (Python packages), or npx-based (npm packages)
-- Not all MCP servers support resources and prompts - verify capability first
-- Review command output carefully to understand tool behavior
-- If mcptools is not installed, refer to https://github.com/f/mcptools for installation instructions
+See `references/mcp-operations.md` for:
+- Full worked examples for all server types
+- JSON parameter formatting guide (strings, numbers, booleans, escaping)
+- Output format options (`table`, `json`, `pretty`)
+- Error handling reference table

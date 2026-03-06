@@ -1,6 +1,6 @@
 ---
 name: ml-system-design-interviewer
-description: Conduct or evaluate ML System Design interviews for Principal-level engineering candidates.
+description: Conduct, evaluate, or prepare for ML System Design interviews for Principal-level engineering candidates. Use when running mock interviews, assessing candidates, training interviewers, or preparing interview questions for ML engineering roles.
 ---
 
 # ML System Design Interviewer
@@ -79,7 +79,7 @@ The reference guide provides a complete rubric (Exceeds/Meets/Below) for these 8
 
 ## Bundled Resources
 
-- **references/interviewer-guide.md** - Complete 427-line interview guide with detailed instructions, rubric, examples, and best practices (MUST READ)
+- **references/interviewer-guide.md** - Complete interview guide with detailed instructions, rubric, examples, and best practices (MUST READ)
 
 ## Related Context
 

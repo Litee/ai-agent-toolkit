@@ -1,6 +1,6 @@
 ---
 name: generate-podcast-script
-description: Generate AI-powered podcast scripts with natural conversation flow. Use when creating podcast scripts, multi-speaker dialogue, or conversational content for audio production.
+description: Generate AI-powered podcast scripts with natural conversation flow. Use when creating podcast scripts, episodes, multi-speaker dialogue, or conversational content for audio production.
 ---
 
 # Podcast Script Generator
@@ -79,8 +79,8 @@ After generating the script, inform the user:
 - **Speech tempo used** (prominently displayed: "✓ Script generated with target tempo: XXX WPM")
 - Listener expertise level applied
 - File path where script is saved
-- **Estimated audio generation time** using formula: `20 + (word_count / 125)` minutes
-  - Example: 2,625 words ≈ 41 minutes (20 + 2625/125)
+- **Estimated audio generation time** using formula: `20 + (word_count / 100)` minutes
+  - Example: 2,000 words ≈ 40 minutes (20 + 2000/100)
   - Note: "First-run with cold cache may add 5-10 minutes"
 - Next steps: "When using generate-podcast-audio, remember the speech tempo used (XXX WPM) for tempo analysis"
 
