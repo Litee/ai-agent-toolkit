@@ -11,7 +11,7 @@ import csv
 import json
 import sys
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Dict, List, Optional, Union
 
@@ -74,7 +74,7 @@ class CloudWatchLogsQueryExecutor:
 
         # Handle "now"
         if time_str.lower() == 'now':
-            return int(datetime.now().timestamp() * 1000)
+            return int(datetime.now(timezone.utc).timestamp() * 1000)
 
         # Handle named ranges
         named_ranges = {
@@ -89,17 +89,17 @@ class CloudWatchLogsQueryExecutor:
         if time_str.lower() in named_ranges:
             if time_str.lower() == 'today':
                 # Start of today
-                now = datetime.now()
+                now = datetime.now(timezone.utc)
                 start_of_day = now.replace(hour=0, minute=0, second=0, microsecond=0)
                 return int(start_of_day.timestamp() * 1000)
             elif time_str.lower() == 'yesterday':
                 # Start of yesterday
-                now = datetime.now()
+                now = datetime.now(timezone.utc)
                 start_of_yesterday = (now - timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
                 return int(start_of_yesterday.timestamp() * 1000)
             else:
                 delta = named_ranges[time_str.lower()]
-                return int((datetime.now() - delta).timestamp() * 1000)
+                return int((datetime.now(timezone.utc) - delta).timestamp() * 1000)
 
         # Handle relative times like "1h", "2d", "30m"
         if time_str[-1] in ['h', 'd', 'm', 's']:
@@ -116,7 +116,7 @@ class CloudWatchLogsQueryExecutor:
                 elif unit == 'd':
                     delta = timedelta(days=value)
 
-                return int((datetime.now() - delta).timestamp() * 1000)
+                return int((datetime.now(timezone.utc) - delta).timestamp() * 1000)
             except ValueError:
                 pass
 
@@ -172,14 +172,16 @@ class CloudWatchLogsQueryExecutor:
                     paginator = self.logs_client.get_paginator('describe_log_groups')
                     page_iterator = paginator.paginate(logGroupNamePrefix=prefix)
 
+                    pattern_matches = []
                     for page in page_iterator:
                         for log_group in page['logGroups']:
-                            validated_groups.append(log_group['logGroupName'])
+                            pattern_matches.append(log_group['logGroupName'])
 
-                    if not validated_groups:
+                    if not pattern_matches:
                         raise LogGroupNotFoundError(
                             f"No log groups found matching pattern: {log_group_pattern}"
                         )
+                    validated_groups.extend(pattern_matches)
                 except Exception as e:
                     if 'ResourceNotFoundException' in str(e):
                         raise LogGroupNotFoundError(

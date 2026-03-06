@@ -1,11 +1,11 @@
 ---
 name: register-safe-terminal-commands
 description: This skill should be used when registering or syncing safe terminal commands to Claude Code settings. Use when the user wants to configure which bash commands Claude Code can execute without requiring approval, or when they need to register/update their safe commands list from the reference file.
-dependencies:
-  - python3
 ---
 
 # Register Safe Terminal Commands Skill
+
+**Prerequisites**: Python 3.
 
 ## Purpose
 
@@ -23,7 +23,7 @@ Use this skill when:
 
 ### Safe Commands Reference File
 
-The `references/safe_terminal_commands.txt` file contains **289 pre-configured safe commands** across these categories:
+The `references/safe_terminal_commands.txt` file contains pre-configured safe commands across these categories:
 
 - **AWS CLI**: Read-only operations for 30+ AWS services (S3, EC2, Lambda, Athena, CloudWatch, etc.)
 - **Git**: Status, log, diff, branch, show, blame operations

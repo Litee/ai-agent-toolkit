@@ -5,6 +5,8 @@ description: Convert podcast scripts into high-quality audio using text-to-speec
 
 # Podcast Audio Generator
 
+**Prerequisites**: Python 3, `boto3`, AWS CLI, and an AWS account with EC2, S3, and Step Functions access.
+
 Convert formatted podcast scripts into high-quality audio using VibeVoice text-to-speech synthesis on AWS EC2 GPU instances.
 
 ## 🚀 Implementation
@@ -140,7 +142,6 @@ word_count=$(python scripts/calculate_podcast_metrics.py count-words --file scri
 - **scripts/generate_podcast_audio.py** - Step Functions orchestration script
 - **scripts/calculate_podcast_metrics.py** - Python script for word counting and duration calculations
 - **references/generate-podcast-audio.md** - Complete usage guide (MANDATORY)
-- **assets/voices/** - Custom voice samples
 
 ## Related Skills
 

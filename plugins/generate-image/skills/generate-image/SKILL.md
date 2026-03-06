@@ -1,6 +1,6 @@
 ---
 name: generate-image
-description: Generate images using Amazon Nova Canvas on AWS Bedrock. Use when creating images, AI art, text-to-image generation, or visual content.
+description: Generate images using Amazon Nova Canvas on AWS Bedrock. Use when creating images, illustrations, pictures, artwork, AI art, text-to-image generation, or any visual content.
 ---
 
 # Generate Image
@@ -14,7 +14,8 @@ Generate images using Amazon Nova Canvas model hosted on AWS Bedrock. This skill
    - To use a specific profile, pass `--aws-profile your-profile-name`
 2. Access to AWS Bedrock in your AWS account
 3. Python 3.6+ installed
-4. boto3 library installed: `pip install boto3`
+4. Activate the project virtual environment: `source .venv/bin/activate`
+5. boto3 library installed: `pip install boto3`
 
 ## Script Usage
 

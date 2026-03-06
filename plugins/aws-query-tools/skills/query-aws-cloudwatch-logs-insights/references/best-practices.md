@@ -241,7 +241,7 @@ CloudWatch Logs Insights has several important service limits to consider:
 - **Maximum 20 log groups per query**
   - The script automatically limits to first 20 if more are matched
   - Use specific patterns to stay under this limit
-- **Maximum 10 concurrent queries per account** (includes dashboard queries)
+- **Maximum 30 concurrent queries per account** (includes dashboard queries)
   - If you hit this limit, wait for queries to complete or cancel unneeded queries
   - Consider scheduling queries to avoid concurrent execution
 
@@ -480,19 +480,20 @@ filter @type = "REPORT"
 filter @type = "REPORT"
 | stats max(@memorySize / 1048576) as provisionedMB,
         avg(@maxMemoryUsed / 1048576) as avgUsedMB,
-        max(@maxMemoryUsed / 1048576) as peakUsedMB,
-        provisionedMB - peakUsedMB as overProvisionedMB
+        max(@maxMemoryUsed / 1048576) as peakUsedMB
 ```
+Note: CloudWatch Logs Insights does not support referencing aliases within the same `stats` command.
+Calculate derived values (e.g., `provisionedMB - peakUsedMB`) client-side after querying.
 
 **Detect Over-Provisioned Memory**:
 ```
 filter @type = "REPORT"
-| stats max(@memorySize / 1024 / 1024) as provisonedMemoryMB,
+| stats max(@memorySize / 1024 / 1024) as provisionedMemoryMB,
         min(@maxMemoryUsed / 1024 / 1024) as smallestMemoryRequestMB,
         avg(@maxMemoryUsed / 1024 / 1024) as avgMemoryUsedMB,
-        max(@maxMemoryUsed / 1024 / 1024) as maxMemoryUsedMB,
-        provisonedMemoryMB - maxMemoryUsedMB as overProvisionedMB
+        max(@maxMemoryUsed / 1024 / 1024) as maxMemoryUsedMB
 ```
+Note: Calculate `provisionedMemoryMB - maxMemoryUsedMB` client-side after querying.
 
 #### API Gateway Patterns
 

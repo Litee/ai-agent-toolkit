@@ -1,6 +1,6 @@
 ---
 name: manage-obsidian-vault
-description: This skill should be used when managing Obsidian vault notes via the Obsidian CLI. Use for creating notes, linking notes, tagging, searching the vault, organizing into folders, backlink analysis, properties/metadata management, daily notes, templates, task management, and vault health analysis. Triggers on any request involving Obsidian notes, cards, knowledge management, or vault operations.
+description: Manage Obsidian vault notes via the Obsidian CLI. Use for creating notes, linking, tagging, searching, organizing, backlink analysis, properties/metadata, daily notes, templates, task management, and vault health analysis. Triggers on any request involving Obsidian, knowledge management, PKM, or vault operations.
 ---
 
 # Manage Obsidian Vault
@@ -14,6 +14,8 @@ The Obsidian CLI (`obsidian`) connects to a running Obsidian instance over a loc
 For the complete command reference with all parameters and flags, read `references/cli-reference.md`.
 
 ## Prerequisites
+
+Requires Obsidian desktop app 1.12+ (installer 1.12.4+) with CLI enabled in Obsidian Settings → General.
 
 ### Check CLI Installation
 
@@ -281,8 +283,8 @@ obsidian files folder="Inbox" | while read -r filepath; do
   obsidian property:set name="status" value="review" type="text" file="$notename"
 done
 
-# Add a property to all notes tagged with a specific tag
-obsidian tag name="status/draft" verbose | grep -oP '(?<=\t)\S+\.md' | while read -r filepath; do
+# Add a property to all notes tagged with a specific tag (use format=json for reliable parsing)
+obsidian tag name="status/draft" format=json | jq -r '.[].path' | while read -r filepath; do
   notename=$(basename "$filepath" .md)
   obsidian property:set name="reviewed" value="false" type="checkbox" file="$notename"
 done

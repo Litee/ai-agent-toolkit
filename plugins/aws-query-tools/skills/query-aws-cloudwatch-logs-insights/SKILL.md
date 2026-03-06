@@ -1,9 +1,15 @@
 ---
 name: query-aws-cloudwatch-logs-insights
-description: This skill should be used when querying AWS CloudWatch Log Insights, including executing queries, monitoring query progress with real-time updates, handling different time formats, and saving results in various output formats. Use when analyzing CloudWatch logs, investigating errors or patterns, or generating reports from log data.
+description: Query AWS CloudWatch Log Insights with real-time progress tracking and flexible time/output formats. Use when analyzing CloudWatch logs, investigating errors or patterns, or generating reports from log data.
 ---
 
 # Query CloudWatch Logs
+
+## Prerequisites
+
+- Python 3 with `boto3` installed
+- AWS account with CloudWatch Logs access
+- AWS credentials configured (environment variables, `~/.aws/credentials`, or instance profile)
 
 ## Overview
 

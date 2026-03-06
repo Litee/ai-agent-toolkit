@@ -120,7 +120,7 @@ class AthenaQueryExecutor:
         Args:
             query_execution_id: The ID of the query execution
             output_file: Local file path to save results (optional)
-            format: Output format (csv, json, parquet) - default: csv
+            format: Output format (default: csv)
 
         Returns:
             local_file_path: Path to the downloaded results file
@@ -158,7 +158,7 @@ class AthenaQueryExecutor:
         Args:
             query: SQL query string
             output_file: Local file path to save results (optional)
-            format: Output format (csv, json, parquet) - default: csv
+            format: Output format (default: csv)
 
         Returns:
             local_file_path: Path to the downloaded results file
@@ -204,8 +204,8 @@ def main():
     parser.add_argument(
         '--format',
         default='csv',
-        choices=['csv', 'json', 'parquet'],
-        help='Output format (default: csv)'
+        choices=['csv'],
+        help='Output format (default: csv). Athena writes CSV to S3; only CSV download is supported.'
     )
 
     parser.add_argument(

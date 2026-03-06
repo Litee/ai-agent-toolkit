@@ -57,7 +57,7 @@ sudo yum install ffmpeg  # RHEL/CentOS
    - **IMPORTANT**: Always use `-n` flag to prevent overwriting existing files
    - If the output file exists, the user must handle the conflict (rename, delete, etc.)
 
-3. **Output Bitrate** (required)
+3. **Output Bitrate** (required for lossy formats; omit for lossless like FLAC/WAV)
    - Specify the target bitrate explicitly
    - Format: `128k`, `192k`, `256k`, `320k`, etc.
    - Higher bitrate = better quality, larger file size
@@ -318,86 +318,14 @@ ffmpeg -n -i input.mp3 -b:a 192k -af "atempo=2.0,atempo=2.0" output.mp3
 ffmpeg -n -i input.mp3 -b:a 192k -af "atempo=0.5,atempo=0.5" output.mp3
 ```
 
-## Metadata Guidelines
-
-### Supported Formats
-
-- **MP3**: Full ID3v2 tag support
-- **AAC/M4A**: Supports iTunes-style metadata (similar tags)
-- **FLAC**: Supports Vorbis comments (same tag names work)
-- **Opus/OGG**: Supports Vorbis comments
-- **WAV**: Limited metadata support (use BWF metadata)
-
-### Best Practices
-
-1. **Quote Values**: Always quote metadata values to handle spaces and special characters
-   ```bash
-   -metadata title="My Song Title"
-   ```
-
-2. **Escape Special Characters**: Use backslash escaping for quotes within values
-   ```bash
-   -metadata comment="Artist's \"Greatest\" Hit"
-   ```
-
-3. **Preserve Existing Metadata**: To copy metadata from input to output:
-   ```bash
-   ffmpeg -n -i input.mp3 -b:a 192k -map_metadata 0 output.mp3
-   ```
-
-4. **Clear All Metadata**: To remove all metadata:
-   ```bash
-   ffmpeg -n -i input.mp3 -b:a 192k -map_metadata -1 output.mp3
-   ```
-
-5. **Year Format**: Use YYYY format for date field (e.g., "2024", not "24")
-
-6. **Track Numbers**: Can use simple format "3" or fraction format "3/12" (track 3 of 12 total)
-
-### Common Metadata Patterns
-
-#### For Music Files
-```bash
--metadata title="Song Title" -metadata artist="Artist Name" -metadata album="Album Name" -metadata date="2024" -metadata genre="Rock" -metadata track="3"
-```
-
-#### For Podcasts
-```bash
--metadata title="Episode Title" -metadata artist="Podcast Name" -metadata album="Season/Series" -metadata genre="Podcast" -metadata date="2024" -metadata comment="Episode description"
-```
-
-#### For Audiobooks
-```bash
--metadata title="Chapter Title" -metadata artist="Author Name" -metadata album="Book Title" -metadata genre="Audiobook" -metadata track="5" -metadata comment="Chapter 5"
-```
-
-### All Supported Metadata Tags
-
-| Tag | Description | Example |
-|-----|-------------|---------|
-| `title` | Track/song title | "My Song" |
-| `artist` | Artist/performer name | "John Doe" |
-| `album` | Album name | "Greatest Hits" |
-| `album_artist` | Album artist (if different) | "Various Artists" |
-| `date` | Release year (YYYY) | "2024" |
-| `genre` | Music genre | "Rock" |
-| `track` | Track number | "3" or "3/12" |
-| `disc` | Disc number | "1" or "1/2" |
-| `comment` | Comments or notes | "Remastered" |
-| `composer` | Music composer | "Jane Smith" |
-| `publisher` | Record label/publisher | "XYZ Records" |
-| `copyright` | Copyright information | "© 2024" |
-| `language` | Language code | "eng" |
-| `encoded_by` | Encoder software/person | "ffmpeg" |
-| `description` | Description or subtitle | "Live version" |
-| `lyrics` | Song lyrics | "Full lyrics text" |
-| `conductor` | Orchestra conductor | "John Williams" |
-| `bpm` | Beats per minute | "120" |
-
 ## Reference Documentation
 
-For detailed parameter documentation, see:
-- `references/ffmpeg-parameters.md` - Comprehensive parameter reference
+For full metadata tag table, format-specific support, codec details, and advanced options, see `references/ffmpeg-parameters.md`.
+
+Quick metadata reference — use `-metadata key="value"` for each tag:
+- Common tags: `title`, `artist`, `album`, `date` (YYYY), `genre`, `track` ("3" or "3/12"), `comment`
+- Preserve existing metadata: `ffmpeg -n -i input.mp3 -b:a 192k -map_metadata 0 output.mp3`
+- Clear all metadata: `ffmpeg -n -i input.mp3 -b:a 192k -map_metadata -1 output.mp3`
 
 ## Summary
 
