@@ -30,6 +30,7 @@ These skills can be installed as plugins in Claude Code.
 /plugin install manage-obsidian-vault@litee-claude-code-plugins
 /plugin install ml-system-design-interviewer@litee-claude-code-plugins
 /plugin install podcast-generation@litee-claude-code-plugins
+/plugin install protect-file-system-access@litee-claude-code-plugins
 /plugin install aws-query-tools@litee-claude-code-plugins
 /plugin install register-safe-terminal-commands@litee-claude-code-plugins
 ```
@@ -49,6 +50,7 @@ Each plugin installs a skill that extends Claude's capabilities:
 | `manage-obsidian-vault` | productivity | Obsidian vault note management via CLI for knowledge management workflows |
 | `ml-system-design-interviewer` | productivity | ML System Design interview framework for Principal-level candidates |
 | `podcast-generation` | user | AI-powered podcast script generation and audio synthesis using AWS TTS |
+| `protect-file-system-access` | developer-tools | PreToolUse hook blocking direct edits to AWS credentials, SSH keys, shell profiles, and lockfiles |
 | `register-safe-terminal-commands` | developer-tools | Safe terminal command configuration for Claude Code |
 
 **Note:** Each plugin may have additional dependencies. Check the individual [skill documentation](skills/) for prerequisites and detailed usage instructions.
