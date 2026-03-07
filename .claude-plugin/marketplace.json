@@ -74,7 +74,7 @@
       "description": "This plugin contains a hook that blocks direct editing of protected system files including AWS credentials, SSH keys, shell profiles, and package lockfiles. Use to prevent accidental corruption of critical configuration files.",
       "source": "./plugins/protect-file-system-access",
       "strict": false,
-      "version": "1.0.1",
+      "version": "1.0.3",
       "category": "developer-tools",
       "keywords": ["security", "hooks", "file-protection", "aws", "ssh"]
     },
