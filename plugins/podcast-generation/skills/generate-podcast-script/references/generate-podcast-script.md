@@ -7,7 +7,7 @@ Generate AI-powered podcast scripts optimized for natural conversation flow usin
 ## Parameters
 
 ### Script Generation Parameters
-- **script_style** (required): "tech_discussion", "solo_expert", "business_panel", or "interview"
+- **script_style** (required): "tech_discussion", "solo_expert", "business_panel", "interview", or "system_design_interview"
   - Determines default speaker configuration and audio style
 - **target_duration** (required): Duration (e.g., "5 minutes", "10 minutes", "00:15:00")
   - Used for script generation word count calculation (~175 words per minute default, configurable via speech_tempo)

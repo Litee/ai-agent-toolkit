@@ -11,15 +11,30 @@ Convert formatted podcast scripts into high-quality audio using VibeVoice text-t
 
 ## 🚀 Implementation
 
-This skill uses a Step Functions-based orchestration script for robust podcast generation:
+This skill uses a **two-script workflow**: run `setup_infrastructure.py` once per account/region, then run `generate_podcast_audio.py` for each podcast.
 
-**Script**: `scripts/generate_podcast_audio.py`
+### Step 1 (One-Time Setup): `scripts/setup_infrastructure.py`
+
+Creates all persistent AWS infrastructure needed for podcast generation:
+- S3 bucket with 24-hour lifecycle policy
+- IAM roles (Lambda execution, Step Functions, EC2 instance profile)
+- Step Functions state machine
+
+```bash
+python3 scripts/setup_infrastructure.py --profile PROFILE --region REGION
+```
+
+Safe to re-run — all operations are idempotent.
+
+### Step 2 (Per Podcast): `scripts/generate_podcast_audio.py`
+
+Generates audio for a single podcast script. Requires infrastructure from Step 1 to already exist.
+
 - ✅ **Guaranteed cleanup** even if script crashes or client disconnects
 - ✅ Visual workflow tracking in AWS console
 - ✅ Built-in retry logic and error handling
 - ✅ Can disconnect and check status later
 - ✅ Execution audit trails
-- ✅ Idempotent IAM role creation (policies always ensured on every run)
 
 **Why Step Functions?**
 Step Functions provides stronger guarantees for cleanup and error handling compared to direct execution, making it production-ready for all workloads.
@@ -38,7 +53,7 @@ Step Functions provides stronger guarantees for cleanup and error handling compa
 
 **Step Functions Overhead:** ~$0.025 per 1,000 state transitions (<$0.05 per podcast, <5% of total cost)
 
-**One-Time Setup:** Creates permanent S3 bucket and IAM roles (reused across runs, minimal/no cost). Safe for concurrent executions.
+**One-Time Setup:** `setup_infrastructure.py` creates a permanent S3 bucket and IAM roles (reused across runs, minimal/no cost). Safe for concurrent executions.
 
 ## ⚠️ MANDATORY: Read Detailed Instructions First
 
@@ -57,8 +72,9 @@ The reference contains essential information about:
 - **Script file**: Must follow the "Speaker N:" format for each line
   - **Duration Limit**: The ML model has a maximum limit of 60 minutes (1 hour) for audio generation
   - **Validation Required**: Before generating audio, you MUST validate the script duration and ask for user confirmation if it may exceed 60 minutes
-- **Voice selection**: Choose from available voice profiles for each speaker
+- **Voice selection**: Choose from available voice profiles for each speaker (built-in or custom)
 - **AWS region**: Specify the AWS region for EC2 instance deployment
+- **Voices directory** (optional): Path to a directory with custom voice WAV files; if omitted, defaults to `assets/voices/` relative to the skill's scripts directory
 - **Speech tempo**: Track the speech_tempo value from script generation (default: 175 WPM)
   - Used for mandatory tempo analysis after audio generation
   - Needed to calculate drift and determine if speed adjustment is required
@@ -110,9 +126,9 @@ word_count=$(python scripts/calculate_podcast_metrics.py count-words --file scri
 
 ## Workflow Overview
 
-1. **Calculate and communicate execution time** - Estimate duration, inform user of expected completion time
-2. **Validation & Setup** - Validate script format and AWS credentials
-3. **Infrastructure Creation** - Create S3 bucket, IAM roles, security groups
+1. **Infrastructure Setup (one-time)** - Run `setup_infrastructure.py` to create S3 bucket, IAM roles, and state machine
+2. **Calculate and communicate execution time** - Estimate duration, inform user of expected completion time
+3. **Validation** - Validate script format and AWS credentials; verify infrastructure exists
 4. **EC2 Launch** - Launch GPU instance and install dependencies
 5. **Audio Generation** - Generate audio using VibeVoice TTS
 6. **Download** - Download WAV file from S3
@@ -139,9 +155,12 @@ word_count=$(python scripts/calculate_podcast_metrics.py count-words --file scri
 
 ## Bundled Resources
 
-- **scripts/generate_podcast_audio.py** - Step Functions orchestration script
+- **scripts/setup_infrastructure.py** - One-time AWS infrastructure setup script (run once per account/region)
+- **scripts/generate_podcast_audio.py** - Per-podcast Step Functions orchestration script
+- **scripts/_podcast_shared.py** - Shared utilities and naming conventions (internal module)
 - **scripts/calculate_podcast_metrics.py** - Python script for word counting and duration calculations
 - **references/generate-podcast-audio.md** - Complete usage guide (MANDATORY)
+- **assets/voices/** - Optional directory for custom voice WAV samples (not included; add your own)
 
 ## Related Skills
 

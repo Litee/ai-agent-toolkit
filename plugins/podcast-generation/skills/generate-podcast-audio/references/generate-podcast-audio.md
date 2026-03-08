@@ -10,10 +10,11 @@ Convert formatted podcast scripts into high-quality audio using VibeVoice on AWS
 - **NEVER instruct the user to run manual AWS CLI commands** for cleanup unless automatic cleanup has failed
 - Trust the script's automatic cleanup - it handles Ctrl+C gracefully and cleans up on exit
 
-**PERMANENT Infrastructure** (created once per account/region, NEVER deleted):
+**PERMANENT Infrastructure** (created by `setup_infrastructure.py`, NEVER deleted by `generate_podcast_audio.py`):
 - S3 bucket: `podcast-temp-{account-id}-{region}` - DO NOT delete it or ask user to delete it (automatically configured with 24-hour lifecycle policy)
-- IAM role: `podcast-ec2-role-{account-id}-{region}` - DO NOT delete it or ask user to delete it (automatically created by script)
-- IAM instance profile: Same as IAM role - DO NOT delete it or ask user to delete it (automatically created by script)
+- IAM role: `podcast-ec2-role-{account-id}-{region}` - DO NOT delete it or ask user to delete it (created by setup_infrastructure.py)
+- IAM instance profile: Same as IAM role - DO NOT delete it or ask user to delete it (created by setup_infrastructure.py)
+- Step Functions state machine: `podcast-generation-{region}` - DO NOT delete it (created by setup_infrastructure.py)
 
 **Per-Run Resources** (automatically cleaned up each run):
 - EC2 instances: Terminated automatically
@@ -35,12 +36,20 @@ Convert formatted podcast scripts into high-quality audio using VibeVoice on AWS
 
 ## Parameters
 
+### setup_infrastructure.py
+
+- **--profile** (required): AWS CLI profile name
+- **--region** (required): AWS region where infrastructure will be created
+
+### generate_podcast_audio.py
+
 - **--script-path** (required): Path to existing script file
-- **--speaker-names** (required): Space-separated list of speaker voice names in order (first voice = Speaker 1, second = Speaker 2, etc.). Example: Helen Ryan Duncan
+- **--speaker-names** (required): Space-separated list of speaker voice names in order (first voice = Speaker 1, second = Speaker 2, etc.). Example: Alice Frank
 - **--profile** (required): AWS CLI profile name
 - **--region** (required): AWS region for EC2 instance launch
 - **--instance-type** (optional): EC2 instance type (defaults to g6.4xlarge)
 - **--output-dir** (optional): Local directory for audio files (defaults to current directory)
+- **--voices-dir** (optional): Path to directory containing custom voice WAV files (defaults to `assets/voices/` next to the script). Only needed when using voices beyond the VibeVoice built-ins.
 - **--verbose** (optional): Enable detailed SSH debugging output (defaults to false)
 
 ### 🚨 CRITICAL: Preventing File Name Conflicts
@@ -72,10 +81,24 @@ Convert formatted podcast scripts into high-quality audio using VibeVoice on AWS
 **Available Voice Names:**
 
 Voices come from two sources:
-1. **VibeVoice built-in:** Alice (woman), Carter (man), Frank (man), Mary (woman)
-2. **Custom voices:** Duncan (man), George (man), Helen (woman), Joe (man), Lin (woman), Luke (man), Ryan (man)
 
-**Note:** Built-in voices are automatically available after VibeVoice installation on EC2. Custom voices are uploaded from the skill's assets directory.
+**1. VibeVoice built-in voices (always available):**
+- Alice (woman), Carter (man), Frank (man), Mary (woman)
+
+These are included automatically after VibeVoice is cloned on EC2. No setup required.
+
+**2. Custom voices (user-provided):**
+- Any WAV voice sample you provide. The voice name must appear somewhere in the filename (e.g., `en-Helen_woman.wav` can be referenced as `Helen`).
+- Custom voices are uploaded from your voices directory (`--voices-dir`) to S3 and copied to EC2 before generation.
+
+**Custom Voice Setup:**
+
+To use custom voices:
+1. Record or obtain WAV voice samples for your desired voices (short 5-30 second clips of the voice speaking work best)
+2. Name each file so the voice name appears in the filename, e.g., `my-voice.wav` or `en-John_man.wav`
+3. Place all voice WAV files in a directory on your local machine
+4. Pass the directory path via `--voices-dir /path/to/your/voices`
+5. Reference voices by the name portion of their filename (e.g., `my-voice` or `John`)
 
 **Tip:** For multi-speaker podcasts, using a mix of different male and female voices helps create distinct, engaging speaker identities.
 
@@ -109,7 +132,28 @@ aws sts get-caller-identity --profile YOUR_PROFILE
 ls -lh path/to/your-script.md
 ```
 
-### 2. Validate Script Duration (MANDATORY)
+### 2. Set Up AWS Infrastructure (One-Time)
+
+**⚠️ REQUIRED BEFORE FIRST USE:** Run `setup_infrastructure.py` once per AWS account/region before generating any podcasts. This creates the permanent infrastructure that `generate_podcast_audio.py` relies on.
+
+```bash
+python3 scripts/setup_infrastructure.py \
+  --profile YOUR_PROFILE \
+  --region us-west-2
+```
+
+**What it creates:**
+- S3 bucket: `podcast-temp-{account-id}-{region}` (with 24-hour lifecycle policy)
+- IAM role for Lambda: `podcast-lambda-role-{account-id}-{region}`
+- IAM role for Step Functions: `podcast-stepfunctions-role-{account-id}-{region}`
+- IAM role + instance profile for EC2: `podcast-ec2-role-{account-id}-{region}`
+- Step Functions state machine: `podcast-generation-{region}`
+
+**Safe to re-run** — all operations are idempotent. Re-running on an existing setup just verifies resources exist.
+
+If infrastructure is missing when you run `generate_podcast_audio.py`, the script will fail immediately with a clear message telling you to run `setup_infrastructure.py` first.
+
+### 3. Validate Script Duration (MANDATORY)
 
 **⚠️ CRITICAL: Before proceeding with audio generation, you MUST validate the script duration.**
 
@@ -154,15 +198,15 @@ The VibeVoice ML model has a hard limit of **60 minutes (1 hour)** for audio gen
 - Avoids long-running operations that will ultimately fail
 - Saves time by catching issues before EC2 launch
 
-### 3. Select Compute Resources
+### 4. Select Compute Resources
 
 **Default Instance Type:** g6.4xlarge (can be changed with `--instance-type` parameter)
 
 **Note:** If an instance type is unavailable due to capacity constraints, try a different region or wait and try again later.
 
-### 4. Generate Audio Using Automation Script (RECOMMENDED)
+### 5. Generate Audio Using Automation Script
 
-**🎯 This is the recommended approach** - the automation script handles all EC2 operations automatically, providing a simple, reliable workflow with robust error handling and automatic cleanup.
+The automation script handles all EC2 operations automatically, providing a simple, reliable workflow with robust error handling and automatic cleanup. **Infrastructure must be set up first** (Step 2).
 
 #### What the Script Does
 
@@ -170,15 +214,15 @@ The [`generate_podcast_audio.py`](generate_podcast_audio.py) automation script p
 
 **Automated Operations:**
 1. ✅ Validates script format before launching EC2 (catches errors early)
-   - **Note**: Duration validation (60-minute limit check) must be done manually before running the script (see Step 2)
-2. ✅ Creates AWS infrastructure (S3 bucket, IAM roles, security groups)
+   - **Note**: Duration validation (60-minute limit check) must be done manually before running the script (see Step 3)
+2. ✅ Verifies infrastructure exists (fails fast with clear message if `setup_infrastructure.py` hasn't been run)
 3. ✅ Launches EC2 instance with 12-hour auto-termination safeguard
 4. ✅ Waits for SSM agent availability with retry logic
 5. ✅ Installs all dependencies via SSM (clones VibeVoice from GitHub, installs from source)
 6. ✅ Transfers script file to instance via S3
 7. ✅ Executes audio generation with progress monitoring via SSM
 8. ✅ Downloads generated audio file via S3 (WAV format)
-9. ✅ Cleans up ALL AWS resources (instance, IAM roles, security groups, S3 files)
+9. ✅ Cleans up temporary AWS resources (instance, security groups, S3 files; permanent infra retained)
 10. ✅ Detects ALL orphaned resources from any run (helps identify stuck instances from previous runs)
 
 **Key Features:**
@@ -197,7 +241,17 @@ The [`generate_podcast_audio.py`](generate_podcast_audio.py) automation script p
 ```bash
 python3 generate_podcast_audio.py \
   --script-path path/to/your-script_20251025143000.md \
-  --speaker-names Helen Ryan Duncan \
+  --speaker-names Alice Frank \
+  --profile YOUR_PROFILE \
+  --region us-west-2
+```
+
+With custom voices:
+```bash
+python3 generate_podcast_audio.py \
+  --script-path path/to/your-script_20251025143000.md \
+  --speaker-names MyVoice Alice \
+  --voices-dir ~/my-voices \
   --profile YOUR_PROFILE \
   --region us-west-2
 ```
@@ -212,6 +266,7 @@ python3 generate_podcast_audio.py \
   --profile <profile>            # (Required) AWS CLI profile
   --instance-type <type>         # (Optional) EC2 type (default: g6.4xlarge)
   --output-dir <directory>       # (Optional) Local output directory (default: .)
+  --voices-dir <directory>       # (Optional) Directory with custom voice WAV files
   --verbose                      # (Optional) Enable detailed SSH debugging output
 ```
 
@@ -225,7 +280,7 @@ python3 generate_podcast_audio.py \
 **--speaker-names** (required)
 - Space-separated list of voice names matching script speakers (see "Available Voice Names" section above for full list)
 - **IMPORTANT: Voices are applied in the specified order** - first voice = Speaker 1, second voice = Speaker 2, third voice = Speaker 3, etc.
-- Example: `--speaker-names Helen Ryan Duncan` assigns Helen to Speaker 1, Ryan to Speaker 2, Duncan to Speaker 3
+- Example: `--speaker-names Alice Frank` assigns Alice to Speaker 1, Frank to Speaker 2
 
 **--profile** (required)
 - AWS CLI profile name (no default - must be explicitly provided)
@@ -245,6 +300,12 @@ python3 generate_podcast_audio.py \
 - Will be created if doesn't exist
 - Audio files named based on script filename: `<script-name>.wav`
 
+**--voices-dir** (optional, default: `assets/voices/` next to the script)
+- Directory containing your custom voice WAV files
+- Only needed if using voices beyond the VibeVoice built-ins (Alice, Carter, Frank, Mary)
+- Voice name matching: the voice name you pass in `--speaker-names` must appear somewhere in the WAV filename
+- Example: `--voices-dir ~/my-custom-voices`
+
 **--verbose** (optional, default: false)
 - Enables detailed SSM command debugging output
 - Shows all SSM commands, STDOUT, STDERR, and execution status
@@ -253,19 +314,20 @@ python3 generate_podcast_audio.py \
 
 #### Usage Examples
 
-**Example 1: Basic usage with required parameters (timestamp in filename)**
+**Example 1: Basic usage with built-in voices (timestamp in filename)**
 ```bash
 python3 generate_podcast_audio.py \
   --script-path ~/podcasts/tech-podcast_20251025143000.md \
-  --speaker-names Helen Ryan \
+  --speaker-names Alice Frank \
   --region us-west-2
 ```
 
-**Example 2: Timestamp in output directory (alternative approach)**
+**Example 2: Timestamp in output directory with custom voices**
 ```bash
 python3 generate_podcast_audio.py \
   --script-path ~/podcasts/podcast-interview.md \
-  --speaker-names Duncan Helen Ryan \
+  --speaker-names MyHost MyGuest \
+  --voices-dir ~/my-voices \
   --profile my-aws-profile \
   --region us-west-2 \
   --output-dir ~/podcast-outputs/run_20251025143000
@@ -275,13 +337,13 @@ python3 generate_podcast_audio.py \
 ```bash
 python3 generate_podcast_audio.py \
   --script-path ~/podcasts/episode_20251025143000.md \
-  --speaker-names Duncan Joe \
+  --speaker-names Alice Carter \
   --region us-west-2 \
   --output-dir ~/podcasts/output_20251025143000 \
   --verbose
 ```
 
-### 5. Shutdown and Resource Cleanup
+### 6. Shutdown and Resource Cleanup
 
 **⚠️ CRITICAL: Graceful Shutdown Requirement**
 
@@ -347,7 +409,7 @@ Even if cleanup fails, all EC2 instances have a built-in 12-hour auto-terminatio
 
 **However:** You should NEVER rely on this failsafe. Always clean up resources immediately.
 
-### 6. Monitor Progress
+### 7. Monitor Progress
 
 When using the automation script, progress monitoring is automatic:
 
@@ -378,7 +440,7 @@ When using the automation script, progress monitoring is automatic:
 
 **Rationale:** Generation takes 45-120+ minutes. Continuous polling wastes tokens without providing value.
 
-### 7. Retrieve Generated Audio
+### 8. Retrieve Generated Audio
 
 **Automatic Download with Script:**
 The automation script downloads files automatically to your specified output directory via S3. Audio files are:
@@ -418,7 +480,7 @@ aws s3 cp s3://podcast-temp-{account-id}-{region}/{timestamp}/output.wav ./backu
 **File Format:**
 - **WAV**: Uncompressed, highest quality, large file size (~150MB for 15 minutes)
 
-### 8. Speech Tempo Analysis (MANDATORY)
+### 9. Speech Tempo Analysis (MANDATORY)
 
 **⚠️ CRITICAL**: This step is MANDATORY and must be performed after WAV file download. You MUST analyze speech tempo to determine if speed adjustment is needed.
 
@@ -501,13 +563,13 @@ actual_wpm = (word_count / duration_seconds) * 60
 
 **4. Calculate speed adjustment factor:**
 ```
-speed_factor = actual_wpm / target_wpm
+speed_factor = target_wpm / actual_wpm
 ```
 
 **Example:**
 - Actual WPM: 150 WPM
 - Target WPM: 175 WPM
-- Speed factor: 150 / 175 = 0.857x (need to speed up by 17%)
+- Speed factor: 175 / 150 = 1.167x (need to speed up by 17%)
 
 **⚠️ IMPORTANT: Skip Speed Adjustment if Already Close to Target**
 If the actual WPM is already within 5% of the target WPM, **DO NOT apply speed adjustment**. Audio quality is better without unnecessary processing.
@@ -578,12 +640,11 @@ drift_percentage = abs(actual_wpm - target_wpm) / target_wpm * 100
 
 **Example:**
 - Original duration: 900 seconds
-- Speed factor: 0.857x (to speed up from 150 WPM to 175 WPM)
-- Expected duration: 900 / 0.857 = 1050 seconds
-- Expected WPM: 150 × 0.857 = 128.6 WPM ❌ **WRONG! Should be 175 WPM**
-- This indicates an error - the formula should be: speed_factor = target_wpm / actual_wpm
+- Speed factor: 1.167x (to speed up from 150 WPM to 175 WPM)
+- Expected duration: 900 / 1.167 = 771 seconds
+- Expected WPM: 150 × 1.167 = 175.0 WPM ✅ **Matches target!**
 
-### 9. Metadata Extraction (MANDATORY)
+### 10. Metadata Extraction (MANDATORY)
 
 **⚠️ CRITICAL**: After successful audio generation and tempo analysis, you MUST extract and display metadata for use with the convert-audio skill.
 
@@ -633,7 +694,7 @@ These metadata fields can be embedded into the final audio file using the conver
 - Metadata extraction uses a sub-agent for efficient processing
 - This step only runs after successful audio generation (don't waste resources if generation fails)
 
-### 10. Tempo Adjustment Recommendation
+### 11. Tempo Adjustment Recommendation
 
 **⚠️ CRITICAL**: Based on the drift percentage, you MUST provide recommendations for tempo adjustment using the convert-audio skill:
 
@@ -729,21 +790,40 @@ If you want to proceed with tempo adjustment, use the convert-audio skill:
 ### Example Input
 
 ```
-Generate podcast from ~/tech-podcast_20251025143000.md with three hosts using voices: Helen, Ryan, and Duncan.
+Generate podcast from ~/tech-podcast_20251025143000.md with three hosts using built-in voices: Alice, Carter, and Frank.
 
 Script: ~/tech-podcast_20251025143000.md
-Speakers: Helen Ryan Duncan
+Speakers: Alice Carter Frank
 Region: us-west-2
 Budget: Standard performance
 ```
 
-### Example Command
+### Example Commands
 
 ```bash
-# Note: Timestamp included in script filename to prevent file conflicts
+# Step 1 (one-time): Set up infrastructure
+python3 scripts/setup_infrastructure.py \
+  --profile YOUR_PROFILE \
+  --region us-west-2
+```
+
+```bash
+# Step 2: Generate audio (note: timestamp in filename prevents file conflicts)
 python3 generate_podcast_audio.py \
   --script-path ~/tech-podcast_20251025143000.md \
-  --speaker-names Helen Ryan Duncan \
+  --speaker-names Alice Carter Frank \
+  --profile YOUR_PROFILE \
+  --region us-west-2 \
+  --output-dir ~/podcast-outputs
+```
+
+### Example Command (with custom voices)
+
+```bash
+python3 generate_podcast_audio.py \
+  --script-path ~/tech-podcast_20251025143000.md \
+  --speaker-names Jordan Sam Alex \
+  --voices-dir ~/my-voices \
   --profile YOUR_PROFILE \
   --region us-west-2 \
   --output-dir ~/podcast-outputs
@@ -753,7 +833,7 @@ python3 generate_podcast_audio.py \
 
 ```
 ✅ Script format validated successfully
-✅ AWS infrastructure created (keys, security groups)
+✅ Infrastructure verified (S3 bucket, IAM roles, state machine present)
 ✅ EC2 instance launched: i-0abc123def456 (g6.4xlarge)
 ✅ Dependencies installed
 ✅ Audio generation completed
@@ -780,7 +860,7 @@ Orphaned Resource Detection Report:
 
 === Podcast Metadata ===
 Title: The Future of AI in Healthcare
-Artist: Dr. Sarah Chen (Helen voice), Alex Martinez (Ryan voice), Prof. Duncan Wade (Duncan voice)
+Artist: Dr. Sarah Chen (Alice voice), Alex Martinez (Carter voice), Prof. Duncan Wade (Frank voice)
 Description: A technical discussion exploring how artificial intelligence is transforming modern healthcare delivery and patient outcomes
 ========================
 
