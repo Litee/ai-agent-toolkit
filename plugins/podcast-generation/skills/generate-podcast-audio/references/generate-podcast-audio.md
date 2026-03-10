@@ -39,14 +39,14 @@ Convert formatted podcast scripts into high-quality audio using VibeVoice on AWS
 ### setup_infrastructure.py
 
 - **--profile** (required): AWS CLI profile name
-- **--region** (required): AWS region where infrastructure will be created
+- **--region** (optional): AWS region where infrastructure will be created (default: profile's configured region)
 
 ### generate_podcast_audio.py
 
 - **--script-path** (required): Path to existing script file
 - **--speaker-names** (required): Space-separated list of speaker voice names in order (first voice = Speaker 1, second = Speaker 2, etc.). Example: Alice Frank
 - **--profile** (required): AWS CLI profile name
-- **--region** (required): AWS region for EC2 instance launch
+- **--region** (optional): AWS region for EC2 instance launch (default: profile's configured region)
 - **--instance-type** (optional): EC2 instance type (defaults to g6.4xlarge)
 - **--output-dir** (optional): Local directory for audio files (defaults to current directory)
 - **--voices-dir** (optional): Path to directory containing custom voice WAV files (defaults to `assets/voices/` next to the script). Only needed when using voices beyond the VibeVoice built-ins.
@@ -283,10 +283,10 @@ python3 generate_podcast_audio.py \
 - Example: `--speaker-names Alice Frank` assigns Alice to Speaker 1, Frank to Speaker 2
 
 **--profile** (required)
-- AWS CLI profile name (no default - must be explicitly provided)
+- AWS CLI profile name (must be explicitly provided)
 - Must have EC2 permissions
 
-**--region** (required)
+**--region** (optional, default: profile's configured region)
 - AWS region for EC2 instance launch
 - Common options: us-west-2, us-east-1
 - Consider capacity availability for GPU instances

@@ -32,6 +32,7 @@ from _podcast_shared import (
     get_default_voices_dir,
     log_progress,
     get_aws_account_id,
+    get_aws_region,
     upload_to_s3,
     download_from_s3,
     get_bucket_name,
@@ -360,8 +361,8 @@ Examples:
                         help='Path to podcast script file')
     parser.add_argument('--profile', required=True,
                         help='AWS CLI profile')
-    parser.add_argument('--region', required=True,
-                        help='AWS region')
+    parser.add_argument('--region', default=None,
+                        help='AWS region (default: profile\'s configured region)')
     parser.add_argument('--instance-type', default='g6.4xlarge',
                         help='EC2 instance type (default: g6.4xlarge)')
     parser.add_argument('--speaker-names', nargs='+', required=True,
@@ -373,6 +374,9 @@ Examples:
                              '(default: assets/voices/ relative to this script)')
 
     args = parser.parse_args()
+    if args.region is None:
+        args.region = get_aws_region(profile=args.profile)
+        log_progress(f"No --region specified, using profile default: {args.region}")
 
     separator = "=" * 80
     log_progress(separator)

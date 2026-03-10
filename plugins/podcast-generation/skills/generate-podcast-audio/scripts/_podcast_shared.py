@@ -83,6 +83,23 @@ def log_progress(message: str, level: str = "INFO") -> None:
     print(f"[{ts}] [{level}] {message}", flush=True)
 
 
+def get_aws_region(*, profile: str) -> str:
+    """Get the default AWS region for the given profile."""
+    result = subprocess.run([
+        "aws", "configure", "get", "region",
+        "--profile", profile,
+    ], capture_output=True, text=True, timeout=30)
+
+    region = result.stdout.strip()
+    if result.returncode != 0 or not region:
+        raise Exception(
+            f"No region specified and no default region configured for profile '{profile}'. "
+            "Use --region or set a default with: "
+            f"aws configure set region <region> --profile {profile}"
+        )
+    return region
+
+
 def get_aws_account_id(*, profile: str) -> str:
     """Get AWS account ID for the given profile."""
     result = subprocess.run([

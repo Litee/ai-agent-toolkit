@@ -27,6 +27,7 @@ import subprocess
 from _podcast_shared import (
     log_progress,
     get_aws_account_id,
+    get_aws_region,
     get_bucket_name,
     get_lambda_role_name,
     get_sf_role_name,
@@ -1016,9 +1017,13 @@ Example:
         """
     )
     parser.add_argument('--profile', required=True, help='AWS CLI profile')
-    parser.add_argument('--region', required=True, help='AWS region')
+    parser.add_argument('--region', default=None,
+                        help='AWS region (default: profile\'s configured region)')
 
     args = parser.parse_args()
+    if args.region is None:
+        args.region = get_aws_region(profile=args.profile)
+        log_progress(f"No --region specified, using profile default: {args.region}")
 
     separator = "=" * 80
     log_progress(separator)
