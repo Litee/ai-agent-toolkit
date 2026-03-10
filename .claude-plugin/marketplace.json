@@ -64,7 +64,7 @@
       "description": "This plugin contains skills for querying AWS data sources including Athena SQL queries with S3 result download, parallel execution, and CTE optimization, as well as CloudWatch Log Insights queries with real-time progress tracking and flexible time handling.",
       "source": "./plugins/aws-query-tools",
       "strict": false,
-      "version": "1.0.2",
+      "version": "1.0.3",
       "category": "developer-tools",
       "keywords": ["aws", "athena", "sql", "query", "s3", "cloudwatch", "logs", "log-insights", "monitoring"],
       "skills": ["./skills/query-aws-athena", "./skills/query-aws-cloudwatch-logs-insights"]

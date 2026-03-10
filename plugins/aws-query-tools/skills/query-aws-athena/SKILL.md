@@ -35,7 +35,9 @@ Use the provided script to execute Athena queries and automatically download res
 ./scripts/query_athena.py \
     --query "SELECT * FROM my_table LIMIT 100" \
     --database my_database \
-    --output-location s3://my-bucket/athena-results/
+    --output-location s3://my-bucket/athena-results/ \
+    --region us-east-1 \
+    --profile my-aws-profile
 ```
 
 The script automatically:
@@ -77,6 +79,7 @@ Use the `--profile` parameter to specify which AWS credentials profile to use:
     --query "SELECT * FROM my_table LIMIT 100" \
     --database my_database \
     --output-location s3://my-bucket/athena-results/ \
+    --region us-east-1 \
     --profile my-aws-profile
 ```
 

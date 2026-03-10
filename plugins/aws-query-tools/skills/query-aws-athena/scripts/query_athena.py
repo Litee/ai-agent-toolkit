@@ -48,6 +48,14 @@ class AthenaQueryExecutor:
             session_kwargs['region_name'] = region
         session = boto3.Session(**session_kwargs)
 
+        if not session.region_name:
+            print(
+                "Error: No AWS region configured. "
+                "Pass --region us-east-1 (or set a default region in your AWS profile).",
+                file=sys.stderr
+            )
+            sys.exit(1)
+
         self.athena_client = session.client('athena')
         self.s3_client = session.client('s3')
 
