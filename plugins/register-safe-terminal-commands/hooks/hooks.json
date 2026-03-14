@@ -1,0 +1,17 @@
+{
+  "description": "Auto-syncs safe terminal commands to Claude Code settings on session start",
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ${CLAUDE_PLUGIN_ROOT}/skills/register-safe-terminal-commands/scripts/sync_safe_commands.py",
+            "timeout": 30
+          }
+        ]
+      }
+    ]
+  }
+}

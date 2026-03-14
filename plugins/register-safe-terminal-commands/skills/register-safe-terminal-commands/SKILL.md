@@ -11,12 +11,14 @@ description: This skill should be used when registering or syncing safe terminal
 
 This skill manages safe terminal commands for Claude Code—bash commands that can be executed automatically without requiring user approval for each execution. Safe commands are typically read-only, non-destructive operations like viewing files, checking status, or querying services.
 
+> **Auto-sync**: This plugin includes a `SessionStart` hook that automatically syncs safe commands on every Claude Code session start. Use this skill only when you need manual control (dry-run preview or verbose output).
+
 ## When to Use This Skill
 
 Use this skill when:
-- Adding or updating safe terminal commands in Claude Code settings
-- Syncing safe commands from the reference file to `~/.claude/settings.json`
-- Managing the list of pre-approved bash commands
+- Previewing what commands would be added with `--dry-run` before committing
+- Inspecting all unchanged commands with `--verbose` output
+- Manually re-syncing after editing `safe_terminal_commands.txt` mid-session
 - User asks to "add safe commands" or "sync safe commands to Claude Code"
 
 ## How It Works

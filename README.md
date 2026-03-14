@@ -51,6 +51,6 @@ Each plugin installs a skill that extends Claude's capabilities:
 | `ml-system-design-interviewer` | productivity | ML System Design interview framework for Principal-level candidates |
 | `podcast-generation` | user | AI-powered podcast script generation and audio synthesis using AWS TTS |
 | `protect-file-system-access` | developer-tools | PreToolUse hook blocking direct edits to AWS credentials, SSH keys, shell profiles, and lockfiles |
-| `register-safe-terminal-commands` | developer-tools | Safe terminal command configuration for Claude Code |
+| `register-safe-terminal-commands` | developer-tools | SessionStart hook that auto-syncs safe terminal commands to Claude Code settings; skill available for manual dry-run/verbose sync |
 
 **Note:** Each plugin may have additional dependencies. Check the individual [skill documentation](skills/) for prerequisites and detailed usage instructions.
