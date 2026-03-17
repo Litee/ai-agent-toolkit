@@ -30,6 +30,9 @@ from datetime import datetime, timedelta
 from _podcast_shared import (
     BUILTIN_VOICES,
     get_default_voices_dir,
+    is_s3_uri,
+    list_s3_wav_files,
+    copy_s3_to_s3,
     log_progress,
     get_aws_account_id,
     get_aws_region,
@@ -201,16 +204,30 @@ def find_ami(*, profile: str, region: str) -> str:
 # Voice handling
 # ---------------------------------------------------------------------------
 
-def verify_voices_directory(voices_dir: str | None = None) -> list[Path]:
-    """Verify voice files exist and return list of WAV files."""
-    resolved_dir: str = voices_dir if voices_dir is not None else get_default_voices_dir()
-    voices_path = Path(resolved_dir)
+def verify_voices_directory(voices_dir: str | None = None, *, profile: str | None = None) -> list[str]:
+    """Verify voice files exist and return list of WAV filenames.
 
+    Accepts either a local directory path or an S3 URI (s3://bucket/prefix/).
+    When voices_dir is an S3 URI, profile must be provided.
+    """
+    resolved_dir: str = voices_dir if voices_dir is not None else get_default_voices_dir()
+
+    if is_s3_uri(resolved_dir):
+        if profile is None:
+            raise ValueError("profile is required when voices_dir is an S3 URI")
+        wav_filenames = list_s3_wav_files(profile=profile, s3_uri=resolved_dir)
+        if not wav_filenames:
+            raise ValueError(f"No voice files (.wav) found in: {resolved_dir}")
+        log_progress(f"Found {len(wav_filenames)} voice files in {resolved_dir}")
+        for name in sorted(wav_filenames):
+            log_progress(f"  - {name}")
+        return wav_filenames
+
+    voices_path = Path(resolved_dir)
     if not voices_path.exists():
         raise FileNotFoundError(f"Voices directory not found: {voices_path.absolute()}")
 
     wav_files = list(voices_path.glob("*.wav"))
-
     if not wav_files:
         raise ValueError(f"No voice files (.wav) found in: {voices_path.absolute()}")
 
@@ -218,56 +235,88 @@ def verify_voices_directory(voices_dir: str | None = None) -> list[Path]:
     for wav_file in sorted(wav_files):
         log_progress(f"  - {wav_file.name}")
 
-    return wav_files
+    return [f.name for f in wav_files]
 
 
 def upload_voices(*, profile: str, bucket: str, timestamp: str, speaker_names: list[str],
                   voices_dir: str | None = None) -> None:
-    """Upload custom voice samples to S3 for specified speakers."""
+    """Upload custom voice samples to S3 for specified speakers.
+
+    voices_dir may be a local directory path or an S3 URI (s3://bucket/prefix/).
+    For S3 URIs, matched voice files are copied S3-to-S3 into the temp bucket.
+    """
     resolved_dir: str = voices_dir if voices_dir is not None else get_default_voices_dir()
-    voices_path = Path(resolved_dir)
-    all_wav_files = list(voices_path.glob("*.wav"))
 
     builtin_requested = []
     custom_requested = []
-
     for speaker_name in speaker_names:
         if speaker_name.lower() in BUILTIN_VOICES:
             builtin_requested.append(speaker_name)
         else:
             custom_requested.append(speaker_name)
 
-    custom_wav_files = []
-    if custom_requested:
-        for wav_file in all_wav_files:
-            if any(name.lower() in wav_file.stem.lower() for name in custom_requested):
-                custom_wav_files.append(wav_file)
-
-    missing_custom_voices = []
-    for custom_voice in custom_requested:
-        found = any(custom_voice.lower() in wav_file.stem.lower() for wav_file in custom_wav_files)
-        if not found:
-            missing_custom_voices.append(custom_voice)
-
-    if missing_custom_voices:
-        available_custom_voices = [f.stem for f in all_wav_files]
-        raise ValueError(
-            f"Custom voice files not found: {missing_custom_voices}. "
-            f"Available custom voices: {', '.join(available_custom_voices)}. "
-            f"Available built-in voices: {', '.join(sorted(BUILTIN_VOICES))}"
-        )
-
     if builtin_requested:
         log_progress(f"Built-in voices (available after VibeVoice clone): {', '.join(builtin_requested)}")
 
-    if custom_wav_files:
+    if not custom_requested:
+        log_progress("No custom voices to upload (using built-in voices only)")
+        return
+
+    if is_s3_uri(resolved_dir):
+        # --- S3 source: list, match, then S3-to-S3 copy ---
+        src_prefix = resolved_dir if resolved_dir.endswith("/") else resolved_dir + "/"
+        all_wav_filenames = list_s3_wav_files(profile=profile, s3_uri=src_prefix)
+
+        matched_filenames = [
+            fname for fname in all_wav_filenames
+            if any(name.lower() in Path(fname).stem.lower() for name in custom_requested)
+        ]
+
+        missing_custom_voices = [
+            name for name in custom_requested
+            if not any(name.lower() in Path(fname).stem.lower() for fname in matched_filenames)
+        ]
+        if missing_custom_voices:
+            available_stems = [Path(f).stem for f in all_wav_filenames]
+            raise ValueError(
+                f"Custom voice files not found: {missing_custom_voices}. "
+                f"Available custom voices: {', '.join(available_stems)}. "
+                f"Available built-in voices: {', '.join(sorted(BUILTIN_VOICES))}"
+            )
+
+        log_progress(f"Copying {len(matched_filenames)} custom voice files from S3 to temp bucket...")
+        for fname in matched_filenames:
+            src_uri = src_prefix + fname
+            dst_uri = f"s3://{bucket}/{timestamp}/voices/{fname}"
+            copy_s3_to_s3(profile=profile, src_uri=src_uri, dst_uri=dst_uri)
+            log_progress(f"  {fname}")
+    else:
+        # --- Local source: glob, match, then upload ---
+        voices_path = Path(resolved_dir)
+        all_wav_files = list(voices_path.glob("*.wav"))
+
+        custom_wav_files = [
+            wav_file for wav_file in all_wav_files
+            if any(name.lower() in wav_file.stem.lower() for name in custom_requested)
+        ]
+
+        missing_custom_voices = [
+            name for name in custom_requested
+            if not any(name.lower() in wav_file.stem.lower() for wav_file in custom_wav_files)
+        ]
+        if missing_custom_voices:
+            available_custom_voices = [f.stem for f in all_wav_files]
+            raise ValueError(
+                f"Custom voice files not found: {missing_custom_voices}. "
+                f"Available custom voices: {', '.join(available_custom_voices)}. "
+                f"Available built-in voices: {', '.join(sorted(BUILTIN_VOICES))}"
+            )
+
         log_progress(f"Uploading {len(custom_wav_files)} custom voice files to S3...")
         for wav_file in custom_wav_files:
             s3_key = f"{timestamp}/voices/{wav_file.name}"
             upload_to_s3(profile=profile, bucket=bucket, local_path=str(wav_file), s3_key=s3_key)
             log_progress(f"  {wav_file.name}")
-    else:
-        log_progress("No custom voices to upload (using built-in voices only)")
 
 
 # ---------------------------------------------------------------------------
@@ -370,7 +419,8 @@ Examples:
     parser.add_argument('--output-dir', default='.',
                         help='Output directory for audio files (default: same directory as script)')
     parser.add_argument('--voices-dir', default=None,
-                        help='Directory containing custom voice WAV files '
+                        help='Directory containing custom voice WAV files, '
+                             'or an S3 URI (s3://bucket/prefix/) for voices already on S3 '
                              '(default: assets/voices/ relative to this script)')
 
     args = parser.parse_args()
@@ -403,10 +453,12 @@ Examples:
         log_progress("=== Phase 2: Infrastructure Verification ===")
         verify_infrastructure(profile=args.profile, region=args.region, account_id=account_id)
 
-        # Phase 3: Prepare local assets
-        log_progress("")
-        log_progress("=== Phase 3: Verifying Voice Files ===")
-        verify_voices_directory(args.voices_dir)
+        # Phase 3: Verify voice files (skip when only built-in voices and no explicit voices_dir)
+        all_builtin = all(name.lower() in BUILTIN_VOICES for name in args.speaker_names)
+        if args.voices_dir is not None or not all_builtin:
+            log_progress("")
+            log_progress("=== Phase 3: Verifying Voice Files ===")
+            verify_voices_directory(args.voices_dir, profile=args.profile)
 
         log_progress("")
         log_progress("=== Finding AMI ===")

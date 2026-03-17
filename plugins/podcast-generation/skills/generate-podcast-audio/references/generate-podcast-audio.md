@@ -49,7 +49,7 @@ Convert formatted podcast scripts into high-quality audio using VibeVoice on AWS
 - **--region** (optional): AWS region for EC2 instance launch (default: profile's configured region)
 - **--instance-type** (optional): EC2 instance type (defaults to g6.4xlarge)
 - **--output-dir** (optional): Local directory for audio files (defaults to current directory)
-- **--voices-dir** (optional): Path to directory containing custom voice WAV files (defaults to `assets/voices/` next to the script). Only needed when using voices beyond the VibeVoice built-ins.
+- **--voices-dir** (optional): Path to a local directory containing custom voice WAV files, or an S3 URI (`s3://bucket/prefix/`) for voices already deployed to S3 (defaults to `assets/voices/` next to the script). Only needed when using voices beyond the VibeVoice built-ins.
 - **--verbose** (optional): Enable detailed SSH debugging output (defaults to false)
 
 ### 🚨 CRITICAL: Preventing File Name Conflicts
@@ -89,16 +89,23 @@ These are included automatically after VibeVoice is cloned on EC2. No setup requ
 
 **2. Custom voices (user-provided):**
 - Any WAV voice sample you provide. The voice name must appear somewhere in the filename (e.g., `en-Helen_woman.wav` can be referenced as `Helen`).
-- Custom voices are uploaded from your voices directory (`--voices-dir`) to S3 and copied to EC2 before generation.
+- Custom voices are staged in the temp S3 bucket and synced to EC2 before generation.
+  - **Local directory**: files are uploaded from your machine to the temp bucket.
+  - **S3 URI**: files are copied S3-to-S3 into the temp bucket (no local download needed).
 
 **Custom Voice Setup:**
 
-To use custom voices:
-1. Record or obtain WAV voice samples for your desired voices (short 5-30 second clips of the voice speaking work best)
+To use custom voices from a **local directory**:
+1. Record or obtain WAV voice samples (short 5-30 second clips work best)
 2. Name each file so the voice name appears in the filename, e.g., `my-voice.wav` or `en-John_man.wav`
 3. Place all voice WAV files in a directory on your local machine
 4. Pass the directory path via `--voices-dir /path/to/your/voices`
 5. Reference voices by the name portion of their filename (e.g., `my-voice` or `John`)
+
+To use custom voices from **S3**:
+1. Upload your WAV voice samples to an S3 bucket/prefix accessible by the AWS profile you use
+2. Pass the S3 URI via `--voices-dir s3://my-bucket/voices/`
+3. Reference voices the same way (name must appear in the filename)
 
 **Tip:** For multi-speaker podcasts, using a mix of different male and female voices helps create distinct, engaging speaker identities.
 
@@ -301,10 +308,11 @@ python3 generate_podcast_audio.py \
 - Audio files named based on script filename: `<script-name>.wav`
 
 **--voices-dir** (optional, default: `assets/voices/` next to the script)
-- Directory containing your custom voice WAV files
+- Local directory or S3 URI containing your custom voice WAV files
 - Only needed if using voices beyond the VibeVoice built-ins (Alice, Carter, Frank, Mary)
 - Voice name matching: the voice name you pass in `--speaker-names` must appear somewhere in the WAV filename
-- Example: `--voices-dir ~/my-custom-voices`
+- Local example: `--voices-dir ~/my-custom-voices`
+- S3 example: `--voices-dir s3://my-bucket/voices/`
 
 **--verbose** (optional, default: false)
 - Enables detailed SSM command debugging output
@@ -817,13 +825,25 @@ python3 generate_podcast_audio.py \
   --output-dir ~/podcast-outputs
 ```
 
-### Example Command (with custom voices)
+### Example Command (with custom voices from local directory)
 
 ```bash
 python3 generate_podcast_audio.py \
   --script-path ~/tech-podcast_20251025143000.md \
   --speaker-names Jordan Sam Alex \
   --voices-dir ~/my-voices \
+  --profile YOUR_PROFILE \
+  --region us-west-2 \
+  --output-dir ~/podcast-outputs
+```
+
+### Example Command (with custom voices from S3)
+
+```bash
+python3 generate_podcast_audio.py \
+  --script-path ~/tech-podcast_20251025143000.md \
+  --speaker-names Jordan Sam Alex \
+  --voices-dir s3://my-bucket/voices/ \
   --profile YOUR_PROFILE \
   --region us-west-2 \
   --output-dir ~/podcast-outputs

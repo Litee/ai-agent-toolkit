@@ -74,7 +74,7 @@ The reference contains essential information about:
   - **Validation Required**: Before generating audio, you MUST validate the script duration and ask for user confirmation if it may exceed 60 minutes
 - **Voice selection**: Choose from available voice profiles for each speaker (built-in or custom)
 - **AWS region** (optional): AWS region for EC2 instance deployment; defaults to the profile's configured region
-- **Voices directory** (optional): Path to a directory with custom voice WAV files; if omitted, defaults to `assets/voices/` relative to the skill's scripts directory
+- **Voices directory** (optional): Path to a local directory with custom voice WAV files, or an S3 URI (`s3://bucket/prefix/`) for voices already deployed to S3; if omitted, defaults to `assets/voices/` relative to the skill's scripts directory
 - **Speech tempo**: Track the speech_tempo value from script generation (default: 175 WPM)
   - Used for mandatory tempo analysis after audio generation
   - Needed to calculate drift and determine if speed adjustment is required

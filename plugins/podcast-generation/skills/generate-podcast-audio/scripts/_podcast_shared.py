@@ -115,6 +115,64 @@ def get_aws_account_id(*, profile: str) -> str:
     return result.stdout.strip()
 
 
+def is_s3_uri(path: str) -> bool:
+    """Return True if path is an S3 URI (starts with s3://)."""
+    return path.startswith("s3://")
+
+
+def parse_s3_uri(s3_uri: str) -> tuple[str, str]:
+    """Split 's3://bucket/prefix' into ('bucket', 'prefix').
+
+    The prefix always ends with '/' if non-empty so it can be used as a
+    directory-style S3 prefix.
+    """
+    without_scheme = s3_uri[len("s3://"):]
+    if "/" in without_scheme:
+        bucket, prefix = without_scheme.split("/", 1)
+    else:
+        bucket, prefix = without_scheme, ""
+    if prefix and not prefix.endswith("/"):
+        prefix += "/"
+    return bucket, prefix
+
+
+def list_s3_wav_files(*, profile: str, s3_uri: str) -> list[str]:
+    """List .wav filenames in an S3 URI folder. Returns bare filenames only."""
+    # Ensure trailing slash so aws s3 ls treats it as a directory
+    uri = s3_uri if s3_uri.endswith("/") else s3_uri + "/"
+    result = subprocess.run([
+        "aws", "s3", "ls",
+        "--profile", profile,
+        uri,
+    ], capture_output=True, text=True, timeout=30)
+
+    if result.returncode != 0:
+        raise Exception(f"Failed to list S3 voices directory '{uri}': {result.stderr}")
+
+    wav_files = []
+    for line in result.stdout.splitlines():
+        parts = line.split()
+        if parts:
+            filename = parts[-1]
+            if filename.lower().endswith(".wav"):
+                wav_files.append(filename)
+
+    return wav_files
+
+
+def copy_s3_to_s3(*, profile: str, src_uri: str, dst_uri: str) -> None:
+    """Copy a single object between S3 locations."""
+    result = subprocess.run([
+        "aws", "s3", "cp",
+        "--profile", profile,
+        src_uri,
+        dst_uri,
+    ], capture_output=True, text=True, timeout=300)
+
+    if result.returncode != 0:
+        raise Exception(f"Failed to copy {src_uri} -> {dst_uri}: {result.stderr}")
+
+
 def upload_to_s3(*, profile: str, bucket: str, local_path: str, s3_key: str) -> str:
     """Upload file to S3 bucket. Returns S3 URI."""
     log_progress(f"Uploading {Path(local_path).name} to S3...")
