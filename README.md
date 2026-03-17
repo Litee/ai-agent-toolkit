@@ -25,6 +25,7 @@ These skills can be installed as plugins in Claude Code.
 /plugin install analyze-mcp@litee-claude-code-plugins
 /plugin install aws-documentation@litee-claude-code-plugins
 /plugin install convert-audio@litee-claude-code-plugins
+/plugin install file-system-tools@litee-claude-code-plugins
 /plugin install generate-image@litee-claude-code-plugins
 /plugin install manage-anki-flashcards@litee-claude-code-plugins
 /plugin install manage-obsidian-vault@litee-claude-code-plugins
@@ -45,6 +46,7 @@ Each plugin installs a skill that extends Claude's capabilities:
 | `aws-documentation` | developer-tools | AWS CDK expert guidance and official AWS documentation search via MCP servers |
 | `aws-query-tools` | developer-tools | AWS Athena SQL queries and CloudWatch Log Insights with query optimization, CTE patterns, and real-time progress tracking |
 | `convert-audio` | user | Audio format conversion using ffmpeg (MP3, WAV, AAC, FLAC, Opus, OGG) |
+| `file-system-tools` | developer-tools | Free disk space by cleaning development caches, IDE artefacts, and Docker resources. Scan for bloat directories (node_modules, virtual environments, build caches) |
 | `generate-image` | user | Image generation using Amazon Nova Canvas on AWS Bedrock |
 | `manage-anki-flashcards` | productivity | Anki flashcard management through AnkiConnect API |
 | `manage-obsidian-vault` | productivity | Obsidian vault note management via CLI for knowledge management workflows |

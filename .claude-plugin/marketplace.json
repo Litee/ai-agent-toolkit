@@ -5,7 +5,7 @@
   },
   "metadata": {
     "description": "Collection of AI agent skills for AWS CDK development, AWS documentation search, AWS querying (Athena, CloudWatch), Anki flashcard management, Obsidian vault management, audio conversion, podcast generation, safe terminal command registration, image generation, and ML system design interviews",
-    "version": "1.1.2",
+    "version": "1.1.3",
     "homepage": "https://github.com/Litee/ai-agent-toolkit"
   },
   "plugins": [
@@ -97,6 +97,16 @@
       "category": "user",
       "keywords": ["podcast", "script", "tts", "audio", "conversation", "text-to-speech", "audio-generation", "voice", "aws", "ec2"],
       "skills": ["./skills/generate-podcast-script", "./skills/generate-podcast-audio"]
+    },
+    {
+      "name": "file-system-tools",
+      "description": "This plugin contains skills for freeing disk space on developer machines and scanning for bloat directories. Cleans package manager caches, IDE build artefacts, and Docker resources. Scans for node_modules, virtual environments, and build caches. Use when disk is full, cleaning caches, reclaiming storage, or finding bloat.",
+      "source": "./plugins/file-system-tools",
+      "strict": false,
+      "version": "1.0.2",
+      "category": "developer-tools",
+      "keywords": ["disk", "cache", "cleanup", "storage", "free-space"],
+      "skills": ["./skills/free-disk-space"]
     },
     {
       "name": "generate-image",
