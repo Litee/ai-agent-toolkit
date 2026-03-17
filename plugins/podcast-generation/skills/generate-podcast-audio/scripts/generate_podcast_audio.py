@@ -166,6 +166,20 @@ def count_script_words(script_path: str) -> int:
     return total_words
 
 
+def count_script_speakers(script_path: str) -> int:
+    """Return the number of distinct speaker numbers found in the script."""
+    speaker_pattern = re.compile(r'^Speaker (\d+):')
+    speaker_numbers: set[int] = set()
+
+    with open(script_path, 'r') as f:
+        for line in f:
+            m = speaker_pattern.match(line.strip())
+            if m:
+                speaker_numbers.add(int(m.group(1)))
+
+    return len(speaker_numbers)
+
+
 def calculate_expected_completion(word_count: int) -> tuple[int, str]:
     """Calculate expected completion time based on word count."""
     estimate_minutes = int(20 + (word_count / 100)) + 1
@@ -441,6 +455,17 @@ Examples:
 
         word_count = count_script_words(args.script_path)
         log_progress(f"Script word count: {word_count} words")
+
+        speaker_count = count_script_speakers(args.script_path)
+        name_count = len(args.speaker_names)
+        if speaker_count != name_count:
+            raise ValueError(
+                f"Speaker count mismatch: script has {speaker_count} distinct speaker(s) "
+                f"but {name_count} name(s) were provided via --speaker-names "
+                f"({', '.join(args.speaker_names)}). "
+                f"Provide exactly one name per speaker in the script."
+            )
+        log_progress(f"Speaker count validated: {speaker_count} speaker(s)")
 
         account_id = get_aws_account_id(profile=args.profile)
         log_progress(f"Account ID: {account_id}")

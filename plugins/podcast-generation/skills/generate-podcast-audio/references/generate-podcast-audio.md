@@ -88,10 +88,16 @@ Voices come from two sources:
 These are included automatically after VibeVoice is cloned on EC2. No setup required.
 
 **2. Custom voices (user-provided):**
-- Any WAV voice sample you provide. The voice name must appear somewhere in the filename (e.g., `en-Helen_woman.wav` can be referenced as `Helen`).
+- Any WAV voice sample you provide. The voice name must appear somewhere in the filename stem (e.g., `en-Helen_woman.wav` can be referenced as `Helen`).
 - Custom voices are staged in the temp S3 bucket and synced to EC2 before generation.
   - **Local directory**: files are uploaded from your machine to the temp bucket.
   - **S3 URI**: files are copied S3-to-S3 into the temp bucket (no local download needed).
+
+**Voice Filename Matching Semantics:**
+- Matching is **case-insensitive**: `helen` matches `en-Helen_woman.wav`
+- Matching is **substring-based on the filename stem** (no extension): `Helen` matches `en-Helen_woman.wav`
+- If **multiple files** match the same voice name, all matching files are uploaded (no error; VibeVoice uses the first match)
+- If **no file** matches a custom voice name, the script fails immediately with a list of available voice filenames
 
 **Custom Voice Setup:**
 
