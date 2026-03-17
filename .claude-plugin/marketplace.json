@@ -99,6 +99,16 @@
       "skills": ["./skills/generate-podcast-script", "./skills/generate-podcast-audio"]
     },
     {
+      "name": "cmux",
+      "description": "This plugin contains a skill for orchestrating terminal sessions, browser automation, and progress reporting inside the cmux terminal multiplexer. Also includes a SessionStart hook that detects whether the session is running in cmux and prints workspace/surface context.",
+      "source": "./plugins/cmux",
+      "strict": false,
+      "version": "1.0.1",
+      "category": "developer-tools",
+      "keywords": ["cmux", "terminal", "multiplexer", "browser", "automation", "sessions", "splits"],
+      "skills": ["./skills/cmux"]
+    },
+    {
       "name": "file-system-tools",
       "description": "This plugin contains skills for freeing disk space on developer machines and scanning for bloat directories. Cleans package manager caches, IDE build artefacts, and Docker resources. Scans for node_modules, virtual environments, and build caches. Use when disk is full, cleaning caches, reclaiming storage, or finding bloat.",
       "source": "./plugins/file-system-tools",
