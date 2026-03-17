@@ -1,5 +1,5 @@
 ---
-name: cmux
+name: use-cmux
 description: cmux Terminal Multiplexer — Agent Integration. Use when orchestrating terminal sessions, running parallel commands, monitoring output, reporting progress, opening browser panels for web automation or markdown preview, creating split panes, or taking screenshots inside cmux.
 ---
 

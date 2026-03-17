@@ -103,10 +103,10 @@
       "description": "This plugin contains a skill for orchestrating terminal sessions, browser automation, and progress reporting inside the cmux terminal multiplexer. Also includes a SessionStart hook that detects whether the session is running in cmux and prints workspace/surface context and LLM behavioural instructions.",
       "source": "./plugins/cmux",
       "strict": false,
-      "version": "1.0.2",
+      "version": "1.0.3",
       "category": "developer-tools",
       "keywords": ["cmux", "terminal", "multiplexer", "browser", "automation", "sessions", "splits"],
-      "skills": ["./skills/cmux"]
+      "skills": ["./skills/use-cmux"]
     },
     {
       "name": "file-system-tools",
