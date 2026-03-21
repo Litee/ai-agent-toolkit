@@ -5,7 +5,7 @@
   },
   "metadata": {
     "description": "Collection of AI agent skills for AWS CDK development, AWS documentation search, AWS querying (Athena, CloudWatch), Anki flashcard management, Obsidian vault management, audio conversion, podcast generation, safe terminal command registration, image generation, and ML system design interviews",
-    "version": "1.1.4",
+    "version": "1.1.5",
     "homepage": "https://github.com/Litee/ai-agent-toolkit"
   },
   "plugins": [
@@ -77,6 +77,15 @@
       "version": "1.0.4",
       "category": "developer-tools",
       "keywords": ["security", "hooks", "file-protection", "aws", "ssh"]
+    },
+    {
+      "name": "status-line",
+      "description": "This plugin configures Claude Code to use a rich statusline script that displays context usage, token counts, cost, model ID, git branch, and working directory. A SessionStart hook checks if the statusline is already configured and updates user-level settings if not.",
+      "source": "./plugins/status-line",
+      "strict": false,
+      "version": "1.0.0",
+      "category": "developer-tools",
+      "keywords": ["statusline", "status", "context", "tokens", "cost", "git"]
     },
     {
       "name": "register-safe-terminal-commands",

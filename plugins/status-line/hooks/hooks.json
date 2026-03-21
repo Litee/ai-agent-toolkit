@@ -1,0 +1,17 @@
+{
+  "description": "Configures Claude Code statusline on session start if not already set",
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node ${CLAUDE_PLUGIN_ROOT}/hooks/scripts/ensure-status-line.js",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}
