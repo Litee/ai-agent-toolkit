@@ -22,7 +22,6 @@ These skills can be installed as plugins in Claude Code.
 
 **Direct installation:**
 ```bash
-/plugin install analyze-mcp@litee-claude-code-plugins
 /plugin install aws-documentation@litee-claude-code-plugins
 /plugin install cmux@litee-claude-code-plugins
 /plugin install convert-audio@litee-claude-code-plugins
@@ -44,7 +43,6 @@ Each plugin installs a skill that extends Claude's capabilities:
 
 | Plugin (Skill) | Category | Description |
 |--------|----------|-------------|
-| `analyze-mcp` | developer-tools | MCP server introspection and tool testing via CLI |
 | `aws-documentation` | developer-tools | AWS CDK expert guidance and official AWS documentation search via MCP servers |
 | `aws-query-tools` | developer-tools | AWS Athena SQL queries and CloudWatch Log Insights with query optimization, CTE patterns, and real-time progress tracking |
 | `cmux` (`use-cmux`) | developer-tools | Terminal multiplexer integration: orchestrate sessions, browser automation, progress reporting; SessionStart hook prints cmux context and LLM behavioural instructions when running inside cmux |

@@ -5,20 +5,10 @@
   },
   "metadata": {
     "description": "Collection of AI agent skills for AWS CDK development, AWS documentation search, AWS querying (Athena, CloudWatch), Anki flashcard management, Obsidian vault management, audio conversion, podcast generation, safe terminal command registration, image generation, and ML system design interviews",
-    "version": "1.1.6",
+    "version": "1.1.7",
     "homepage": "https://github.com/Litee/ai-agent-toolkit"
   },
   "plugins": [
-    {
-      "name": "analyze-mcp",
-      "description": "This plugin contains a skill for introspecting MCP servers and testing MCP tool calls via CLI. Use for discovering tools/resources/prompts an MCP server provides or making test calls to MCP servers.",
-      "source": "./plugins/analyze-mcp",
-      "strict": false,
-      "version": "1.0.4",
-      "category": "developer-tools",
-      "keywords": ["mcp", "introspection", "testing", "mcptools"],
-      "skills": ["./skills/analyze-mcp"]
-    },
     {
       "name": "aws-documentation",
       "description": "This plugin contains skills for AWS CDK infrastructure development and searching official AWS documentation. Use for CDK guidance, architecture patterns, GenAI constructs, Bedrock agent schemas, CDK Nag rules, documentation search, and AWS architecture recommendations.",
