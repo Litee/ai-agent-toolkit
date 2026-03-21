@@ -64,6 +64,13 @@ cmux clear-progress
 cmux clear-log
 ```
 
+> **Important:** `$CMUX_WORKSPACE_ID` reflects the workspace at session start and does **not** update if the pane is moved. Always resolve the current workspace ref via `cmux identify --json` and pass `--workspace <ref>` explicitly to `set-status`, `set-progress`, `log`, and `notify` when the pane may have been relocated:
+> ```bash
+> WORKSPACE_REF=$(cmux identify --json | python3 -c "import sys,json; print(json.load(sys.stdin)['focused']['workspace_ref'])")
+> cmux set-status build "Running" --icon hammer --workspace "$WORKSPACE_REF"
+> cmux set-progress 0.5 --label "Halfway" --workspace "$WORKSPACE_REF"
+> ```
+
 ### Workspace Management
 
 ```bash
