@@ -1,11 +1,11 @@
 ---
 name: generate-podcast-script
-description: Generate AI-powered podcast scripts with natural conversation flow. Use when creating podcast scripts, episodes, multi-speaker dialogue, or conversational content for audio production.
+description: Generate AI-powered podcast scripts with natural conversation flow. Use when creating podcast scripts, episodes, multi-speaker dialogue, conversational content for audio production, or writing dialogue for text-to-speech. Triggers on "write a podcast script", "create podcast episode", "generate dialogue", "podcast episode generation", "multi-speaker script", "script for audio", or any request to produce a formatted conversational script ready for TTS synthesis.
 ---
 
 # Podcast Script Generator
 
-Generate AI-powered podcast scripts optimized for natural conversation flow using AWS Bedrock. Scripts follow strict formatting requirements for text-to-speech synthesis and incorporate educational psychology principles for maximum engagement and retention.
+Generate AI-powered podcast scripts optimized for natural conversation flow. Scripts follow strict formatting requirements for text-to-speech synthesis and incorporate educational psychology principles for maximum engagement and retention.
 
 ## When to Use This Skill
 
@@ -87,7 +87,7 @@ After generating the script, inform the user:
 ## Bundled Resources
 
 - **references/generate-podcast-script.md** - Complete generation guide (MUST READ before execution)
-- **scripts/calculate_podcast_metrics.py** - Python script for word counting and duration calculations
+- **${SKILL_DIR}/scripts/calculate_podcast_metrics.py** - Python script for word counting and duration calculations
 
 ## Next Steps
 

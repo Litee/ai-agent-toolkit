@@ -48,12 +48,12 @@ Each plugin installs a skill that extends Claude's capabilities:
 | `aws-documentation` | developer-tools | AWS CDK expert guidance and official AWS documentation search via MCP servers |
 | `aws-query-tools` | developer-tools | AWS Athena SQL queries and CloudWatch Log Insights with query optimization, CTE patterns, and real-time progress tracking |
 | `cmux` (`use-cmux`) | developer-tools | Terminal multiplexer integration: orchestrate sessions, browser automation, progress reporting; SessionStart hook prints cmux context and LLM behavioural instructions when running inside cmux |
-| `convert-audio` | user | Audio format conversion using ffmpeg (MP3, WAV, AAC, FLAC, Opus, OGG) |
+| `convert-audio` | user | Audio format conversion using ffmpeg (MP3, WAV, AAC, FLAC, Opus, OGG), bitrate/speed adjustment, and metadata tagging (ID3 tags) |
 | `file-system-tools` | developer-tools | Free disk space by cleaning development caches, IDE artefacts, and Docker resources. Scan for bloat directories (node_modules, virtual environments, build caches) |
 | `generate-image` | user | Image generation using Amazon Nova Canvas on AWS Bedrock |
 | `manage-anki-flashcards` | productivity | Anki flashcard management through AnkiConnect API |
 | `manage-obsidian-vault` | productivity | Obsidian vault note management via CLI for knowledge management workflows |
-| `ml-system-design-interviewer` | productivity | ML System Design interview framework for Principal-level candidates |
+| `ml-system-design-interviewer` | productivity | ML System Design interview framework for Principal/Staff-level candidates |
 | `podcast-generation` | user | AI-powered podcast script generation and audio synthesis using AWS TTS |
 | `protect-file-system-access` | developer-tools | PreToolUse hook blocking direct edits to AWS credentials, SSH keys, shell profiles, and lockfiles |
 | `register-safe-terminal-commands` | developer-tools | SessionStart hook that auto-syncs safe terminal commands to Claude Code settings; skill available for manual dry-run/verbose sync |

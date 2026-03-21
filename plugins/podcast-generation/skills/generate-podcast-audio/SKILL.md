@@ -1,6 +1,6 @@
 ---
 name: generate-podcast-audio
-description: Convert podcast scripts into high-quality audio using text-to-speech synthesis on AWS. Use when generating podcast audio, voice content, or converting scripts to speech.
+description: Convert podcast scripts into high-quality audio using text-to-speech synthesis on AWS. Use when generating podcast audio, converting scripts to speech, producing TTS audio, creating voice content from text, or running the VibeVoice audio pipeline. Triggers on "generate podcast audio", "convert script to audio", "text-to-speech", "TTS", "podcast MP3", "produce audio from script", or any request to turn a formatted podcast script into a playable audio file.
 ---
 
 # Podcast Audio Generator
@@ -21,7 +21,7 @@ Creates all persistent AWS infrastructure needed for podcast generation:
 - Step Functions state machine
 
 ```bash
-python3 scripts/setup_infrastructure.py --profile PROFILE --region REGION
+python3 ${SKILL_DIR}/scripts/setup_infrastructure.py --profile PROFILE --region REGION
 ```
 
 Safe to re-run — all operations are idempotent.
@@ -92,7 +92,7 @@ The reference contains essential information about:
 
 ```bash
 # Count words in script
-word_count=$(python scripts/calculate_podcast_metrics.py count-words --file script.txt)
+word_count=$(python3 ${SKILL_DIR}/scripts/calculate_podcast_metrics.py count-words --file script.txt)
 
 # Calculate estimate: 20 + (word_count / 100) minutes
 # Example: 8,000 words ≈ 100 minutes (20 + 8000/100)

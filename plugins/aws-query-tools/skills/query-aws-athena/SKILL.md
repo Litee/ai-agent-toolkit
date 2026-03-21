@@ -32,7 +32,7 @@ For detailed explanations and implementation guidance, read the `references/best
 Use the provided script to execute Athena queries and automatically download results from S3:
 
 ```bash
-./scripts/query_athena.py \
+${SKILL_DIR}/scripts/query_athena.py \
     --query "SELECT * FROM my_table LIMIT 100" \
     --database my_database \
     --output-location s3://my-bucket/athena-results/ \
@@ -51,11 +51,12 @@ The script automatically:
 For complex queries, store them in a file and reference it:
 
 ```bash
-./scripts/query_athena.py \
+${SKILL_DIR}/scripts/query_athena.py \
     --query-file query.sql \
     --database my_database \
     --output-location s3://my-bucket/athena-results/ \
-    --output-file results.csv
+    --output-file results.csv \
+    --profile my-aws-profile
 ```
 
 ### Execute Without Downloading
@@ -63,11 +64,12 @@ For complex queries, store them in a file and reference it:
 To only execute the query without downloading results:
 
 ```bash
-./scripts/query_athena.py \
+${SKILL_DIR}/scripts/query_athena.py \
     --query "SELECT * FROM my_table" \
     --database my_database \
     --output-location s3://my-bucket/athena-results/ \
-    --no-download
+    --no-download \
+    --profile my-aws-profile
 ```
 
 ## AWS Profile Configuration
@@ -75,7 +77,7 @@ To only execute the query without downloading results:
 Use the `--profile` parameter to specify which AWS credentials profile to use:
 
 ```bash
-./scripts/query_athena.py \
+${SKILL_DIR}/scripts/query_athena.py \
     --query "SELECT * FROM my_table LIMIT 100" \
     --database my_database \
     --output-location s3://my-bucket/athena-results/ \
@@ -155,6 +157,22 @@ For comprehensive CTE patterns, examples, and best practices, read the `referenc
 - Pattern 8: Pivot-like operations
 - Pattern 9: Recursive CTEs (hierarchical data)
 - Pattern 10: Data quality checks
+
+## Script Parameters
+
+### Required Parameters
+- `--query` or `--query-file`: SQL query string or path to a `.sql` file
+- `--database`: Athena database name
+- `--output-location`: S3 URI for query results (e.g., `s3://my-bucket/athena-results/`)
+- `--profile`: AWS credentials profile name (required)
+
+### Optional Parameters
+- `--output-file`: Local file path to save downloaded results (auto-generated if not specified)
+- `--format`: Output format — `csv`, `json`, or `parquet` (default: `csv`)
+- `--region`: AWS region (uses profile default if not specified)
+- `--no-download`: Execute query but skip downloading results from S3
+
+Run `${SKILL_DIR}/scripts/query_athena.py --help` for the full parameter list.
 
 ## Workflow
 

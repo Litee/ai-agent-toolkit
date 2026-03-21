@@ -33,32 +33,35 @@ Before executing queries, follow these key practices:
 
 ### Basic Error Search
 ```bash
-./scripts/query_cloudwatch_logs.py \
+${SKILL_DIR}/scripts/query_cloudwatch_logs.py \
   --query 'fields @timestamp, @message | filter @message like /ERROR/' \
   --log-groups '/aws/lambda/my-function' \
   --start-time '1h' \
   --end-time 'now' \
-  --format csv
+  --format csv \
+  --profile my-aws-profile
 ```
 
 ### Statistics Aggregation
 ```bash
-./scripts/query_cloudwatch_logs.py \
+${SKILL_DIR}/scripts/query_cloudwatch_logs.py \
   --query 'stats count() by bin(5m) | sort bin(5m) desc' \
   --log-groups '/aws/ecs/my-service' \
   --start-time '2025-12-05T00:00:00Z' \
   --end-time '2025-12-05T23:59:59Z' \
   --output-file 'hourly_stats.json' \
-  --format json
+  --format json \
+  --profile my-aws-profile
 ```
 
 ### Multiple Log Groups with Wildcards
 ```bash
-./scripts/query_cloudwatch_logs.py \
+${SKILL_DIR}/scripts/query_cloudwatch_logs.py \
   --query 'fields @timestamp, @log, @message | filter level = "ERROR"' \
   --log-groups '/aws/lambda/prod-*' \
   --start-time 'last-24h' \
-  --update-interval 60
+  --update-interval 60 \
+  --profile my-aws-profile
 ```
 
 ## AWS Profile Configuration
@@ -66,7 +69,7 @@ Before executing queries, follow these key practices:
 Use the `--profile` parameter to specify which AWS credentials profile to use:
 
 ```bash
-./scripts/query_cloudwatch_logs.py \
+${SKILL_DIR}/scripts/query_cloudwatch_logs.py \
   --query 'fields @timestamp, @message | filter @message like /ERROR/' \
   --log-groups '/aws/lambda/my-function' \
   --start-time '1h' \
@@ -101,11 +104,12 @@ The `--profile` parameter is required to ensure explicit AWS credential selectio
 
 For complex queries, use `--query-file` to load from a file:
 ```bash
-./scripts/query_cloudwatch_logs.py \
+${SKILL_DIR}/scripts/query_cloudwatch_logs.py \
   --query-file 'complex_analysis.txt' \
   --log-groups '/aws/ecs/production' \
   --start-time 'yesterday' \
-  --end-time 'today'
+  --end-time 'today' \
+  --profile my-aws-profile
 ```
 
 ### 2. Query Execution
@@ -211,7 +215,7 @@ End: 2025-12-05T09:00:00Z (1733396400000)
 
 ### Query from File with Custom Updates
 ```bash
-./scripts/query_cloudwatch_logs.py \
+${SKILL_DIR}/scripts/query_cloudwatch_logs.py \
   --query-file 'analysis/error_patterns.txt' \
   --log-groups '/aws/lambda/prod-api,/aws/lambda/prod-worker' \
   --start-time '2025-12-01T00:00:00Z' \
@@ -226,20 +230,22 @@ End: 2025-12-05T09:00:00Z (1733396400000)
 
 ### Wildcard Log Groups for Microservices
 ```bash
-./scripts/query_cloudwatch_logs.py \
+${SKILL_DIR}/scripts/query_cloudwatch_logs.py \
   --query 'fields @timestamp, @log, level, message | filter level = "WARN" or level = "ERROR"' \
   --log-groups '/aws/ecs/prod-*' \
   --start-time 'last-week' \
-  --format json
+  --format json \
+  --profile my-aws-profile
 ```
 
 ### Table Output for Terminal Viewing
 ```bash
-./scripts/query_cloudwatch_logs.py \
+${SKILL_DIR}/scripts/query_cloudwatch_logs.py \
   --query 'stats count() as total by level | sort total desc' \
   --log-groups '/aws/lambda/my-function' \
   --start-time 'last-24h' \
-  --format table
+  --format table \
+  --profile my-aws-profile
 ```
 
 ## Resources

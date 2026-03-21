@@ -1,6 +1,6 @@
 ---
 name: search-aws-documentation
-description: Search and read official AWS documentation via MCP. Use when looking up AWS service docs, API references, user guides, best practices, or tutorials from docs.aws.amazon.com. Also provides AWS architecture guidance and solution recommendations.
+description: Search and read official AWS documentation via MCP. Use when looking up AWS service docs, API references, user guides, best practices, or tutorials from docs.aws.amazon.com. Also provides AWS architecture guidance and solution recommendations. Triggers on "how does X work in AWS", "AWS documentation for", "look up AWS service", "AWS API reference", "AWS best practices", "what AWS service should I use", or any question whose answer requires reading official AWS docs.
 ---
 
 # Search AWS Documentation
@@ -25,21 +25,21 @@ The skill utilizes tools from two AWS MCP servers for comprehensive documentatio
 
 When building AWS solutions, follow this recommended order:
 
-1. **prompt_understanding** (awslabs.core-mcp-server) - **START HERE** to get AWS service recommendations
+1. **prompt_understanding** (awslabs.core-mcp-server) — *Optional but recommended if available.* Get AWS service recommendations before searching docs.
 2. **search_documentation** (awslabs.aws-documentation-mcp-server) - Search for documentation on recommended services
 3. **read_documentation** (awslabs.aws-documentation-mcp-server) - Read specific documentation pages
 4. **recommend** (awslabs.aws-documentation-mcp-server) - Discover related documentation
-5. **get_available_services** (awslabs.aws-documentation-mcp-server) - Check China region availability (if needed)
+5. **get_available_services** (awslabs.aws-documentation-mcp-server) - Check China/GovCloud region availability (if needed)
 
 ---
 
 ## Tool 1: prompt_understanding
 
-**⚠️ IMPORTANT: Call this tool FIRST when starting any AWS solution design to get service recommendations before searching documentation.**
+**Optional tool** from `awslabs.core-mcp-server` (which is separately configured). If available, call this first when starting any AWS solution design to get service recommendations before searching documentation. If `awslabs.core-mcp-server` is not configured, skip to Tool 2 (`search_documentation`).
 
-Provides guidance and planning support when building AWS solutions, translating prompts into actionable AWS service recommendations and architectural planning. This tool provides a starting point for using AWS MCP servers.
+Provides guidance and planning support when building AWS solutions, translating prompts into actionable AWS service recommendations and architectural planning.
 
-**MCP Server:** awslabs.core-mcp-server
+**MCP Server:** awslabs.core-mcp-server (optional)
 
 ### Parameters
 
@@ -70,11 +70,11 @@ mcptools call prompt_understanding --params '{"prompt":"deploy a highly availabl
 
 ### Important Notes
 
-- **START HERE** when building any AWS solution or architecture
+- **Use if available** — skip gracefully if `awslabs.core-mcp-server` is not configured
 - Provides AWS service recommendations based on requirements
 - Offers architectural guidance and best practices
 - Helps translate high-level requirements into specific AWS services
-- Use this tool BEFORE searching documentation to understand what services you need
+- When available, use this BEFORE searching documentation to understand what services you need
 
 ---
 
@@ -138,9 +138,9 @@ See `references/tool-reference.md` for full usage details and examples.
 
 ### Workflow 1: Architecture Planning → Documentation Lookup (Recommended)
 
-**Use this workflow when building new AWS solutions.** Start with architecture guidance, then look up documentation on recommended services.
+**Use this workflow when building new AWS solutions.** Start with architecture guidance (if `awslabs.core-mcp-server` is available), then look up documentation on recommended services.
 
-1. **Get AWS service recommendations** (START HERE)
+1. **Get AWS service recommendations** *(optional — skip if awslabs.core-mcp-server not configured)*
    ```bash
    mcptools call prompt_understanding --params '{"prompt":"build a serverless API with authentication and database"}' awslabs.core-mcp-server
    ```

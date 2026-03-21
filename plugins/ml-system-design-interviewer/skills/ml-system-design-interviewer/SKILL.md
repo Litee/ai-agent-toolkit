@@ -1,6 +1,6 @@
 ---
 name: ml-system-design-interviewer
-description: Conduct, evaluate, or prepare for ML System Design interviews for Principal-level engineering candidates. Use when running mock interviews, assessing candidates, training interviewers, or preparing interview questions for ML engineering roles.
+description: Conduct, evaluate, or prepare for ML System Design interviews for Principal/Staff-level engineering candidates. Use when running mock interviews, assessing candidates, training interviewers, or preparing interview questions for ML engineering roles.
 ---
 
 # ML System Design Interviewer

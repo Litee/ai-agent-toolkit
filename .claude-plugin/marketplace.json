@@ -5,7 +5,7 @@
   },
   "metadata": {
     "description": "Collection of AI agent skills for AWS CDK development, AWS documentation search, AWS querying (Athena, CloudWatch), Anki flashcard management, Obsidian vault management, audio conversion, podcast generation, safe terminal command registration, image generation, and ML system design interviews",
-    "version": "1.1.5",
+    "version": "1.1.6",
     "homepage": "https://github.com/Litee/ai-agent-toolkit"
   },
   "plugins": [
@@ -14,7 +14,7 @@
       "description": "This plugin contains a skill for introspecting MCP servers and testing MCP tool calls via CLI. Use for discovering tools/resources/prompts an MCP server provides or making test calls to MCP servers.",
       "source": "./plugins/analyze-mcp",
       "strict": false,
-      "version": "1.0.3",
+      "version": "1.0.4",
       "category": "developer-tools",
       "keywords": ["mcp", "introspection", "testing", "mcptools"],
       "skills": ["./skills/analyze-mcp"]
@@ -24,17 +24,17 @@
       "description": "This plugin contains skills for AWS CDK infrastructure development and searching official AWS documentation. Use for CDK guidance, architecture patterns, GenAI constructs, Bedrock agent schemas, CDK Nag rules, documentation search, and AWS architecture recommendations.",
       "source": "./plugins/aws-documentation",
       "strict": false,
-      "version": "1.0.2",
+      "version": "1.0.3",
       "category": "developer-tools",
       "keywords": ["aws", "cdk", "documentation", "architecture", "mcp", "bedrock", "infrastructure"],
       "skills": ["./skills/aws-cdk-expert", "./skills/search-aws-documentation"]
     },
     {
       "name": "convert-audio",
-      "description": "This plugin contains a skill for converting audio files between formats using ffmpeg (MP3, WAV, AAC, FLAC, Opus, OGG), adjusting bitrate/quality, changing sample rate/channels, or modifying playback speed.",
+      "description": "This plugin contains a skill for converting audio files between formats using ffmpeg (MP3, WAV, AAC, FLAC, Opus, OGG), adjusting bitrate/quality, changing sample rate/channels, modifying playback speed, or adding/editing audio metadata (ID3 tags).",
       "source": "./plugins/convert-audio",
       "strict": false,
-      "version": "1.0.4",
+      "version": "1.0.5",
       "category": "user",
       "keywords": ["ffmpeg", "audio", "conversion", "mp3", "wav", "flac"],
       "skills": ["./skills/convert-audio"]
@@ -44,7 +44,7 @@
       "description": "This plugin contains a skill for working with Anki flashcard software through the AnkiConnect API. Use for creating flashcards, managing decks, searching notes/cards, syncing collections, controlling review sessions, or any Anki automation tasks.",
       "source": "./plugins/manage-anki-flashcards",
       "strict": false,
-      "version": "1.0.5",
+      "version": "1.0.6",
       "category": "productivity",
       "keywords": ["anki", "flashcards", "spaced-repetition", "learning"],
       "skills": ["./skills/manage-anki-flashcards"]
@@ -54,7 +54,7 @@
       "description": "This plugin contains a skill for managing Obsidian vault notes via the Obsidian CLI. Use for creating notes, linking, tagging, searching, organizing into folders, backlink analysis, properties management, daily notes, templates, task management, and vault health analysis.",
       "source": "./plugins/manage-obsidian-vault",
       "strict": false,
-      "version": "1.0.2",
+      "version": "1.0.3",
       "category": "productivity",
       "keywords": ["obsidian", "notes", "knowledge-management", "vault", "zettelkasten", "markdown"],
       "skills": ["./skills/manage-obsidian-vault"]
@@ -64,7 +64,7 @@
       "description": "This plugin contains skills for querying AWS data sources including Athena SQL queries with S3 result download, parallel execution, and CTE optimization, as well as CloudWatch Log Insights queries with real-time progress tracking and flexible time handling.",
       "source": "./plugins/aws-query-tools",
       "strict": false,
-      "version": "1.0.3",
+      "version": "1.0.4",
       "category": "developer-tools",
       "keywords": ["aws", "athena", "sql", "query", "s3", "cloudwatch", "logs", "log-insights", "monitoring"],
       "skills": ["./skills/query-aws-athena", "./skills/query-aws-cloudwatch-logs-insights"]
@@ -92,7 +92,7 @@
       "description": "This plugin auto-syncs safe terminal commands to Claude Code settings on session start, and contains a skill for manual sync with dry-run and verbose options. Use when configuring which bash commands Claude Code can execute without requiring approval.",
       "source": "./plugins/register-safe-terminal-commands",
       "strict": false,
-      "version": "1.1.0",
+      "version": "1.1.1",
       "category": "developer-tools",
       "keywords": ["terminal", "bash", "permissions", "safety"],
       "skills": ["./skills/register-safe-terminal-commands"]
@@ -102,7 +102,7 @@
       "description": "This plugin contains skills for AI-powered podcast production: generating podcast scripts with natural conversation flow and converting scripts into high-quality audio using text-to-speech synthesis on AWS. Use when creating podcast scripts, multi-speaker dialogue, or generating podcast audio from scripts.",
       "source": "./plugins/podcast-generation",
       "strict": false,
-      "version": "1.1.1",
+      "version": "1.1.2",
       "category": "user",
       "keywords": ["podcast", "script", "tts", "audio", "conversation", "text-to-speech", "audio-generation", "voice", "aws", "ec2"],
       "skills": ["./skills/generate-podcast-script", "./skills/generate-podcast-audio"]
@@ -112,7 +112,7 @@
       "description": "This plugin contains a skill for orchestrating terminal sessions, browser automation, and progress reporting inside the cmux terminal multiplexer. Also includes a SessionStart hook that detects whether the session is running in cmux and prints workspace/surface context and LLM behavioural instructions.",
       "source": "./plugins/cmux",
       "strict": false,
-      "version": "1.0.3",
+      "version": "1.0.4",
       "category": "developer-tools",
       "keywords": ["cmux", "terminal", "multiplexer", "browser", "automation", "sessions", "splits"],
       "skills": ["./skills/use-cmux"]
@@ -139,10 +139,10 @@
     },
     {
       "name": "ml-system-design-interviewer",
-      "description": "This plugin contains a skill for conducting, evaluating, or preparing for ML System Design interviews for Principal-level engineering candidates. Use when running mock interviews, preparing questions, or assessing candidates with structured rubrics.",
+      "description": "This plugin contains a skill for conducting, evaluating, or preparing for ML System Design interviews for Principal/Staff-level engineering candidates. Use when running mock interviews, preparing questions, or assessing candidates with structured rubrics.",
       "source": "./plugins/ml-system-design-interviewer",
       "strict": false,
-      "version": "1.0.2",
+      "version": "1.0.3",
       "category": "productivity",
       "keywords": ["ml", "machine-learning", "interview", "system-design", "hiring", "evaluation"],
       "skills": ["./skills/ml-system-design-interviewer"]

@@ -194,9 +194,11 @@ Derive the HTML filename from the source markdown filename:
    ```bash
    python3 -m http.server 18923 --directory /tmp --bind 127.0.0.1 &>/dev/null &
    ```
-3. **Open in cmux browser panel** using the direction the user requested:
+3. **Open in cmux browser panel** using the two-step pattern (direct URL on `open-split` is unreliable):
    ```bash
-   cmux browser <your-surface> open-split "http://127.0.0.1:18923/<basename>.html"
+   cmux browser <your-surface> open-split --direction right
+   sleep 1 && cmux browser <new-surface> navigate "http://127.0.0.1:18923/<basename>.html"
+   cmux browser <new-surface> wait --load-state networkidle
    ```
 
 For the markdown-to-HTML conversion script, use `${SKILL_DIR}/scripts/md-to-html.py`.

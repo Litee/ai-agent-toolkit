@@ -255,135 +255,16 @@ for note in "Old Note 1" "Old Note 2" "Old Note 3"; do
 done
 ```
 
-### Workflow 5: Creating Notes from Templates
+### Workflows 5–9: Templates, Bulk Updates, Health Analysis, Properties, Tasks
 
-To create consistently structured notes:
-
-```bash
-# List available templates
-obsidian templates
-
-# Preview a template with variable resolution
-obsidian template:read name="Knowledge Card" resolve
-
-# Create a note from a template
-obsidian create name="New Concept" template="Knowledge Card"
-obsidian create path="Projects/NewProject/Overview.md" template="Project Overview"
-```
-
-### Workflow 6: Bulk Property Updates
-
-To update metadata across multiple notes:
+For these advanced workflows, load `references/advanced-workflows.md`. Quick reference:
 
 ```bash
-# Promote all draft notes in a folder to review status
-# (list files, then update each one)
-obsidian files folder="Inbox" | while read -r filepath; do
-  notename=$(basename "$filepath" .md)
-  obsidian property:set name="status" value="review" type="text" file="$notename"
-done
-
-# Add a property to all notes tagged with a specific tag (use format=json for reliable parsing)
-obsidian tag name="status/draft" format=json | jq -r '.[].path' | while read -r filepath; do
-  notename=$(basename "$filepath" .md)
-  obsidian property:set name="reviewed" value="false" type="checkbox" file="$notename"
-done
-```
-
-Note: output format of `files` and `tag` commands affects parsing. Use `format=json` for more reliable programmatic processing:
-
-```bash
-obsidian files folder="Inbox" format=json
-```
-
-### Workflow 7: Vault Health Analysis
-
-To audit the knowledge graph and find structural issues:
-
-```bash
-# Find orphaned notes (no incoming links — isolated knowledge)
-obsidian orphans
-obsidian orphans total
-
-# Find dead-end notes (no outgoing links — stubs or incomplete)
-obsidian deadends
-obsidian deadends total
-
-# Find broken links (references to non-existent notes)
-obsidian unresolved
-obsidian unresolved verbose
-
-# Review tag distribution to spot unused or overly broad tags
-obsidian tags counts sort=count
-
-# Count files and folders
-obsidian vault info=files
-obsidian vault info=folders
-```
-
-Health check routine — run all at once:
-```bash
-echo "=== Orphans ===" && obsidian orphans total
-echo "=== Dead Ends ===" && obsidian deadends total
-echo "=== Unresolved Links ===" && obsidian unresolved total
-echo "=== Top Tags ===" && obsidian tags counts sort=count | head -20
-```
-
-### Workflow 8: Working with Properties and Metadata
-
-To manage frontmatter across notes:
-
-```bash
-# Read all properties on a note
-obsidian properties file="My Note"
-
-# Read a specific property value
-obsidian property:read name="status" file="My Note"
-
-# Set a property (creates or updates)
-obsidian property:set name="status" value="permanent" type="text" file="My Note"
-obsidian property:set name="priority" value="3" type="number" file="My Note"
-obsidian property:set name="reviewed" value="true" type="checkbox" file="My Note"
-obsidian property:set name="due" value="2024-03-15" type="date" file="My Note"
-
-# Remove a property
-obsidian property:remove name="obsolete-field" file="My Note"
-
-# List all property names used across the vault (with counts)
-obsidian properties counts sort=count
-```
-
-### Workflow 9: Task Management within Notes
-
-To manage tasks embedded in notes:
-
-```bash
-# List all incomplete tasks in the vault
-obsidian tasks todo
-
-# List all completed tasks
-obsidian tasks done
-
-# List tasks in a specific file
-obsidian tasks todo file="Project Plan"
-
-# List tasks from today's daily note
-obsidian tasks daily
-
-# List tasks with file and line number
-obsidian tasks verbose
-
-# Toggle a specific task (by file + line number)
-obsidian task file="Project Plan" line=8 toggle
-
-# Mark a task done
-obsidian task file="Project Plan" line=8 done
-
-# Mark a task as todo
-obsidian task file="Project Plan" line=8 todo
-
-# Use task reference syntax
-obsidian task ref="Projects/Plan.md:8" toggle
+obsidian templates                              # list templates
+obsidian tasks todo                             # list incomplete tasks
+obsidian orphans total                          # count isolated notes
+obsidian unresolved total                       # count broken links
+obsidian properties counts sort=count          # all property names with counts
 ```
 
 ---
@@ -399,7 +280,6 @@ obsidian vaults
 # Target a specific vault by name
 obsidian vault=Work search query="quarterly review"
 obsidian vault="Personal Notes" daily:append content="- [ ] New task"
-obsidian vault=Archive files total
 ```
 
 The `vault=<name>` prefix must appear **before** the command and any other parameters.
@@ -467,6 +347,8 @@ obsidian create name="Note" content='Cost: $100. Running `echo hello`.'
 ## CLI Reference
 
 For the complete command reference with all commands, parameters, flags, and examples, read `references/cli-reference.md`.
+
+For advanced workflows (templates, bulk updates, vault health, properties, tasks), read `references/advanced-workflows.md`.
 
 Available command categories:
 - **Files and Folders**: `create`, `read`, `append`, `prepend`, `move`, `rename`, `delete`, `open`, `file`, `files`, `folders`

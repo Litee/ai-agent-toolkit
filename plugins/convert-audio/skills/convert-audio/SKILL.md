@@ -1,6 +1,6 @@
 ---
 name: convert-audio
-description: Convert audio files between formats using ffmpeg. Use when converting audio formats (MP3, WAV, AAC, FLAC, Opus, OGG), adjusting bitrate/quality, changing sample rate/channels, or modifying playback speed.
+description: Convert audio files between formats using ffmpeg. Use when converting audio formats (MP3, WAV, AAC, FLAC, Opus, OGG), adjusting bitrate/quality, changing sample rate/channels, modifying playback speed, or adding/editing audio metadata (ID3 tags, title, artist, album). Triggers on "convert audio", "change audio format", "compress audio", "adjust bitrate", "audio metadata tags", "add ID3 tags", "change playback speed", or any request to process an audio file with ffmpeg.
 ---
 
 # Audio Conversion Skill
@@ -182,99 +182,16 @@ Convert to mono, 48kHz, 1.5x speed, 192k bitrate:
 ffmpeg -n -i input.wav -b:a 192k -ac 1 -ar 48000 -af "atempo=1.5" output.mp3
 ```
 
-### Example 7: Convert to Different Format with Quality
-Convert MP3 to FLAC (lossless) with specific sample rate:
+For lossless conversion, metadata tagging, and complex combined-parameter examples, see `references/advanced-examples.md`.
 
-```bash
-ffmpeg -n -i input.mp3 -ar 48000 output.flac
-```
-*Note: FLAC is lossless, so bitrate is not specified*
+## Workflow
 
-### Example 8: Slow Down Audio
-Convert and slow down to 75% speed:
-
-```bash
-ffmpeg -n -i input.mp3 -b:a 192k -af "atempo=0.75" output.mp3
-```
-
-### Example 9: Basic Metadata (Title and Artist)
-Convert WAV to MP3 with title and artist metadata:
-
-```bash
-ffmpeg -n -i input.wav -b:a 192k -metadata title="My Song" -metadata artist="John Doe" output.mp3
-```
-
-### Example 10: Complete Album Metadata
-Convert to MP3 with comprehensive album metadata:
-
-```bash
-ffmpeg -n -i input.wav -b:a 320k -metadata title="Track Name" -metadata artist="Artist Name" -metadata album="Album Name" -metadata date="2024" -metadata genre="Rock" -metadata track="3/12" output.mp3
-```
-
-### Example 11: Podcast Episode Metadata
-Convert to mono MP3 optimized for podcasts with metadata:
-
-```bash
-ffmpeg -n -i input.wav -b:a 64k -ac 1 -metadata title="Episode 42: AI Best Practices" -metadata artist="Tech Podcast" -metadata album="Season 2" -metadata date="2024" -metadata genre="Podcast" -metadata comment="Discussion about AI coding practices" output.mp3
-```
-
-### Example 12: Combined Parameters with Metadata
-Convert with all parameters including speed adjustment and metadata:
-
-```bash
-ffmpeg -n -i input.wav -b:a 192k -ac 2 -ar 44100 -af "atempo=1.25" -metadata title="Fast Version" -metadata artist="Artist Name" -metadata album="Remixes" output.mp3
-```
-
-## Workflow Instructions
-
-### Step 1: Validate Prerequisites
-```bash
-which ffmpeg
-```
-
-If ffmpeg is not found, ask the user for permission to install it.
-
-### Step 2: Validate Input File
-```bash
-ls -lh <input_file>
-```
-
-Confirm the input file exists and display its size.
-
-### Step 3: Check Output File Conflict
-```bash
-ls <output_file> 2>/dev/null
-```
-
-If the output file exists, inform the user and ask them to:
-- Provide a different output filename
-- Delete the existing file
-- Move the existing file
-
-### Step 4: Construct ffmpeg Command
-
-Based on user requirements, build the command:
-1. Start with: `ffmpeg -n -i <input_file>`
-2. Add required bitrate: `-b:a <bitrate>`
-3. Add optional audio parameters if specified:
-   - `-ac <channels>` (if user wants to change channels)
-   - `-ar <sample_rate>` (if user wants to change sample rate)
-   - `-af "atempo=<tempo>"` (if user wants to change speed)
-4. Add optional metadata tags if specified:
-   - `-metadata title="value"` (for track title)
-   - `-metadata artist="value"` (for artist name)
-   - Additional `-metadata key="value"` flags as needed
-5. End with: `<output_file>`
-
-### Step 5: Execute Conversion
-Run the constructed ffmpeg command.
-
-### Step 6: Verify Output
-```bash
-ls -lh <output_file>
-```
-
-Confirm the output file was created and display its size.
+1. **Validate Prerequisites** — `which ffmpeg`; ask user for permission before installing
+2. **Validate Input File** — `ls -lh <input_file>`
+3. **Check Output Conflict** — if `<output_file>` exists, ask user to rename/delete/move it
+4. **Construct Command** — use template: `ffmpeg -n -i <input> [-b:a <bitrate>] [-ac <ch>] [-ar <rate>] [-af "atempo=<n>"] [-metadata key="value" ...] <output>`
+5. **Execute** — run the command
+6. **Verify** — `ls -lh <output_file>`
 
 ## Error Handling
 
@@ -320,12 +237,8 @@ ffmpeg -n -i input.mp3 -b:a 192k -af "atempo=0.5,atempo=0.5" output.mp3
 
 ## Reference Documentation
 
-For full metadata tag table, format-specific support, codec details, and advanced options, see `references/ffmpeg-parameters.md`.
-
-Quick metadata reference — use `-metadata key="value"` for each tag:
-- Common tags: `title`, `artist`, `album`, `date` (YYYY), `genre`, `track` ("3" or "3/12"), `comment`
-- Preserve existing metadata: `ffmpeg -n -i input.mp3 -b:a 192k -map_metadata 0 output.mp3`
-- Clear all metadata: `ffmpeg -n -i input.mp3 -b:a 192k -map_metadata -1 output.mp3`
+- **`references/advanced-examples.md`** — Examples 7–12: lossless conversion, slow-down, metadata tagging (podcast, album, combined), full metadata tag table, preserve/clear metadata commands
+- **`references/ffmpeg-parameters.md`** — Full codec details, format-specific support, and advanced ffmpeg options
 
 ## Summary
 

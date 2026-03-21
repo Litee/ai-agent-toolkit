@@ -27,7 +27,7 @@ Before using this skill, ensure:
 First, verify AnkiConnect is accessible:
 
 ```bash
-./scripts/anki_connect.py deck-names
+${SKILL_DIR}/scripts/anki_connect.py deck-names
 ```
 
 This should list all your Anki decks. If it fails, ensure Anki is running and AnkiConnect is installed.
@@ -35,7 +35,7 @@ This should list all your Anki decks. If it fails, ensure Anki is running and An
 ### Create a Simple Flashcard
 
 ```bash
-./scripts/anki_connect.py add-note \
+${SKILL_DIR}/scripts/anki_connect.py add-note \
     --deck "Default" \
     --model "Basic" \
     --fields '{"Front":"What is Python?","Back":"A programming language"}' \
@@ -45,14 +45,14 @@ This should list all your Anki decks. If it fails, ensure Anki is running and An
 ### Search for Notes
 
 ```bash
-./scripts/anki_connect.py find-notes --query "deck:Default tag:python"
+${SKILL_DIR}/scripts/anki_connect.py find-notes --query "deck:Default tag:python"
 ```
 
 ### List All Decks and Note Types
 
 ```bash
-./scripts/anki_connect.py deck-names
-./scripts/anki_connect.py model-names
+${SKILL_DIR}/scripts/anki_connect.py deck-names
+${SKILL_DIR}/scripts/anki_connect.py model-names
 ```
 
 ## Best Practices
@@ -65,11 +65,11 @@ When performing bulk operations (adding many cards, updating tags, moving cards 
 
 1. **CLI with JSON files** (Preferred for bulk operations)
    - Create a temporary JSON file with your data
-   - Use the CLI command to process the file: `./scripts/anki_connect.py add-notes --json-file data.json`
+   - Use the CLI command to process the file: `${SKILL_DIR}/scripts/anki_connect.py add-notes --json-file data.json`
    - This is safer, easier to debug, and less error-prone
 
 2. **CLI invoke command** (For operations without dedicated commands)
-   - Use `./scripts/anki_connect.py invoke --action <action> --params <params>`
+   - Use `${SKILL_DIR}/scripts/anki_connect.py invoke --action <action> --params <params>`
    - Keeps logic simple and leverages the tested CLI tool
 
 3. **Python library** (Use sparingly and with caution)
@@ -85,8 +85,8 @@ When you have content to convert into flashcards:
 
 1. **Identify the deck and note type**
    ```bash
-   ./scripts/anki_connect.py deck-names
-   ./scripts/anki_connect.py model-names
+   ${SKILL_DIR}/scripts/anki_connect.py deck-names
+   ${SKILL_DIR}/scripts/anki_connect.py model-names
    ```
 
 2. **Check fields for the note type**
@@ -99,7 +99,7 @@ When you have content to convert into flashcards:
 3. **Create notes**
    - Single note:
      ```bash
-     ./scripts/anki_connect.py add-note \
+     ${SKILL_DIR}/scripts/anki_connect.py add-note \
          --deck "My Deck" \
          --model "Basic" \
          --fields '{"Front":"Question","Back":"Answer"}' \
@@ -123,14 +123,14 @@ When you have content to convert into flashcards:
      ]
      ```
      ```bash
-     ./scripts/anki_connect.py add-notes --json-file notes.json
+     ${SKILL_DIR}/scripts/anki_connect.py add-notes --json-file notes.json
      ```
 
 ### Workflow 2: Bulk Importing Flashcards
 
-For bulk operations, create a temporary JSON file with your data and use the CLI:
+For bulk operations, create a temporary JSON file in `/tmp` and use the CLI:
 
-**Step 1: Create a JSON file** (e.g., `bulk_notes.json`) with your notes:
+**Step 1: Create a JSON file** (e.g., `/tmp/bulk_notes.json`) with your notes:
 
 ```json
 [
@@ -158,7 +158,7 @@ For bulk operations, create a temporary JSON file with your data and use the CLI
 **Step 2: Import using the CLI:**
 
 ```bash
-./scripts/anki_connect.py add-notes --json-file bulk_notes.json
+${SKILL_DIR}/scripts/anki_connect.py add-notes --json-file /tmp/bulk_notes.json
 ```
 
 This approach is safer and less error-prone than writing custom Python scripts.
@@ -177,31 +177,31 @@ Search using Anki's query syntax:
 
 **Example: Find all due Python cards**
 ```bash
-./scripts/anki_connect.py find-cards --query "deck:Programming tag:python is:due"
+${SKILL_DIR}/scripts/anki_connect.py find-cards --query "deck:Programming tag:python is:due"
 ```
 
 **Example: Get information about specific notes**
 ```bash
 # First find notes
-./scripts/anki_connect.py find-notes --query "deck:Default"
+${SKILL_DIR}/scripts/anki_connect.py find-notes --query "deck:Default"
 
 # Then get detailed info (all fields)
-./scripts/anki_connect.py notes-info --note-ids 1234567890 9876543210
+${SKILL_DIR}/scripts/anki_connect.py notes-info --note-ids 1234567890 9876543210
 
 # Get only specific fields
-./scripts/anki_connect.py notes-info --note-ids 1234567890 --fields "Front,Back"
+${SKILL_DIR}/scripts/anki_connect.py notes-info --note-ids 1234567890 --fields "Front,Back"
 ```
 
 ### Workflow 4: Managing Decks and Organization
 
 **Create a new deck:**
 ```bash
-./scripts/anki_connect.py create-deck --deck "Python::Advanced Concepts"
+${SKILL_DIR}/scripts/anki_connect.py create-deck --deck "Python::Advanced Concepts"
 ```
 
 **Get deck statistics:**
 ```bash
-./scripts/anki_connect.py invoke \
+${SKILL_DIR}/scripts/anki_connect.py invoke \
     --action "getDeckStats" \
     --params '{"decks": ["Default", "Programming"]}'
 ```
@@ -210,87 +210,33 @@ Search using Anki's query syntax:
 
 First, find the cards you want to move:
 ```bash
-./scripts/anki_connect.py find-cards --query "deck:OldDeck tag:python"
+${SKILL_DIR}/scripts/anki_connect.py find-cards --query "deck:OldDeck tag:python"
 # Example output: [1234567890, 9876543210, ...]
 ```
 
 Then move them using the `changeDeck` action:
 ```bash
-./scripts/anki_connect.py invoke \
+${SKILL_DIR}/scripts/anki_connect.py invoke \
     --action "changeDeck" \
     --params '{"cards": [1234567890, 9876543210], "deck": "NewDeck"}'
 ```
 
-### Workflow 5: Managing Tags
+### Workflow 5–7: Tags, Review Sessions, and Syncing
 
-**Add tags to existing notes:**
+For tag management, programmatic review session control, and AnkiWeb syncing, see `references/advanced-workflows.md`.
 
-First, find the notes you want to tag:
+Quick reference:
 ```bash
-./scripts/anki_connect.py find-notes --query "deck:Programming -tag:reviewed"
-# Example output: [1234567890, 9876543210, ...]
+# Sync with AnkiWeb
+${SKILL_DIR}/scripts/anki_connect.py sync
+
+# List all tags
+${SKILL_DIR}/scripts/anki_connect.py invoke --action "getTags" --params '{}'
 ```
 
-Then add the tags:
-```bash
-./scripts/anki_connect.py invoke \
-    --action "addTags" \
-    --params '{"notes": [1234567890, 9876543210], "tags": "reviewed"}'
-```
+## CLI Reference
 
-**List all tags:**
-```bash
-./scripts/anki_connect.py invoke \
-    --action "getTags" \
-    --params '{}'
-```
-
-### Workflow 6: Review Session Control
-
-Control Anki's review interface programmatically:
-
-```python
-from scripts.anki_connect import AnkiConnectClient
-
-client = AnkiConnectClient()
-
-# Open deck for review
-client.invoke("guiDeckReview", {"name": "Default"})
-
-# Get current card
-current = client.invoke("guiCurrentCard")
-if current:
-    print(f"Question: {current['question']}")
-
-    # Show answer
-    client.invoke("guiShowAnswer")
-
-    # Answer with "Good" (ease=3)
-    client.invoke("guiAnswerCard", {"ease": 3})
-```
-
-### Workflow 7: Syncing with AnkiWeb
-
-```bash
-./scripts/anki_connect.py sync
-```
-
-Or programmatically:
-```python
-from scripts.anki_connect import AnkiConnectClient
-
-client = AnkiConnectClient()
-client.sync()
-print("Synced with AnkiWeb")
-```
-
-## Using the Python Script
-
-The `anki_connect.py` script provides both a CLI interface and a Python library.
-
-### CLI Usage
-
-Available commands:
+Available commands for `${SKILL_DIR}/scripts/anki_connect.py`:
 - `add-note` - Create a single flashcard
 - `add-notes` - Bulk create from JSON file
 - `find-notes` - Search for notes
@@ -302,137 +248,11 @@ Available commands:
 - `sync` - Sync with AnkiWeb
 - `invoke` - Raw API call for any action
 
-**CLI Examples:**
-```bash
-# Get help
-./scripts/anki_connect.py --help
-./scripts/anki_connect.py add-note --help
+Run `${SKILL_DIR}/scripts/anki_connect.py --help` or `${SKILL_DIR}/scripts/anki_connect.py <command> --help` for details.
 
-# Raw API call
-./scripts/anki_connect.py invoke \
-    --action "deckNames" \
-    --params '{}'
+## Python Library
 
-# Search with complex query
-./scripts/anki_connect.py find-notes \
-    --query "deck:Default (tag:python OR tag:javascript) -is:suspended"
-```
-
-### Library Usage
-
-**WARNING: Use the Python library sparingly and with caution.**
-
-The `AnkiConnectClient` Python library should only be used for:
-- Quick one-off queries (checking connection, getting deck names, single note lookups)
-- Cases where the CLI is genuinely insufficient
-
-**Do NOT use the Python library for bulk operations** - instead, use the CLI with JSON files as shown in the workflows above. Writing custom Python scripts for bulk operations is error-prone.
-
-If you must use the library, here's how to import and use the `AnkiConnectClient` class:
-
-```python
-from scripts.anki_connect import AnkiConnectClient
-
-# Initialize client
-client = AnkiConnectClient()
-
-# Check connection
-if not client.check_connection():
-    print("Cannot connect to AnkiConnect")
-    exit(1)
-
-# Use any method
-decks = client.deck_names()
-models = client.model_names()
-note_id = client.add_note(
-    deck_name="Default",
-    model_name="Basic",
-    fields={"Front": "Question", "Back": "Answer"},
-    tags=["python"]
-)
-
-# Get note information (all fields)
-notes = client.notes_info([note_id])
-
-# Get note information (specific fields only)
-notes = client.notes_info([note_id], fields=["Front", "Back"])
-
-# Use invoke() for any API action
-result = client.invoke("getDeckStats", {"decks": ["Default"]})
-```
-
-## Creating Effective Anki Cards
-
-For comprehensive guidance on card formulation, cognitive science principles, and best practices, see `references/card-creation-guide.md`. Key principles: one concept per card, active recall questions, use cloze deletions for facts.
-
-## Advanced Operations
-
-**NOTE:** The examples in this section use the Python library for demonstration purposes. These are advanced, one-off operations where the Python approach may be acceptable. However, for any bulk operations, you should still prefer the CLI with JSON files approach as described in the Best Practices section.
-
-### Creating Custom Note Types
-
-```python
-from scripts.anki_connect import AnkiConnectClient
-
-client = AnkiConnectClient()
-
-# Create a new note type with three fields
-client.invoke("createModel", {
-    "modelName": "Programming Card",
-    "inOrderFields": ["Concept", "Code", "Explanation"],
-    "cardTemplates": [
-        {
-            "Front": "<h2>{{Concept}}</h2><pre>{{Code}}</pre>",
-            "Back": "{{FrontSide}}<hr><div>{{Explanation}}</div>"
-        }
-    ],
-    "css": ".card { font-family: monospace; font-size: 16px; }"
-})
-```
-
-### Adding Media to Cards
-
-```python
-from scripts.anki_connect import AnkiConnectClient
-
-client = AnkiConnectClient()
-
-# Store image from URL
-client.invoke("storeMediaFile", {
-    "filename": "diagram.png",
-    "url": "https://example.com/diagram.png"
-})
-
-# Add note with image
-client.add_note(
-    deck_name="Default",
-    model_name="Basic",
-    fields={
-        "Front": "What does this diagram show?<br><img src='diagram.png'>",
-        "Back": "System architecture overview"
-    }
-)
-```
-
-### Batch Operations with Multi
-
-Execute multiple operations in one request:
-
-```python
-from scripts.anki_connect import AnkiConnectClient
-
-client = AnkiConnectClient()
-
-result = client.invoke("multi", {
-    "actions": [
-        {"action": "deckNames"},
-        {"action": "modelNames"},
-        {"action": "getTags"}
-    ]
-})
-
-decks, models, tags = result
-```
+**Use sparingly.** The CLI with JSON files is safer for bulk operations. Load `references/advanced-workflows.md` for library usage examples (custom note types, media, batch operations, review session control).
 
 ## API Reference
 
@@ -492,21 +312,20 @@ AnkiConnect error: Cannot create note because it is a duplicate
 
 2. **Verify deck and model names**:
    ```bash
-   ./scripts/anki_connect.py deck-names
-   ./scripts/anki_connect.py model-names
+   ${SKILL_DIR}/scripts/anki_connect.py deck-names
+   ${SKILL_DIR}/scripts/anki_connect.py model-names
    ```
 
-3. **Check field names for a model**:
-   ```python
-   from scripts.anki_connect import AnkiConnectClient
-   client = AnkiConnectClient()
-   fields = client.model_field_names("Basic")
-   print(fields)  # ['Front', 'Back']
+3. **Check field names for a model** (see `references/advanced-workflows.md` for library usage):
+   ```bash
+   ${SKILL_DIR}/scripts/anki_connect.py invoke \
+       --action "modelFieldNames" \
+       --params '{"modelName": "Basic"}'
    ```
 
 4. **Use raw invoke for debugging**:
    ```bash
-   ./scripts/anki_connect.py invoke \
+   ${SKILL_DIR}/scripts/anki_connect.py invoke \
        --action "version" \
        --params '{}'
    ```
@@ -560,3 +379,7 @@ Comprehensive guide on creating effective Anki cards with:
 - Common mistakes and how to avoid them
 - Note type selection guidance
 - Tagging strategy
+
+### references/advanced-workflows.md
+
+Advanced operations: tag management (Workflow 5), review session control (Workflow 6), AnkiWeb sync (Workflow 7), Python library usage, creating custom note types, adding media, batch operations.

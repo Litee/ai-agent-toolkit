@@ -1,6 +1,6 @@
 ---
 name: register-safe-terminal-commands
-description: This skill should be used when registering or syncing safe terminal commands to Claude Code settings. Use when the user wants to configure which bash commands Claude Code can execute without requiring approval, or when they need to register/update their safe commands list from the reference file.
+description: This skill should be used when registering or syncing safe terminal commands to Claude Code settings. Use when the user wants to configure which bash commands Claude Code can execute without requiring approval, whitelist commands for auto-approval, allow commands without confirmation prompts, or register/update their safe commands list. Triggers on "register safe commands", "sync safe commands", "allow commands without approval", "whitelist bash commands", "auto-approve terminal commands", "add commands to allowlist", or any request to configure Claude Code's bash permission settings.
 ---
 
 # Register Safe Terminal Commands Skill
@@ -50,7 +50,7 @@ The `scripts/sync_safe_commands.py` script syncs commands from the reference fil
 #### Basic Usage
 
 ```bash
-./scripts/sync_safe_commands.py
+${SKILL_DIR}/scripts/sync_safe_commands.py
 ```
 
 This will:
@@ -65,15 +65,15 @@ This will:
 
 ```bash
 # Preview changes without modifying settings (dry-run mode)
-./scripts/sync_safe_commands.py --dry-run
-./scripts/sync_safe_commands.py -n
+${SKILL_DIR}/scripts/sync_safe_commands.py --dry-run
+${SKILL_DIR}/scripts/sync_safe_commands.py -n
 
 # Show all commands including unchanged ones (verbose mode)
-./scripts/sync_safe_commands.py --verbose
-./scripts/sync_safe_commands.py -v
+${SKILL_DIR}/scripts/sync_safe_commands.py --verbose
+${SKILL_DIR}/scripts/sync_safe_commands.py -v
 
 # Combine options
-./scripts/sync_safe_commands.py -n -v
+${SKILL_DIR}/scripts/sync_safe_commands.py -n -v
 ```
 
 #### Command-line Options
@@ -103,11 +103,10 @@ The `Bash(command:*)` format tells Claude Code to automatically approve any bash
 
 When a user requests to sync safe commands:
 
-1. **Locate the sync script**: Navigate to this skill's `scripts/` directory
-2. **Run the sync script**: Execute `./scripts/sync_safe_commands.py`
-3. **Use options as needed**: Add `--dry-run` to preview or `--verbose` for detailed output
-4. **Verify the output**: Review the sync report showing added/unchanged commands
-5. **Confirm completion**: The script will report total changes made and create a backup
+1. **Run the sync script**: Execute `${SKILL_DIR}/scripts/sync_safe_commands.py`
+2. **Use options as needed**: Add `--dry-run` to preview or `--verbose` for detailed output
+3. **Verify the output**: Review the sync report showing added/unchanged commands
+4. **Confirm completion**: The script will report total changes made and create a backup
 
 ## Adding New Safe Commands
 

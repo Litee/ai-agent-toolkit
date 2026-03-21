@@ -65,11 +65,6 @@ For complete tool documentation and examples, see `references/tool-reference.md`
    mcptools call GenerateBedrockAgentSchema --params '{"lambdaCode":"<lambda-code>"}' uvx awslabs.cdk-mcp-server@latest
    ```
 
-3. **Get CDK guidance on best practices**
-   ```bash
-   mcptools call CDKGeneralGuidance --params '{}' uvx awslabs.cdk-mcp-server@latest
-   ```
-
 ### Workflow 3: Working with Lambda Layers
 
 1. **Get Lambda layer documentation**
@@ -77,26 +72,16 @@ For complete tool documentation and examples, see `references/tool-reference.md`
    mcptools call LambdaLayerDocumentationProvider --params '{"topic":"python"}' uvx awslabs.cdk-mcp-server@latest
    ```
 
-2. **Get CDK guidance on best practices**
-   ```bash
-   mcptools call CDKGeneralGuidance --params '{}' uvx awslabs.cdk-mcp-server@latest
-   ```
-
 ### Workflow 4: Security Compliance with CDK Nag
 
-1. **Explain specific CDK Nag rules**
+1. **Explain specific CDK Nag rules** before suppressing
    ```bash
    mcptools call ExplainCDKNagRule --params '{"rule_id":"AwsSolutions-IAM4"}' uvx awslabs.cdk-mcp-server@latest
    ```
 
-2. **Check suppressions in code**
+2. **Validate suppressions in code**
    ```bash
    mcptools call CheckCDKNagSuppressions --params '{"code":"<cdk-code-with-suppressions>"}' uvx awslabs.cdk-mcp-server@latest
-   ```
-
-3. **Get CDK guidance including suppression best practices**
-   ```bash
-   mcptools call CDKGeneralGuidance --params '{}' uvx awslabs.cdk-mcp-server@latest
    ```
 
 ---
@@ -104,6 +89,8 @@ For complete tool documentation and examples, see `references/tool-reference.md`
 ## Best Practices
 
 ### Using CDK Guidance Effectively
+
+> **Version pinning**: Examples use `@latest`. For reproducible builds, pin to a specific version (e.g., `uvx awslabs.cdk-mcp-server@0.1.2`) once you confirm it works.
 
 1. **Read comprehensive guidance** - Use CDKGeneralGuidance to get complete documentation on CDK best practices, workflow, patterns, and security
 2. **Start with patterns** - Use GetAwsSolutionsConstructPattern to find vetted patterns before building from scratch
