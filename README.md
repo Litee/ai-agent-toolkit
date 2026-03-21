@@ -25,6 +25,7 @@ These skills can be installed as plugins in Claude Code.
 /plugin install aws-documentation@litee-claude-code-plugins
 /plugin install cmux@litee-claude-code-plugins
 /plugin install convert-audio@litee-claude-code-plugins
+/plugin install cron-restoration-guard@litee-claude-code-plugins
 /plugin install file-system-tools@litee-claude-code-plugins
 /plugin install generate-image@litee-claude-code-plugins
 /plugin install manage-anki-flashcards@litee-claude-code-plugins
@@ -47,6 +48,7 @@ Each plugin installs a skill that extends Claude's capabilities:
 | `aws-query-tools` | developer-tools | AWS Athena SQL queries and CloudWatch Log Insights with query optimization, CTE patterns, and real-time progress tracking |
 | `cmux` (`use-cmux`) | developer-tools | Terminal multiplexer integration: orchestrate sessions, browser automation, progress reporting; SessionStart hook prints cmux context and LLM behavioural instructions when running inside cmux |
 | `convert-audio` | user | Audio format conversion using ffmpeg (MP3, WAV, AAC, FLAC, Opus, OGG), bitrate/speed adjustment, and metadata tagging (ID3 tags) |
+| `cron-restoration-guard` | developer-tools | SessionStart hook (resume only) that instructs the agent to verify and re-register any cron jobs from the previous session that are no longer active |
 | `file-system-tools` | developer-tools | Free disk space by cleaning development caches, IDE artefacts, and Docker resources. Scan for bloat directories (node_modules, virtual environments, build caches) |
 | `generate-image` | user | Image generation using Amazon Nova Canvas on AWS Bedrock |
 | `manage-anki-flashcards` | productivity | Anki flashcard management through AnkiConnect API |

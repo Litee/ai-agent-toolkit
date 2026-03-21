@@ -1,0 +1,17 @@
+{
+  "description": "On session resume, instructs the agent to verify that expected cron jobs from the previous session are still registered and to re-register any that are missing.",
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "resume",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/session-start.sh\"",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}
