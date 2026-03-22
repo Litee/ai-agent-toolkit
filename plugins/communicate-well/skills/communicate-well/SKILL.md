@@ -1,0 +1,147 @@
+---
+name: communicate-well
+description: "This skill should be used before composing any outbound message across any async channel — chat (Slack-like), tickets, code reviews, or similar. Use when posting updates, commenting on tickets, writing code review feedback, acknowledging instructions, deciding message frequency, structuring status updates, or following signing conventions. Triggers on 'post a message', 'add a comment', 'reply to', 'write a comment', 'communicate with', 'message style', 'how should I write', 'notify', 'message frequency', 'signing convention', 'thread etiquette', 'notification fatigue', 'what to write in a ticket comment', or any request involving outbound communication."
+---
+
+# communicate-well
+
+Guidelines for AI agents communicating through asynchronous channels. Apply before composing any outbound message — chat, tickets, code reviews, or similar.
+
+---
+
+## The Value Test
+
+Before posting ANY message, ask:
+
+1. **Is this information new?** (Not already visible in ticket fields, thread history, CI panel, or linked systems)
+2. **Does this require human attention?** (If not, use a field update, log entry, or reaction instead)
+3. **Would a human post this?** (If a person wouldn't bother saying it, the agent shouldn't either)
+4. **Is it actionable?** (Reader can do something with it)
+5. **Is the timing right?** (Not duplicating a message from 5 minutes ago; not posting at 3am for a non-urgent update)
+
+If any of 1–4 is "no" — stay silent, update a field, write to a log, or add a reaction.
+
+---
+
+## Signing Convention
+
+- **First agentic message in a communication chain:** Start with `🤖 [AI Agent on behalf of Andrey]`
+- **Subsequent messages in the same thread/chain:** `🤖` prefix only
+
+"First in chain" means the first message in a new conversation, thread, or ticket — not the first message ever posted.
+
+---
+
+## Message Style
+
+- **Lead with the conclusion** (pyramid principle): outcome first, reasoning only if asked.
+- **Minimize vertical space.** Prefer a compact line over a multi-line block. Use inline formatting instead of separate lines where possible.
+- **Front-load severity and action.** Start with the "so what" — what must the reader do or know? Don't bury it in preamble.
+- **Link, don't paste.** Deep link to the dashboard, PR, log, or runbook. Don't dump raw output.
+- **Attribute, don't rephrase.** When another participant has already answered, reference them directly rather than paraphrasing.
+- **Identify yourself.** Make clear which bot/system/workflow is speaking; never post without context about what triggered the message.
+- **Recap policy:** Short recap is OK if >7 days have passed and communicators may have forgotten context. Otherwise, don't recap what's already visible.
+
+---
+
+## Message Frequency
+
+**Default to silence.** Every message competes for the reader's attention.
+
+- Post at most **two messages per task**: one on start (if the request wasn't already acknowledged with 👍) and one with the final result.
+- Post mid-task **only if:**
+  - A blocker needs human input
+  - A significant error occurred that may change the outcome
+  - A decision is required to continue
+- **Never post** percentage progress, heartbeat confirmations, "still running" updates, or any other zero-signal content — unless the user explicitly asks for it.
+- **Batch over stream.** Multiple small updates become a single periodic summary. Digests beat real-time play-by-play.
+
+---
+
+## Acknowledging Instructions
+
+- **Actionable message** (requires a response or action): post a thread reply stating what was understood and what is being done.
+- **FYI message** (informational, no action required): add a 👍 reaction. No reply needed.
+
+---
+
+## Status Reporting (thread-first)
+
+1. **Top-level message** — short topic handle only. Example: `🧵 PWDT OG images processing`. No body.
+2. **Thread reply** — calibrate detail to what the reader needs to act or decide. Omit process narration.
+
+**Standalone top-level posts must identify the job.** If a background job posts a new top-level message (not a reply), include the job name: `🤖 SOTW enrichment — Batch 2/5 complete`, not `🤖 Batch 2/5 complete`.
+
+---
+
+## Trust Is a One-Way Door
+
+Once an agent floods a channel with low-value messages, trust is permanently destroyed. Teams remove noisy bots within months. Rebuilding trust is significantly harder than establishing it.
+
+A noisy agent is **worse than no agent at all** — without the agent, humans review and catch issues themselves. With a noisy agent, humans assume coverage exists and reduce their attention, while the agent creates a false sense of coverage.
+
+---
+
+## Anti-Patterns
+
+| Anti-Pattern | Description | Fix |
+|---|---|---|
+| **The Chatty Bot** | Progress updates for every micro-step | Consolidate into one final message |
+| **Echo Chamber** | Repeating info already visible (ticket fields, CI panel, thread history) | Only post *new* information |
+| **Boy Who Cried Wolf** | Too many low-severity alerts train humans to ignore everything | Implement severity thresholds; suppress below threshold |
+| **Context-Free Alert** | "Error occurred" with no link, service name, severity, or action | Always include the delta and the reason |
+| **Log Dumper** | Pasting full stack traces or raw JSON into a channel | Link to log storage; include only the relevant 2–3 lines |
+| **The Interrupter** | DMs or @-mentions for non-urgent automated notifications | Use channel posts; let humans check on their schedule |
+| **Override Wars** | Bot fighting a human (or another bot) over a field/status | Human always wins; add debounce/hysteresis logic |
+| **Missing Identity** | Messages that don't identify themselves as automated | Always prefix with 🤖 and system context |
+| **Tombstone** | "No issues found" / "All checks passed" comments when there's nothing to report | Say nothing |
+| **Ghost Commit** | Editing a comment to change factual content without acknowledgment | Put true info first, strikethrough the false block |
+
+---
+
+## Channel-Type Guidelines
+
+### Chat channels (Slack-like)
+
+- **Thread by default, channel-level by exception.** Only new, distinct events warrant top-level posts.
+- **React (emoji) instead of reply** for acknowledgements and simple status indicators — zero notification noise.
+- **Never @here or @channel** unless a genuine emergency (P1 incidents only).
+- Do NOT set `reply_broadcast=true` (also-send-to-channel) unless the update is critical and time-sensitive.
+- Watch **both the thread and the channel** for new messages; never reply to unrelated messages.
+- Opt-in verbosity: start minimal, let users request more detail.
+
+**Expected reaction time:** hours to days. Don't require urgent response.
+
+### Ticket systems (Jira, Linear, etc.)
+
+- **Update fields instead of commenting** for machine-readable state changes. Field changes can be configured to suppress notifications.
+- **Batch comments.** At least 15–30 minutes between automated comments on the same ticket (unless critical/blocking).
+- **Don't edit comments for status changes.** For factual corrections only: put true information first, then ~~strikethrough the false block~~.
+- **One status transition = one comment max.** The transition itself is visible in history; the comment should add only context not already visible.
+- **No state bouncing.** Don't flip a ticket back and forth rapidly; add debounce logic.
+- **Wait for explicit instruction before resolving or downgrading.** Do NOT close or lower the severity of a ticket unless the system owner or user explicitly asks.
+- **Respect human overrides.** If a human manually set a status, don't override it.
+
+**Expected reaction time:** hours to days.
+
+### Code review comments
+
+- **Severity tiers:**
+  - Critical → block merge
+  - High → require acknowledgment
+  - Medium → collapsible
+  - Low / style → suppress entirely
+- **Concise > thorough.** Concise comments are 3× more likely to be acted on (study of 22,000+ AI review comments). A five-page essay for a two-line change is an anti-pattern.
+- **Every finding must include reproduction conditions,** not just "potential issue on line X." Include inputs, conditions, and expected vs. actual behaviour.
+- **Don't duplicate what linters already catch.** Reserve AI review for what rules cannot catch: logic errors, cross-file impacts, context-dependent security issues.
+- **Provide the fix, not just the finding.** ~80% auto-fix coverage is the gold standard.
+- **If no actionable findings: post nothing.** "No issues found" is noise.
+- **Keep AI comments minimal** so they complement, not replace, human discussion. Concise comments are significantly more likely to be acted on than verbose ones.
+- When replying to a comment on your own CR, nudge the comment author in chat separately.
+
+**Nudging reviewers for approvals:**
+- Target only reviewers who have NOT yet approved.
+- Ping just enough people to reach the required approval count.
+- Prioritize reviewers who were active committers for the modified packages.
+
+**Expected reaction time:** hours.
