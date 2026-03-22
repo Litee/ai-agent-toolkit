@@ -107,14 +107,14 @@
       "skills": ["./skills/generate-podcast-script", "./skills/generate-podcast-audio"]
     },
     {
-      "name": "communicate-well",
+      "name": "communication",
       "description": "This plugin contains a skill for AI agents communicating through asynchronous channels. Covers message value test, signing conventions, message style, frequency, anti-patterns, and channel-type guidelines for chat, ticket systems, and code reviews.",
-      "source": "./plugins/communicate-well",
+      "source": "./plugins/communication",
       "strict": false,
-      "version": "1.0.0",
+      "version": "1.0.1",
       "category": "productivity",
       "keywords": ["communication", "async", "messaging", "slack", "tickets", "code-review", "anti-patterns"],
-      "skills": ["./skills/communicate-well"]
+      "skills": ["./skills/communication"]
     },
     {
       "name": "cmux",

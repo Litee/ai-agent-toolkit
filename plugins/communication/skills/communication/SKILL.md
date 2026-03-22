@@ -1,5 +1,5 @@
 ---
-name: communicate-well
+name: communication
 description: "This skill should be used before composing any outbound message across any async channel — chat (Slack-like), tickets, code reviews, or similar. Use when posting updates, commenting on tickets, writing code review feedback, acknowledging instructions, deciding message frequency, structuring status updates, or following signing conventions. Triggers on 'post a message', 'add a comment', 'reply to', 'write a comment', 'communicate with', 'message style', 'how should I write', 'notify', 'message frequency', 'signing convention', 'thread etiquette', 'notification fatigue', 'what to write in a ticket comment', or any request involving outbound communication."
 ---
 
