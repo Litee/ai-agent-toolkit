@@ -54,7 +54,7 @@ Each plugin installs a skill that extends Claude's capabilities:
 | `file-system-tools` | developer-tools | Free disk space by cleaning development caches, IDE artefacts, and Docker resources. Scan for bloat directories (node_modules, virtual environments, build caches) |
 | `generate-image` | user | Image generation using Amazon Nova Canvas on AWS Bedrock |
 | `manage-anki-flashcards` | productivity | Anki flashcard management through AnkiConnect API |
-| `manage-obsidian-vault` | productivity | Obsidian vault note management via CLI for knowledge management workflows |
+| `manage-obsidian-vault` (`use-obsidian-cli`, `use-obsidian-markdown`, `manage-personal-knowledge-in-obsidian`) | productivity | Three skills: Obsidian CLI operations (CRUD, search, tags, properties, daily notes, templates, tasks); Obsidian Flavored Markdown syntax (wikilinks, embeds, callouts, properties, math, Mermaid); personal knowledge management methodology (atomic notes, PKM workflows, vault health) |
 | `ml-system-design-interviewer` | productivity | ML System Design interview framework for Principal/Staff-level candidates |
 | `podcast-generation` | user | AI-powered podcast script generation and audio synthesis using AWS TTS |
 | `protect-file-system-access` | developer-tools | PreToolUse hook blocking direct edits to AWS credentials, SSH keys, shell profiles, and lockfiles |
