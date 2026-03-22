@@ -114,7 +114,7 @@
       "version": "1.0.1",
       "category": "productivity",
       "keywords": ["communication", "async", "messaging", "slack", "tickets", "code-review", "anti-patterns"],
-      "skills": ["./skills/communication"]
+      "skills": ["./skills/communicate-well"]
     },
     {
       "name": "cmux",
