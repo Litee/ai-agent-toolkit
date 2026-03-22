@@ -79,10 +79,10 @@
     },
     {
       "name": "status-line",
-      "description": "This plugin configures Claude Code to use a rich statusline script that displays context usage, token counts, cost, model ID, git branch, and working directory. A SessionStart hook checks if the statusline is already configured and updates user-level settings if not.",
+      "description": "This plugin configures Claude Code to use a rich statusline script that displays context usage, token counts, cost, session duration, model ID, git branch, and working directory. A SessionStart hook checks if the statusline is already configured and updates user-level settings if not.",
       "source": "./plugins/status-line",
       "strict": false,
-      "version": "1.0.0",
+      "version": "1.0.1",
       "category": "developer-tools",
       "keywords": ["statusline", "status", "context", "tokens", "cost", "git"]
     },

@@ -87,6 +87,18 @@ function buildCwd(data) {
   return parts.map((p, i) => i < parts.length - 3 ? (p === '' ? '' : p[0]) : p).join('/');
 }
 
+function buildDuration(data) {
+  const ms = data.cost?.total_duration_ms;
+  if (ms == null) return '';
+  const totalSec = Math.floor(ms / 1000);
+  if (totalSec < 60) return `${totalSec}s`;
+  const hours = Math.floor(totalSec / 3600);
+  const minutes = Math.floor((totalSec % 3600) / 60);
+  const seconds = totalSec % 60;
+  if (hours > 0) return `${hours}h ${minutes}m`;
+  return `${minutes}m ${seconds}s`;
+}
+
 
 let input = '';
 process.stdin.setEncoding('utf8');
@@ -98,6 +110,7 @@ process.stdin.on('end', () => {
       buildContextText(data),
       buildTokenCounts(data),
       buildCost(data),
+      buildDuration(data),
       buildModel(data),
       buildGitBranch(data),
       buildCwd(data),
