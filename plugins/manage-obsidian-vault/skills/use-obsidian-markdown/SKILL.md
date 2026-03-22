@@ -253,18 +253,6 @@ Obsidian extends standard Markdown checkboxes with custom statuses:
 
 ---
 
-## Query Blocks
-
-Embed dynamic search results using a `query` code block:
-
-````
-```query
-tag:#project status:done
-```
-````
-
----
-
 ## Example Note
 
 ```markdown

@@ -127,11 +127,7 @@ obsidian read file="Redis Cache Invalidation Strategies"
 obsidian backlinks file="Cache Patterns"
 ```
 
-For content with wikilinks (`[[...]]`), use single quotes around the content argument to prevent shell interpretation:
-
-```bash
-obsidian create name="My Note" content='# Title\n\nSee [[Related Note]] for context.'
-```
+For shell escaping rules when content contains wikilinks or special characters, see the `use-obsidian-cli` skill.
 
 ### Workflow 2: Capturing Quick Ideas via Daily Notes
 
