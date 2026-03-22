@@ -58,9 +58,9 @@ loop:
         interval = min(interval * 2, MAX)
 ```
 
-**Session-resume backoff** — when re-registering a watcher after a session restart, choose the initial interval based on time since last activity:
+**Session-resume backoff** — when re-registering a watcher after a session restart, choose the initial interval based on time since last activity on the channel (query the channel live to determine this):
 
-| Time since last activity | Use interval |
+| Time since last activity on channel | Use interval |
 |---|---|
 | < 30 min | BASE |
 | 30 min – 2h | BASE * 10 |
@@ -123,7 +123,7 @@ Use this template for each channel type. Fill in values at creation time; embed 
 ```
 Check [CHANNEL_TYPE] [IDENTIFIER] for new activity.
 Baseline: [COUNT/STATE]. Current interval: [INTERVAL_MIN] min.
-Last activity: [LAST_ACTIVITY_ISO]. Last check: [LAST_CHECK_ISO].
+Watch started: [WATCH_START_ISO]. Last activity: [LAST_ACTIVITY_ISO]. Last check: [LAST_CHECK_ISO].
 
 Print elapsed time:
   python3 -c "
@@ -148,6 +148,23 @@ If no change:
 ALWAYS embed current state and UTC time when re-creating the cron.
 Stop after 7 days total. Post stop-report to configured notification channel.
 ```
+
+---
+
+## Session Resume Recovery
+
+After a session restart, **both team agents and cron jobs are gone** — they do not survive session interruption. The only thing that persists is conversation history (possibly compressed).
+
+### Recovery steps
+
+1. **Recall from conversation history** what channels you were watching — channel IDs, ticket numbers, CR identifiers, etc.
+2. **Query each channel live** to determine current state (last message timestamp, comment count, approval status). The channel is the source of truth, not any saved watcher state.
+3. **Pick the initial polling interval** using the session-resume backoff table above, based on time since last activity on the channel.
+4. **Re-spawn watcher agents** with fresh baseline state derived from step 2. Pass the channel identifier, current state, and watch start time (from conversation history if available) as context.
+
+### If context is too compressed to recall watchers
+
+Post a message to the configured notification channel asking for confirmation of what was being watched before proceeding to re-spawn.
 
 ---
 
