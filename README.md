@@ -48,7 +48,7 @@ Each plugin installs a skill that extends Claude's capabilities:
 | `aws-documentation` | developer-tools | AWS CDK expert guidance and official AWS documentation search via MCP servers |
 | `aws-query-tools` | developer-tools | AWS Athena SQL queries and CloudWatch Log Insights with query optimization, CTE patterns, and real-time progress tracking |
 | `cmux` (`use-cmux`) | developer-tools | Terminal multiplexer integration: orchestrate sessions, browser automation, progress reporting; SessionStart hook prints cmux context and LLM behavioural instructions when running inside cmux |
-| `communication` | productivity | AI agent async communication guidelines: value test, message style, frequency, anti-patterns, and channel-type rules for chat, tickets, and code reviews |
+| `communication` (`communicate-well`, `watch-communication-channels`) | productivity | Two skills: async communication guidelines (value test, message style, frequency, anti-patterns, channel-type rules); channel watcher framework (team agent architecture, exponential backoff, 7-day timeout, session-resume restoration via SessionStart hook) |
 | `convert-audio` | user | Audio format conversion using ffmpeg (MP3, WAV, AAC, FLAC, Opus, OGG), bitrate/speed adjustment, and metadata tagging (ID3 tags) |
 | `cron-restoration-guard` | developer-tools | SessionStart hook (resume only) that instructs the agent to verify and re-register any cron jobs from the previous session that are no longer active |
 | `file-system-tools` | developer-tools | Free disk space by cleaning development caches, IDE artefacts, and Docker resources. Scan for bloat directories (node_modules, virtual environments, build caches) |
