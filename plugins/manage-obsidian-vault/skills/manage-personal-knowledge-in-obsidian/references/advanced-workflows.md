@@ -1,6 +1,6 @@
 # Advanced Obsidian Workflows
 
-Load this file when the user needs template-based note creation, bulk property updates, vault health analysis, property management, or task management.
+Load this file when the user needs template-based note creation, bulk property updates, vault health analysis, property management, task management, or vault gardening.
 
 ## Workflow 5: Creating Notes from Templates
 
@@ -115,3 +115,92 @@ obsidian task file="Project Plan" line=8 done
 # Use task reference syntax
 obsidian task ref="Projects/Plan.md:8" toggle
 ```
+
+## Workflow 10: Vault Gardening Session
+
+Run periodically (weekly recommended) to maintain vault health and keep knowledge connected. Think of it as pruning a garden: remove dead growth, connect isolated nodes, and promote mature ideas.
+
+### Step 1: Health Snapshot
+
+```bash
+echo "=== Orphans ===" && obsidian orphans total
+echo "=== Dead Ends ===" && obsidian deadends total
+echo "=== Unresolved Links ===" && obsidian unresolved total
+echo "=== Top Tags ===" && obsidian tags counts sort=count | head -20
+echo "=== Total Notes ===" && obsidian vault info=files
+```
+
+### Step 2: Process Inbox
+
+Review notes in the Inbox/ folder (or however unsorted captures are stored). For each note, decide:
+- **Promote**: move to the permanent notes folder, add proper links and properties
+- **Archive**: move to Archive/ if no longer relevant
+- **Delete**: discard if it was a fleeting thought that no longer applies
+
+```bash
+# List all notes in Inbox
+obsidian files folder="Inbox"
+
+# Promote a note
+obsidian move file="Capture from Monday" to="Notes/"
+obsidian property:set name="status" value="permanent" type="text" file="Capture from Monday"
+
+# Archive a note
+obsidian move file="Old Idea" to="Archive/"
+```
+
+### Step 3: Connect Orphaned Notes
+
+Find notes nothing links to and integrate them into the knowledge graph:
+
+```bash
+obsidian orphans
+```
+
+For each orphan:
+- Add contextual wikilinks in existing related notes that should reference it
+- Add a Related Topics section to the orphan itself
+- If the orphan genuinely stands alone (e.g., a reference), leave it intentionally
+
+### Step 4: Review Draft Notes
+
+Find notes that have been sitting in draft status and decide their fate:
+
+```bash
+# Find all notes tagged with draft status
+obsidian tag name="status/draft" verbose
+```
+
+For each: promote to `permanent`, continue refining, or archive if stale.
+
+### Step 5: Tag Audit
+
+Spot tag sprawl and inconsistencies:
+
+```bash
+obsidian tags counts sort=count
+```
+
+- Tags used **fewer than 2 times**: candidates for removal or merge into an existing tag
+- Tags used **more than 50 times**: candidates for splitting into sub-tags (e.g., `#topic/programming` → `#topic/programming/python`)
+- **Synonym pairs**: look for tags like `#coding` and `#programming` that mean the same thing
+- **Orphan tags**: tags that appear in the tag list but were removed from notes
+
+Bulk-update a tag across the vault via property set on all matching notes:
+```bash
+# Find notes with an old tag and update them
+obsidian tag name="coding" format=json | jq -r '.[].path' | while read -r filepath; do
+  notename=$(basename "$filepath" .md)
+  obsidian property:set name="tags" value="programming" type="list" file="$notename"
+done
+```
+
+### Step 6: Random Note Review (Optional)
+
+Read a random note to resurface forgotten knowledge and check if it needs updating:
+
+```bash
+obsidian random:read
+```
+
+If the note is outdated, refine it. If it connects to something you're currently working on, add links.

@@ -7,7 +7,9 @@ description: Manage personal knowledge in Obsidian using atomic notes, linking s
 
 This skill provides opinionated guidance for building and maintaining a personal knowledge base in Obsidian. It assumes the `use-obsidian-cli` skill for CLI operations and `use-obsidian-markdown` for note content syntax.
 
-For advanced workflows (templates, bulk property updates, vault health analysis, task management), read `references/advanced-workflows.md`.
+Obsidian stores everything as plain Markdown files — notes outlive any app. Favor simplicity and portability over plugin-dependent workflows.
+
+For advanced workflows (templates, bulk property updates, vault health analysis, task management, vault gardening), read `references/advanced-workflows.md`.
 
 ---
 
@@ -16,23 +18,72 @@ For advanced workflows (templates, bulk property updates, vault health analysis,
 Each note should capture **one concept or idea**. Atomic notes are:
 - **Self-contained**: readable without requiring context from other notes
 - **Titled descriptively**: the note name should be a complete thought (not "Meeting 2024-03-01" but "Q1 Planning decisions and rationale")
-- **Concise**: if a note grows beyond 500 words, consider splitting into multiple linked notes
+- **Concise**: length follows from atomicity, not a word count target — a simple concept may be 2 sentences; a nuanced argument may be 5 paragraphs
 
 **Anti-patterns to avoid:**
 - "Dump notes" that accumulate everything about a broad topic
 - Date-based naming without content description (use daily notes for that)
 - Notes that are just lists with no synthesis
+- Notes that copy-paste source text without your own synthesis (quotes belong in reference/literature notes, not permanent knowledge cards)
+
+---
+
+## Card Structure
+
+A well-formed knowledge card follows this anatomy:
+
+1. **Opening definition** (1-2 sentences of prose before any `##` header): state the concept directly in your own words. This should be self-contained — readable without clicking any links.
+
+2. **Body**: use `##` for major sections. Use **bold text** for lightweight sub-groupings within a section; reserve `###` for sub-sections substantial enough to warrant their own anchor.
+
+3. **Related Topics** (at the end): each entry is a wikilink followed by ` - ` and a one-sentence explanation of the relationship.
+
+**Example card:**
+
+```markdown
+Consistent hashing distributes keys across a virtual ring of nodes, minimizing key reassignment when the cluster size changes.
+
+## How It Works
+- Each node occupies one or more positions on a hash ring
+- A key hashes to a position and is assigned to the next clockwise node
+- **Virtual nodes:** each physical node maps to multiple ring positions for more even load distribution
+
+## Trade-offs
+- Outperforms modular hashing for dynamic clusters (fewer keys migrate on node changes)
+- Without virtual nodes, load distribution can still be uneven
+
+## Related Topics
+- [[Hash Functions]] - Consistent hashing depends on uniform hash distribution across the ring
+- [[Distributed Caching]] - Primary use case; consistent hashing enables cache cluster scaling without full resharding
+- [[CAP Theorem]] - Informs the availability vs consistency choices in ring-based designs
+```
+
+**Formatting rules:**
+- Distill insights into your own voice — no standalone source attributions ("Author X says..." or "According to Book Y...")
+- No empty lines between bullet points to limit vertical size
+- Default to minimalistic cards; expand only when the idea genuinely requires it
+- Use Title Case for note names in wikilinks: `[[Binary-to-Text Encoding]]`
+- Use pipe syntax when display text differs from the canonical name: `[[Consistent Hashing|consistent hashing]]`
 
 ---
 
 ## Linking Strategy
 
-Links between notes are the core value of Obsidian. Use `[[wikilinks]]` liberally in note content.
+Links between notes are the core value of Obsidian. Two complementary types:
 
-**When to link:**
-- Reference any concept that has its own note
-- Link supporting evidence to claim notes
-- Link examples to principle notes
+**Contextual links** (inline in prose): the strongest form — surrounding text explains *why* the connection exists:
+> "This builds on [[First Principles Thinking]] by applying decomposition at the system boundary."
+
+**Related Topics** (at card bottom): for conceptually adjacent notes that don't fit naturally in prose. Always annotate each link — a bare link list offers no more value than a search result.
+
+**Virtual links**: link freely to notes that don't exist yet. Unresolved links appear in Obsidian's graph view and signal future cards to create. It is normal to have some unresolved links.
+
+**Quality over quantity**: before creating a link, ask "would this note be useful in the target's backlink panel?" If a term appears in hundreds of notes, linking it everywhere adds noise, not signal. Don't link generic terms that lack their own meaningful note.
+
+**Wikilink naming conventions:**
+- Use Title Case canonical names: `[[Binary-to-Text Encoding]]`
+- Use pipe syntax for display text: `[[Consistent Hashing|consistent hashing]]`
+- Cap Related Topics links at ~5-7 entries; if more are needed, the cluster may warrant a dedicated index note
 
 **Maintaining graph health:**
 ```bash
@@ -49,7 +100,7 @@ obsidian unresolved
 obsidian backlinks file="Core Concept" counts
 ```
 
-Run vault health checks periodically (see Workflow 7 in `references/advanced-workflows.md`) to keep the knowledge graph connected.
+Run vault health checks periodically (see Workflow 7 and 10 in `references/advanced-workflows.md`) to keep the knowledge graph connected.
 
 ---
 
@@ -60,14 +111,20 @@ Use **hierarchical tags** for classification: `#topic/subtopic` (e.g., `#program
 **Principles:**
 - Tags classify what a note *is*; links express how notes *relate*
 - Keep tag vocabulary controlled — audit with `obsidian tags counts sort=count`
-- Common tag namespaces: `#type/` (concept, reference, project, person), `#status/` (draft, review, permanent), `#topic/` (subject area)
+- Only add tags you will actually filter or query on — avoid completionist tagging
 - Avoid excessive tags — 3-5 per note is usually sufficient
+
+**Recommended tag namespaces:**
+- `#type/` — concept, reference, project, person, decision, question
+- `#status/` — draft, review, permanent
+- `#topic/` — subject area (max 2 levels: `#topic/programming/python`)
+- `#source/` — book, article, video, podcast, conversation
 
 ---
 
 ## Folder Organization
 
-Use folders for **broad categories**, not fine-grained topics. Topics are expressed through tags and links.
+Use folders for **broad categories**, not fine-grained topics. Topics are expressed through tags and links. Keep folder hierarchies **shallow** — max 2 levels deep. Beyond that, use tags.
 
 Common vault structures:
 - **PARA**: Projects/, Areas/, Resources/, Archive/
@@ -191,7 +248,7 @@ for note in "Old Note 1" "Old Note 2" "Old Note 3"; do
 done
 ```
 
-### Workflows 5–9: Templates, Bulk Updates, Health Analysis, Properties, Tasks
+### Workflows 5–10: Templates, Bulk Updates, Health Analysis, Properties, Tasks, Gardening
 
 For these advanced workflows, load `references/advanced-workflows.md`. Quick reference:
 
@@ -202,3 +259,33 @@ obsidian orphans total                          # count isolated notes
 obsidian unresolved total                       # count broken links
 obsidian properties counts sort=count          # all property names with counts
 ```
+
+---
+
+## AI-Assisted PKM Workflows
+
+When managing the vault as an AI agent, use these patterns:
+
+**Link suggestion**: after creating a note, search for related notes and suggest contextual links or Related Topics entries:
+```bash
+# Search for notes related to a new concept
+obsidian search query="cache invalidation"
+obsidian search query="distributed systems"
+```
+
+**Summary extraction**: distill daily note content into standalone knowledge cards. Read the daily note, identify distinct concepts, create a card per concept using Workflow 1.
+
+**Vault analysis**: periodically surface problems for the user to address:
+```bash
+obsidian orphans total        # isolated notes needing links
+obsidian deadends total       # stub notes needing outgoing links
+obsidian unresolved total     # broken links needing resolution
+obsidian tags counts sort=count  # tag sprawl / inconsistencies
+```
+
+**Gap analysis**: after creating a note, check which linked notes don't exist yet and flag them as candidates for future cards:
+```bash
+obsidian unresolved verbose   # shows which notes have broken outgoing links
+```
+
+For a complete periodic gardening workflow, see Workflow 10 in `references/advanced-workflows.md`.
