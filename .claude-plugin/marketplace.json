@@ -5,7 +5,8 @@
   },
   "metadata": {
     "description": "Collection of AI agent skills for AWS CDK development, AWS documentation search, AWS querying (Athena, CloudWatch), Anki flashcard management, Obsidian vault management, audio conversion, podcast generation, safe terminal command registration, image generation, and ML system design interviews",
-    "version": "1.1.11",
+
+    "version": "1.1.12",
     "homepage": "https://github.com/Litee/ai-agent-toolkit"
   },
   "plugins": [
@@ -60,13 +61,13 @@
     },
     {
       "name": "aws-query-tools",
-      "description": "This plugin contains skills for querying AWS data sources including Athena SQL queries with S3 result download, parallel execution, and CTE optimization, as well as CloudWatch Log Insights queries with real-time progress tracking and flexible time handling.",
+      "description": "This plugin contains skills for querying AWS data sources: Athena SQL queries with S3 result download, parallel execution, and CTE optimization; CloudWatch Log Insights queries with real-time progress tracking; and Glue job monitoring with visible cmux split output, CloudWatch metrics (CPU, heap, records, executors), smart cross-workspace surface discovery, and state-change keystroke notifications.",
       "source": "./plugins/aws-query-tools",
       "strict": false,
-      "version": "1.0.4",
+      "version": "1.1.0",
       "category": "developer-tools",
-      "keywords": ["aws", "athena", "sql", "query", "s3", "cloudwatch", "logs", "log-insights", "monitoring"],
-      "skills": ["./skills/query-aws-athena", "./skills/query-aws-cloudwatch-logs-insights"]
+      "keywords": ["aws", "athena", "sql", "query", "s3", "cloudwatch", "logs", "log-insights", "monitoring", "glue", "etl"],
+      "skills": ["./skills/query-aws-athena", "./skills/query-aws-cloudwatch-logs-insights", "./skills/query-aws-glue"]
     },
     {
       "name": "protect-file-system-access",

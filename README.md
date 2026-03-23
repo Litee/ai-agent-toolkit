@@ -47,7 +47,7 @@ Each plugin installs a skill that extends Claude's capabilities:
 | Plugin (Skill) | Category | Description |
 |--------|----------|-------------|
 | `aws-documentation` | developer-tools | AWS CDK expert guidance and official AWS documentation search via MCP servers |
-| `aws-query-tools` | developer-tools | AWS Athena SQL queries and CloudWatch Log Insights with query optimization, CTE patterns, and real-time progress tracking |
+| `aws-query-tools` (`query-aws-athena`, `query-aws-cloudwatch-logs-insights`, `query-aws-glue`) | developer-tools | AWS Athena SQL queries with S3 download and CTE optimization; CloudWatch Log Insights with real-time progress tracking; Glue job monitoring with background state-change notifications via cmux keystroke injection or team agent polling |
 | `cmux` (`use-cmux`) | developer-tools | Terminal multiplexer integration: orchestrate sessions, browser automation, progress reporting; SessionStart hook prints cmux context and LLM behavioural instructions when running inside cmux |
 | `communication` (`communicate-well`, `watch-communication-channels`) | productivity | Two skills: async communication guidelines (value test, message style, frequency, anti-patterns, channel-type rules); channel watcher framework (team agent architecture, exponential backoff, 7-day timeout, session-resume restoration via SessionStart hook) |
 | `convert-audio` | user | Audio format conversion using ffmpeg (MP3, WAV, AAC, FLAC, Opus, OGG), bitrate/speed adjustment, and metadata tagging (ID3 tags) |
