@@ -37,6 +37,7 @@ These skills can be installed as plugins in Claude Code.
 /plugin install aws-query-tools@litee-claude-code-plugins
 /plugin install register-safe-terminal-commands@litee-claude-code-plugins
 /plugin install status-line@litee-claude-code-plugins
+/plugin install writing@litee-claude-code-plugins
 ```
 
 ### Available Plugins
@@ -60,5 +61,6 @@ Each plugin installs a skill that extends Claude's capabilities:
 | `protect-file-system-access` | developer-tools | PreToolUse hook blocking direct edits to AWS credentials, SSH keys, shell profiles, and lockfiles |
 | `register-safe-terminal-commands` | developer-tools | SessionStart hook that auto-syncs safe terminal commands to Claude Code settings; skill available for manual dry-run/verbose sync |
 | `status-line` | developer-tools | SessionStart hook that configures Claude Code statusline to display context usage, token counts, cost, model ID, git branch, and working directory |
+| `writing` (`write-well`) | productivity | Universal writing quality skill: clarity, structure, conciseness, persuasion, AI writing hygiene, editing checklists, and format-aware guidance for design docs, RFCs, emails, postmortems, and status updates |
 
 **Note:** Each plugin may have additional dependencies. Check the individual [skill documentation](skills/) for prerequisites and detailed usage instructions.

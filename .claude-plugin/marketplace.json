@@ -5,7 +5,7 @@
   },
   "metadata": {
     "description": "Collection of AI agent skills for AWS CDK development, AWS documentation search, AWS querying (Athena, CloudWatch), Anki flashcard management, Obsidian vault management, audio conversion, podcast generation, safe terminal command registration, image generation, and ML system design interviews",
-    "version": "1.1.10",
+    "version": "1.1.11",
     "homepage": "https://github.com/Litee/ai-agent-toolkit"
   },
   "plugins": [
@@ -91,7 +91,7 @@
       "description": "This plugin auto-syncs safe terminal commands to Claude Code settings on session start, and contains a skill for manual sync with dry-run and verbose options. Use when configuring which bash commands Claude Code can execute without requiring approval.",
       "source": "./plugins/register-safe-terminal-commands",
       "strict": false,
-      "version": "1.1.2",
+      "version": "1.1.3",
       "category": "developer-tools",
       "keywords": ["terminal", "bash", "permissions", "safety"],
       "skills": ["./skills/register-safe-terminal-commands"]
@@ -145,6 +145,16 @@
       "category": "user",
       "keywords": ["aws", "bedrock", "nova-canvas", "image-generation", "text-to-image", "ai-art"],
       "skills": ["./skills/generate-image"]
+    },
+    {
+      "name": "writing",
+      "description": "Universal writing quality skill for professional documents. Covers clarity, structure, conciseness, persuasion, AI writing hygiene, editing checklists, and format-aware guidance for design docs, RFCs, emails, postmortems, and status updates.",
+      "source": "./plugins/writing",
+      "strict": false,
+      "version": "1.0.0",
+      "category": "productivity",
+      "keywords": ["writing", "editing", "clarity", "concise", "style", "document", "draft", "proofread", "rewrite", "structure", "RFC", "design doc", "postmortem", "email", "proposal"],
+      "skills": ["./skills/write-well"]
     },
     {
       "name": "ml-system-design-interviewer",
