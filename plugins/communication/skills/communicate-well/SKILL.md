@@ -30,6 +30,8 @@ If any of 1–4 is "no" — stay silent, update a field, write to a log, or add 
 
 "First in chain" means the first message in a new conversation, thread, or ticket — not the first message ever posted.
 
+Platforms increasingly require AI-generated content to be disclosed. Treat this as a compliance obligation that will only get stricter, not a courtesy.
+
 ---
 
 ## Message Style
@@ -41,12 +43,16 @@ If any of 1–4 is "no" — stay silent, update a field, write to a log, or add 
 - **Attribute, don't rephrase.** When another participant has already answered, reference them directly rather than paraphrasing.
 - **Identify yourself.** Make clear which bot/system/workflow is speaking; never post without context about what triggered the message.
 - **Recap policy:** Short recap is OK if >7 days have passed and communicators may have forgotten context. Otherwise, don't recap what's already visible.
+- **Sync vs async**: These rules assume asynchronous channels. In synchronous/interactive contexts (bot DMs, slash commands), silence signals failure — provide intermediate status ("reading...", "analyzing...") when processing takes >3 seconds.
 
 ---
 
 ## Message Frequency
 
-**Default to silence.** Every message competes for the reader's attention.
+**Default to silence.** Not all channels are equally disruptive. A page or @-mention forces an immediate context switch; a channel post sits until the reader chooses to look. Calibrate urgency to the channel's interruption level:
+- **High disruption** (pages, DMs, @-mentions): reserve for genuinely blocking items
+- **Medium disruption** (channel posts): default for task updates and results
+- **Low disruption** (reactions, field updates, log entries): preferred for acknowledgements and status changes
 
 - Post at most **two messages per task**: one on start (if the request wasn't already acknowledged with 👍) and one with the final result.
 - Post mid-task **only if:**
@@ -96,6 +102,11 @@ A noisy agent is **worse than no agent at all** — without the agent, humans re
 | **Missing Identity** | Messages that don't identify themselves as automated | Always prefix with 🤖 and system context |
 | **Tombstone** | "No issues found" / "All checks passed" comments when there's nothing to report | Say nothing |
 | **Ghost Commit** | Editing a comment to change factual content without acknowledgment | Put true info first, strikethrough the false block |
+| **Epistemic Overreach** | Answering what was asked, then volunteering recommendations or conclusions that exceed the agent's actual knowledge of the situation. Knowing one facet (your own processes, your own access, your own changes) does not qualify the agent to advise on the whole. | Constrain the response to what you actually know. If the scope of your knowledge is limited, say so — do not fill the gap with assumptions or recommendations. |
+| **Death of a Thousand Round Trips** | Revealing issues one at a time across multiple cycles instead of all at once | Surface all findings in a single pass |
+| **The Ransom Note** | Holding approval hostage until unrelated improvements are made | Separate must-fix from nice-to-have; approve with follow-up items |
+| **Priority Inversion** | Blocking on style nits while missing a logic bug | Review for correctness first, style last; automate style enforcement |
+| **The Swarm** | Multiple agents sending overlapping notifications about the same event | Coordinate across agents; deduplicate before sending |
 
 ---
 
@@ -117,6 +128,7 @@ A noisy agent is **worse than no agent at all** — without the agent, humans re
 - **Update fields instead of commenting** for machine-readable state changes. Field changes can be configured to suppress notifications.
 - **Batch comments.** At least 15–30 minutes between automated comments on the same ticket (unless critical/blocking).
 - **Don't edit comments for status changes.** For factual corrections only: put true information first, then ~~strikethrough the false block~~.
+- **Timestamp factual assertions.** When stating system state ("the API returns 500"), include the observation time. Facts go stale; undated assertions mislead future readers.
 - **One status transition = one comment max.** The transition itself is visible in history; the comment should add only context not already visible.
 - **No state bouncing.** Don't flip a ticket back and forth rapidly; add debounce logic.
 - **Wait for explicit instruction before resolving or downgrading.** Do NOT close or lower the severity of a ticket unless the system owner or user explicitly asks.
@@ -137,6 +149,9 @@ A noisy agent is **worse than no agent at all** — without the agent, humans re
 - **Provide the fix, not just the finding.** ~80% auto-fix coverage is the gold standard.
 - **If no actionable findings: post nothing.** "No issues found" is noise.
 - **Keep AI comments minimal** so they complement, not replace, human discussion. Concise comments are significantly more likely to be acted on than verbose ones.
+- **Use structured comment labels** when intent isn't obvious from context. Prefix with `suggestion:`, `issue:`, `nitpick:`, `question:`, or `praise:` — and mark `(blocking)` or `(non-blocking)` to set expectations. See [Conventional Comments](https://conventionalcomments.org/).
+- **Target <1% false positive rate.** Noisy findings erode trust faster than missed ones. Encode team-specific patterns rather than generic advice.
+- **Don't block on personal preferences.** Distinguish "I would do it differently" from "This has a bug." If a linter can enforce it, don't comment on it.
 - When replying to a comment on your own CR, nudge the comment author in chat separately.
 
 **Nudging reviewers for approvals:**
