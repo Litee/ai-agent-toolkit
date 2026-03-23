@@ -83,10 +83,13 @@ def extract_bash_commands_from_settings(settings_data: dict) -> set[str]:
     allow_list = permissions.get('allow', [])
 
     for permission in allow_list:
-        if isinstance(permission, str) and permission.startswith('Bash(') and permission.endswith(':*)'):
-            # Extract command from "Bash(command:*)" format
-            command = permission[5:-3]  # Remove "Bash(" prefix and ":*)" suffix
-            bash_commands.add(command)
+        if isinstance(permission, str) and permission.startswith('Bash('):
+            if permission.endswith(' *)'):
+                command = permission[5:-3]  # Remove "Bash(" prefix and " *)" suffix
+                bash_commands.add(command)
+            elif permission.endswith(':*)'):
+                command = permission[5:-3]  # Remove "Bash(" prefix and ":*)" suffix (deprecated format)
+                bash_commands.add(command)
 
     return bash_commands
 
@@ -99,7 +102,7 @@ def add_bash_command_to_settings(settings_data: dict, command: str) -> None:
     if 'allow' not in settings_data['permissions']:
         settings_data['permissions']['allow'] = []
 
-    bash_permission = f"Bash({command}:*)"
+    bash_permission = f"Bash({command} *)"
     if bash_permission not in settings_data['permissions']['allow']:
         settings_data['permissions']['allow'].append(bash_permission)
 

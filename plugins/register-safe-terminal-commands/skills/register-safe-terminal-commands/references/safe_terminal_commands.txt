@@ -176,6 +176,7 @@ aws cloudwatch list-metric-streams
 aws cloudwatch list-metrics
 aws cloudwatch list-tags-for-resource
 aws configure get
+aws configure list-profiles
 aws dynamodb batch-get-item
 aws dynamodb describe-backup
 aws dynamodb describe-continuous-backups
@@ -823,21 +824,71 @@ find
 free
 gcc --version
 git --version
+git -C * blame
+git -C * branch -a
+git -C * branch -r
+git -C * cat-file
+git -C * check-ignore
+git -C * cherry
+git -C * config --get
+git -C * config --list
+git -C * count-objects
+git -C * describe
+git -C * diff
+git -C * fetch
+git -C * for-each-ref
+git -C * log
+git -C * ls-files
+git -C * ls-remote
+git -C * ls-tree
+git -C * merge-base
+git -C * name-rev
+git -C * reflog
+git -C * remote -v
+git -C * rev-parse
+git -C * shortlog
+git -C * show
+git -C * stash list
+git -C * stash show
+git -C * status
+git -C * tag
+git -C * verify-commit
+git -C * verify-tag
+git -C * worktree list
+git -C * worktree prune
 git blame
 git branch -a
 git branch -r
+git cat-file
+git check-ignore
+git cherry
 git config --get
 git config --list
+git count-objects
+git describe
 git diff
 git fetch
+git for-each-ref
 git log
 git ls-files
+git ls-remote
+git ls-tree
+git merge-base
+git name-rev
 git reflog
 git remote -v
 git rev-parse
+git shortlog
 git show
+git stash list
+git stash show
 git status
 git tag
+git verify-commit
+git verify-tag
+git worktree add
+git worktree list
+git worktree prune
 gradle --version
 grep
 gunzip
