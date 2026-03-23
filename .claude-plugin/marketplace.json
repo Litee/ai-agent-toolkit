@@ -111,7 +111,7 @@
       "description": "This plugin contains skills for AI agents communicating through asynchronous channels. Covers message value test, signing conventions, message style, frequency, epistemic responsibility, anti-patterns, and channel-type guidelines. Also includes a channel watcher skill for monitoring chat threads, tickets, and code reviews with team agent architecture, exponential backoff, and session-resume restoration via a SessionStart hook.",
       "source": "./plugins/communication",
       "strict": false,
-      "version": "1.0.5",
+      "version": "1.0.6",
       "category": "productivity",
       "keywords": ["communication", "async", "messaging", "slack", "tickets", "code-review", "anti-patterns", "watcher", "polling", "backoff"],
       "skills": ["./skills/communicate-well", "./skills/watch-communication-channels"]
