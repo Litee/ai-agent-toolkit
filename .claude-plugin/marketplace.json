@@ -64,7 +64,7 @@
       "description": "This plugin contains skills for querying AWS data sources: Athena SQL queries with S3 result download, parallel execution, and CTE optimization; CloudWatch Log Insights queries with real-time progress tracking; and Glue job monitoring with visible cmux split output, CloudWatch metrics (CPU, heap, records, executors), smart cross-workspace surface discovery, and state-change keystroke notifications.",
       "source": "./plugins/aws-query-tools",
       "strict": false,
-      "version": "1.1.2",
+      "version": "1.1.3",
       "category": "developer-tools",
       "keywords": ["aws", "athena", "sql", "query", "s3", "cloudwatch", "logs", "log-insights", "monitoring", "glue", "etl"],
       "skills": ["./skills/query-aws-athena", "./skills/query-aws-cloudwatch-logs-insights", "./skills/monitor-aws-glue-job"]

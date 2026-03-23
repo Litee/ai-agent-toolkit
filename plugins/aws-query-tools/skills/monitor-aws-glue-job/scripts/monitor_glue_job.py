@@ -102,10 +102,12 @@ class GlueJobClient:
         except client.exceptions.EntityNotFoundException:
             # GetJobRun can return EntityNotFoundException for runs on jobs that were
             # deleted and recreated with the same name. GetJobRuns is not affected.
-            runs = client.get_job_runs(JobName=job_name)['JobRuns']
-            for run in runs:
-                if run['Id'] == run_id:
-                    return run
+            # Must paginate — first page may only contain runs from old job definitions.
+            paginator = client.get_paginator('get_job_runs')
+            for page in paginator.paginate(JobName=job_name):
+                for run in page['JobRuns']:
+                    if run['Id'] == run_id:
+                        return run
             raise  # truly not found
 
 
