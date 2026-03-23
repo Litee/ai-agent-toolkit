@@ -16,10 +16,10 @@ import os
 import re
 import json
 import fcntl
-import shutil
 import argparse
 from pathlib import Path
 from dataclasses import dataclass, field
+from typing import IO, Optional
 
 
 VERSION_PATH_RE = re.compile(r'/plugins/cache/([^/]+)/([^/]+)/([^/]+)/')
@@ -30,7 +30,7 @@ class UpdateReport:
     """Report of permission entries added during the update."""
     # Maps (marketplace, plugin_name): list of (old_version, new_version) tuples
     added: dict = field(default_factory=dict)
-    status_line_updated: tuple = field(default=None)  # (old_version, new_version, plugin_key)
+    status_line_updated: Optional[tuple] = field(default=None)  # (old_version, new_version, plugin_key)
 
     @property
     def total_added(self) -> int:
@@ -82,7 +82,7 @@ def build_version_map(installed_plugins_path: Path) -> dict:
         return version_map
 
     plugins = data.get('plugins', {})
-    for plugin_key, entries in plugins.items():
+    for entries in plugins.values():
         if not isinstance(entries, list):
             continue
         for entry in entries:
@@ -116,7 +116,7 @@ def parse_semver(version_str: str):
         return None
 
 
-def get_latest_version(entries: list) -> str:
+def get_latest_version(entries: list) -> Optional[str]:
     """
     Given a list of install entries (each with 'version' and 'lastUpdated'),
     return the version string of the latest one.
@@ -131,7 +131,8 @@ def get_latest_version(entries: list) -> str:
     # Try semver comparison
     semver_entries = [(parse_semver(e['version']), e) for e in entries]
     if all(sv is not None for sv, _ in semver_entries):
-        best = max(semver_entries, key=lambda x: x[0])
+        # All versions are valid semver — safe to cast since we checked above
+        best = max(semver_entries, key=lambda x: x[0] or ())
         return best[1]['version']
 
     # Fall back to lastUpdated
@@ -226,7 +227,7 @@ def update_status_line(settings_data: dict, version_map: dict, report: UpdateRep
     return True
 
 
-def acquire_lock(lock_file_path: Path, timeout_seconds: float = 2.0) -> object:
+def acquire_lock(lock_file_path: Path, timeout_seconds: float = 2.0) -> Optional[IO[str]]:
     """
     Acquire an exclusive flock on the lock file, with a timeout.
     Returns the open file object if successful, None if timed out.
