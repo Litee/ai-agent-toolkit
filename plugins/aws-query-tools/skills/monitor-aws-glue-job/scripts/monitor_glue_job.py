@@ -96,8 +96,17 @@ class GlueJobClient:
 
     def get_job_run(self, job_name: str, run_id: str) -> dict:
         """Fetch current job run details. Recreates session each call for credential refresh."""
-        response = self._client().get_job_run(JobName=job_name, RunId=run_id)
-        return response['JobRun']
+        client = self._client()
+        try:
+            return client.get_job_run(JobName=job_name, RunId=run_id)['JobRun']
+        except client.exceptions.EntityNotFoundException:
+            # GetJobRun can return EntityNotFoundException for runs on jobs that were
+            # deleted and recreated with the same name. GetJobRuns is not affected.
+            runs = client.get_job_runs(JobName=job_name)['JobRuns']
+            for run in runs:
+                if run['Id'] == run_id:
+                    return run
+            raise  # truly not found
 
 
 # ---------------------------------------------------------------------------
@@ -626,6 +635,7 @@ class GlueJobMonitor:
 
         previous_state = None
         consecutive_credential_errors = 0
+        consecutive_poll_errors = 0
         printed_summary = False
         num_workers = 0
 
@@ -648,6 +658,7 @@ class GlueJobMonitor:
             try:
                 run = self.client.get_job_run(job_name, run_id)
                 consecutive_credential_errors = 0
+                consecutive_poll_errors = 0
             except Exception as e:
                 err_str = str(e)
                 if 'ExpiredToken' in err_str or 'InvalidClientTokenId' in err_str:
@@ -665,7 +676,17 @@ class GlueJobMonitor:
                     time.sleep(30)
                     continue
                 else:
-                    print(f"[{ts()}] WARN: Poll error (will retry): {e}", flush=True)
+                    consecutive_poll_errors += 1
+                    print(f"[{ts()}] WARN: Poll error #{consecutive_poll_errors} (will retry): {e}", flush=True)
+                    if consecutive_poll_errors >= 3:
+                        msg = (
+                            f"Glue watcher: '{job_name}' ({run_id}) — POLL ERROR after "
+                            f"{consecutive_poll_errors} consecutive failures.\n"
+                            f"Last error: {e}\n"
+                            f"Monitor is retrying but may need intervention."
+                        )
+                        self.bridge.send_to_claude(msg)
+                        consecutive_poll_errors = 0  # reset after surfacing, keep retrying
                     time.sleep(self.poll_interval)
                     continue
 

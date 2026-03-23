@@ -224,3 +224,11 @@ For the markdown-to-HTML conversion script, use `${SKILL_DIR}/scripts/md-to-html
 - **Don't use focus/select commands** (`select-workspace`, `focus-pane`, etc.) unless the user explicitly asked — don't steal focus
 - **Clean up when done** — close surfaces and workspaces you created
 - **Use `identify --json` first** to understand your current context before creating new terminals
+
+## Known Gotchas
+
+- **`new-surface` and `new-pane --type terminal` create non-functional surfaces.** Surfaces created with these commands show as `[terminal]` in `cmux tree` but reject `cmux send` and `cmux read-screen` with `Error: invalid_params: Surface is not a terminal`. Use `cmux new-split <direction>` instead — it creates a usable terminal split within an existing pane.
+- **`new-split` without `--workspace` creates the split in the focused workspace, not the caller's.** Always pass `--workspace <caller.workspace_ref>` to pin the split to the correct workspace: `cmux new-split right --workspace workspace:9`. Additionally, if the workspace is not currently focused, the resulting split is non-interactive — run `cmux select-workspace --workspace workspace:9` first.
+- **Smart split placement:** Use `right` when the workspace has a single pane; use `down --surface <last-non-CC-surface>` when it already has a horizontal split, to stack new panels vertically on the right rather than creating a cramped third column. The `watch_issues.py create-split` subcommand implements this automatically.
+- **`send` without `--workspace` fails for non-focused workspaces.** Always pass both flags together: `cmux send --surface surface:N --workspace workspace:W 'text'`. The positional form `cmux send surface:N 'text'` fails with `Surface is not a terminal` when the surface is not in the focused workspace.
+- **`send-key` ctrl key names:** Use lowercase with hyphen: `ctrl-c`, `ctrl-l`. Capital `C-c` is not recognised. `enter` and `Return` are both valid for the Enter key.
