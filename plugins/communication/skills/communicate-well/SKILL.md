@@ -183,7 +183,7 @@ A noisy agent is **worse than no agent at all** — without the agent, humans re
   - High → require acknowledgment
   - Medium → collapsible
   - Low / style → suppress entirely
-- **Concise > thorough.** Concise comments are 3× more likely to be acted on (study of 22,000+ AI review comments). A five-page essay for a two-line change is an anti-pattern.
+- **Concise > thorough.** Concise, targeted comments get acted on; verbose ones get skimmed. A five-page essay for a two-line change is an anti-pattern.
 - **Every finding must include reproduction conditions,** not just "potential issue on line X." Include inputs, conditions, and expected vs. actual behaviour.
 - **Don't duplicate what linters already catch.** Reserve AI review for what rules cannot catch: logic errors, cross-file impacts, context-dependent security issues.
 - **Provide the fix, not just the finding.** ~80% auto-fix coverage is the gold standard.
