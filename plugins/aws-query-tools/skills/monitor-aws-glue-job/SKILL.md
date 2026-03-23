@@ -1,5 +1,5 @@
 ---
-name: query-aws-glue
+name: monitor-aws-glue-job
 description: Monitor AWS Glue job execution with visible split-terminal output and
   smart state-change notifications. Use when watching long-running Glue jobs, checking
   Glue job status, or setting up background Glue job monitoring. With cmux, runs in
