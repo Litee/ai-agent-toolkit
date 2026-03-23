@@ -792,6 +792,7 @@ cargo test
 cat
 cd
 chmod
+cmux --help
 comm
 cp
 csvlook
