@@ -6,7 +6,7 @@
   "metadata": {
     "description": "Collection of AI agent skills for AWS CDK development, AWS documentation search, AWS querying (Athena, CloudWatch), Anki flashcard management, Obsidian vault management, audio conversion, podcast generation, safe terminal command registration, image generation, and ML system design interviews",
 
-    "version": "1.1.13",
+    "version": "1.1.14",
     "homepage": "https://github.com/Litee/ai-agent-toolkit"
   },
   "plugins": [
@@ -166,6 +166,15 @@
       "category": "productivity",
       "keywords": ["ml", "machine-learning", "interview", "system-design", "hiring", "evaluation"],
       "skills": ["./skills/ml-system-design-interviewer"]
+    },
+    {
+      "name": "update-versioned-permissions",
+      "description": "This plugin contains a SessionStart hook that auto-clones stale versioned plugin path entries in Claude Code permissions when plugins are upgraded. For each permission entry referencing an old plugin version, it adds a matching entry for the currently installed version. Additive-only — never removes existing entries. Also updates statusLine.command to the latest installed version if stale.",
+      "source": "./plugins/update-versioned-permissions",
+      "strict": false,
+      "version": "1.0.0",
+      "category": "developer-tools",
+      "keywords": ["permissions", "plugins", "upgrade", "hooks", "settings", "versioning"]
     }
   ]
 }

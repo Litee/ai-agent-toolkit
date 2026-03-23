@@ -1,0 +1,17 @@
+{
+  "description": "Auto-clones versioned plugin path entries in permissions when plugins are upgraded",
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ${CLAUDE_PLUGIN_ROOT}/hooks/scripts/update_versioned_permissions.py",
+            "timeout": 15
+          }
+        ]
+      }
+    ]
+  }
+}
