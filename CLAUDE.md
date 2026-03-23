@@ -5,3 +5,4 @@
 - You MUST keep skills alphabetically sorted inside `README.md`.
 - You MUST activate Python virtual environment at `.venv` to test Python scripts.
 - You MUST use a git worktree for all changes. Create one with `git worktree add .worktrees/<branch-name> -b <branch-name>`, make all changes inside it, and keep the main repo clean.
+- You MUST keep `main` branch history linear. Before merging a worktree branch, rebase it onto the latest `main` (`git rebase origin/main` from inside the worktree), then merge with fast-forward only (`git merge --ff-only`) from the main repo. Never create merge commits.
