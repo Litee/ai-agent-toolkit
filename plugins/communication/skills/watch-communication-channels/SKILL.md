@@ -5,11 +5,32 @@ description: "This skill should be used when monitoring any communication channe
 
 # watch-communication-channels
 
-Framework for monitoring async communication channels for responses. Use a dedicated team agent per channel — one for chat, one for tickets, one for a code review — to keep the main session focused on the actual task.
+Framework for monitoring async communication channels for responses. Provides a **default monitoring method** (team agent + CronCreate polling) and a contract for domain-specific skills to supply their own, superior monitoring when available.
 
 ---
 
-## Team Agent Architecture (required)
+## Monitoring Method Selection
+
+When asked to monitor a channel or service, choose the monitoring approach using this hierarchy:
+
+### 1. Domain-specific monitoring (preferred)
+
+If the **calling skill** provides its own monitoring infrastructure, **defer to it**. Domain-specific skills know their domain best and may offer richer monitoring — e.g. cmux split-based watchers with keystroke notifications, dedicated polling scripts with state files, or platform-native event streams.
+
+A skill signals "I handle my own monitoring" by including its own monitoring or watcher section in its SKILL.md. Examples:
+
+- `monitor-aws-glue-job` — cmux split watcher with automatic keystroke notifications; falls back to team agent only when cmux is unavailable
+- Any skill that defines its own poll loop, notification mechanism, or dedicated monitoring process
+
+When a domain-specific skill is active, this skill's team agent architecture, backoff algorithm, and CronCreate template are **not used** — unless the domain skill explicitly delegates back to this skill (e.g. "for background polling without cmux, see `watch-communication-channels`").
+
+### 2. Generic team agent polling (fallback)
+
+When no domain-specific monitoring exists for the channel type, use the full framework below: team agent architecture, backoff algorithm, CronCreate template, and nudge rules.
+
+---
+
+## Team Agent Architecture (fallback default)
 
 **Never poll in the primary session.** Every cron tick interrupts the main session and burns context window. Use a dedicated team agent instead.
 
