@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# NOTE: This file is intentionally duplicated in both podcast skills to keep each skill self-contained.
 """
 Podcast Metrics Calculator
 

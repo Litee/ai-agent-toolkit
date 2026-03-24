@@ -1,6 +1,6 @@
 ---
 name: query-aws-athena
-description: Execute AWS Athena SQL queries, download results from S3, and optimize query performance. Use when querying data in Athena, handling large result sets, running parallel queries, or using CTEs for complex query optimization.
+description: Execute AWS Athena SQL queries, download results from S3, and optimize query performance. Use when querying data in Athena, handling large result sets, running parallel queries, or using CTEs for complex query optimization. Triggers on "run Athena query", "query S3 data", "Athena SQL", "query data in AWS", "Athena results", "download Athena output", "Athena timeout", "large Athena result", or any request to execute or optimize AWS Athena queries.
 ---
 
 # Query AWS Athena

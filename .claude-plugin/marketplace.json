@@ -6,7 +6,7 @@
   "metadata": {
     "description": "Collection of AI agent skills for AWS CDK development, AWS documentation search, AWS querying (Athena, CloudWatch), Anki flashcard management, Obsidian vault management, audio conversion, podcast generation, safe terminal command registration, image generation, and ML system design interviews",
 
-    "version": "1.1.14",
+    "version": "1.1.15",
     "homepage": "https://github.com/Litee/ai-agent-toolkit"
   },
   "plugins": [
@@ -54,7 +54,7 @@
       "description": "This plugin contains a skill for working with Anki flashcard software through the AnkiConnect API. Use for creating flashcards, managing decks, searching notes/cards, syncing collections, controlling review sessions, or any Anki automation tasks.",
       "source": "./plugins/anki",
       "strict": false,
-      "version": "1.0.7",
+      "version": "1.0.8",
       "category": "productivity",
       "keywords": ["anki", "flashcards", "spaced-repetition", "learning"],
       "skills": ["./skills/manage-anki-flashcards"]
@@ -112,7 +112,7 @@
       "description": "This plugin contains skills for AI-powered podcast production: generating podcast scripts with natural conversation flow and converting scripts into high-quality audio using text-to-speech synthesis on AWS. Use when creating podcast scripts, multi-speaker dialogue, or generating podcast audio from scripts.",
       "source": "./plugins/podcast-generation",
       "strict": false,
-      "version": "1.1.3",
+      "version": "1.1.4",
       "category": "user",
       "keywords": ["podcast", "script", "tts", "audio", "conversation", "text-to-speech", "audio-generation", "voice", "aws", "ec2"],
       "skills": ["./skills/generate-podcast-script", "./skills/generate-podcast-audio"]
@@ -122,7 +122,7 @@
       "description": "This plugin contains a skill for AI agents communicating through asynchronous channels. Covers message value test, signing conventions, message style, frequency, epistemic responsibility, anti-patterns, and channel-type guidelines.",
       "source": "./plugins/communication",
       "strict": false,
-      "version": "1.1.0",
+      "version": "1.1.1",
       "category": "productivity",
       "keywords": ["communication", "async", "messaging", "slack", "tickets", "code-review", "anti-patterns"],
       "skills": ["./skills/communicate-well"]
@@ -152,7 +152,7 @@
       "description": "This plugin contains a skill for generating images using Amazon Nova Canvas on AWS Bedrock. Use when creating images, illustrations, AI art, text-to-image generation, or visual content.",
       "source": "./plugins/generate-image",
       "strict": false,
-      "version": "1.0.2",
+      "version": "1.0.3",
       "category": "user",
       "keywords": ["aws", "bedrock", "nova-canvas", "image-generation", "text-to-image", "ai-art"],
       "skills": ["./skills/generate-image"]

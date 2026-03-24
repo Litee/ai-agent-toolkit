@@ -1,6 +1,6 @@
 ---
 name: query-aws-cloudwatch-logs-insights
-description: Query AWS CloudWatch Log Insights with real-time progress tracking and flexible time/output formats. Use when analyzing CloudWatch logs, investigating errors or patterns, or generating reports from log data.
+description: Query AWS CloudWatch Log Insights with real-time progress tracking and flexible time/output formats. Use when analyzing CloudWatch logs, investigating errors or patterns, or generating reports from log data. Triggers on "search CloudWatch logs", "find errors in logs", "CloudWatch Insights query", "log analysis", "what's in the logs", "CloudWatch log search", "query log groups", "investigate logs", or any request to query or analyze AWS CloudWatch logs.
 ---
 
 # Query CloudWatch Logs

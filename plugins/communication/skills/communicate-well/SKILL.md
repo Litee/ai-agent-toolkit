@@ -5,6 +5,8 @@ description: "This skill should be used before composing any outbound message ac
 
 # communicate-well
 
+<!-- NOTE: This skill is intentionally a single file with no references — all content is needed on every invocation. -->
+
 Guidelines for AI agents communicating through asynchronous channels. Apply before composing any outbound message — chat, tickets, code reviews, or similar.
 
 ---

@@ -19,14 +19,14 @@ Generate images using Amazon Nova Canvas model hosted on AWS Bedrock. This skill
 
 ## Script Usage
 
-The `scripts/generate_image.py` script provides a command-line interface to generate images using Nova Canvas.
+The `${SKILL_DIR}/scripts/generate_image.py` script provides a command-line interface to generate images using Nova Canvas.
 
 ### Basic Text-to-Image Generation
 
 Generate a simple image from a text prompt:
 
 ```bash
-python3 scripts/generate_image.py "a serene landscape with mountains and lake" \
+python3 ${SKILL_DIR}/scripts/generate_image.py "a serene landscape with mountains and lake" \
   --output-dir ./my_images
 ```
 
@@ -37,7 +37,7 @@ python3 scripts/generate_image.py "a serene landscape with mountains and lake" \
 Specify what you don't want in the image (recommended for better quality):
 
 ```bash
-python3 scripts/generate_image.py "portrait of a woman" \
+python3 ${SKILL_DIR}/scripts/generate_image.py "portrait of a woman" \
   --output-dir ./my_images \
   --negative-prompt "people, anatomy, hands, low quality, low resolution, low detail"
 ```
@@ -45,7 +45,7 @@ python3 scripts/generate_image.py "portrait of a woman" \
 #### Custom Size and Quality
 
 ```bash
-python3 scripts/generate_image.py "futuristic city skyline at sunset" \
+python3 ${SKILL_DIR}/scripts/generate_image.py "futuristic city skyline at sunset" \
   --output-dir ./my_images \
   --width 1920 \
   --height 1080 \
@@ -57,7 +57,7 @@ python3 scripts/generate_image.py "futuristic city skyline at sunset" \
 Generate images with specific color palettes:
 
 ```bash
-python3 scripts/generate_image.py "abstract art with flowing shapes" \
+python3 ${SKILL_DIR}/scripts/generate_image.py "abstract art with flowing shapes" \
   --output-dir ./my_images \
   --colors "#FF5733" "#33FF57" "#3357FF"
 ```
@@ -65,7 +65,7 @@ python3 scripts/generate_image.py "abstract art with flowing shapes" \
 #### Generate Multiple Images
 
 ```bash
-python3 scripts/generate_image.py "cat playing with yarn" \
+python3 ${SKILL_DIR}/scripts/generate_image.py "cat playing with yarn" \
   --output-dir ./my_images \
   --number-of-images 3 \
   --filename cute_cat
@@ -76,7 +76,7 @@ python3 scripts/generate_image.py "cat playing with yarn" \
 Use a seed for consistent generation:
 
 ```bash
-python3 scripts/generate_image.py "mountain landscape" \
+python3 ${SKILL_DIR}/scripts/generate_image.py "mountain landscape" \
   --output-dir ./my_images \
   --seed 12345
 ```
@@ -84,7 +84,7 @@ python3 scripts/generate_image.py "mountain landscape" \
 #### Custom Output Directory
 
 ```bash
-python3 scripts/generate_image.py "sunset over ocean" \
+python3 ${SKILL_DIR}/scripts/generate_image.py "sunset over ocean" \
   --output-dir ./my_images \
   --filename ocean_sunset
 ```
@@ -92,7 +92,7 @@ python3 scripts/generate_image.py "sunset over ocean" \
 #### Using a Specific AWS Profile
 
 ```bash
-python3 scripts/generate_image.py "mountain vista" \
+python3 ${SKILL_DIR}/scripts/generate_image.py "mountain vista" \
   --output-dir ./my_images \
   --aws-profile my-custom-profile
 ```
@@ -136,19 +136,19 @@ An effective prompt often includes short descriptions of:
 
 ```bash
 # Realistic photo
-python3 scripts/generate_image.py \
+python3 ${SKILL_DIR}/scripts/generate_image.py \
   "realistic editorial photo of female teacher standing at a blackboard with a warm smile" \
   --output-dir ./my_images \
   --negative-prompt "people, anatomy, hands, low quality"
 
 # Whimsical illustration
-python3 scripts/generate_image.py \
+python3 ${SKILL_DIR}/scripts/generate_image.py \
   "whimsical and ethereal soft-shaded story illustration: A woman in a large hat stands at the ship's railing looking out across the ocean" \
   --output-dir ./my_images \
   --quality premium
 
 # Cinematic drone shot
-python3 scripts/generate_image.py \
+python3 ${SKILL_DIR}/scripts/generate_image.py \
   "drone view of a dark river winding through a stark Iceland landscape, cinematic quality" \
   --output-dir ./my_images \
   --width 1920 \
