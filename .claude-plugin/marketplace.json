@@ -6,7 +6,7 @@
   "metadata": {
     "description": "Collection of AI agent skills for AWS CDK development, AWS documentation search, AWS querying (Athena, CloudWatch), Anki flashcard management, Obsidian vault management, audio conversion, podcast generation, safe terminal command registration, image generation, and ML system design interviews",
 
-    "version": "1.1.13",
+    "version": "1.1.14",
     "homepage": "https://github.com/Litee/ai-agent-toolkit"
   },
   "plugins": [
@@ -60,11 +60,11 @@
       "skills": ["./skills/manage-anki-flashcards"]
     },
     {
-      "name": "manage-obsidian-vault",
+      "name": "obsidian",
       "description": "This plugin contains three skills for Obsidian: CLI operations (use-obsidian-cli) for creating, reading, searching, and managing notes via the Obsidian CLI; Obsidian Flavored Markdown syntax (use-obsidian-markdown) covering wikilinks, embeds, callouts, properties, math, Mermaid, and more; and personal knowledge management methodology (manage-personal-knowledge-in-obsidian) with atomic notes philosophy, linking strategies, tagging conventions, and structured workflows.",
-      "source": "./plugins/manage-obsidian-vault",
+      "source": "./plugins/obsidian",
       "strict": false,
-      "version": "2.0.1",
+      "version": "2.0.2",
       "category": "productivity",
       "keywords": ["obsidian", "notes", "knowledge-management", "vault", "zettelkasten", "markdown", "callouts", "embeds", "pkm"],
       "skills": ["./skills/use-obsidian-cli", "./skills/use-obsidian-markdown", "./skills/manage-personal-knowledge-in-obsidian"]

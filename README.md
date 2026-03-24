@@ -31,7 +31,7 @@ These skills can be installed as plugins in Claude Code.
 /plugin install generate-image@litee-claude-code-plugins
 /plugin install local-skill-issues-tracker@litee-claude-code-plugins
 /plugin install manage-anki-flashcards@litee-claude-code-plugins
-/plugin install manage-obsidian-vault@litee-claude-code-plugins
+/plugin install obsidian@litee-claude-code-plugins
 /plugin install ml-system-design-interviewer@litee-claude-code-plugins
 /plugin install podcast-generation@litee-claude-code-plugins
 /plugin install protect-file-system-access@litee-claude-code-plugins
@@ -58,7 +58,7 @@ Each plugin installs a skill that extends Claude's capabilities:
 | `generate-image` | user | Image generation using Amazon Nova Canvas on AWS Bedrock |
 | `local-skill-issues-tracker` (`use-local-skills-issue-tracker`) | developer-tools | Local JSON-based issue tracker for disconnected agents to report skill bugs and feature requests. Includes a filesystem watcher with cmux integration for live notifications on new issues, status changes, and comments |
 | `manage-anki-flashcards` | productivity | Anki flashcard management through AnkiConnect API |
-| `manage-obsidian-vault` (`use-obsidian-cli`, `use-obsidian-markdown`, `manage-personal-knowledge-in-obsidian`) | productivity | Three skills: Obsidian CLI operations (CRUD, search, tags, properties, daily notes, templates, tasks); Obsidian Flavored Markdown syntax (wikilinks, embeds, callouts, properties, math, Mermaid); personal knowledge management methodology (atomic notes, PKM workflows, vault health) |
+| `obsidian` (`use-obsidian-cli`, `use-obsidian-markdown`, `manage-personal-knowledge-in-obsidian`) | productivity | Three skills: Obsidian CLI operations (CRUD, search, tags, properties, daily notes, templates, tasks); Obsidian Flavored Markdown syntax (wikilinks, embeds, callouts, properties, math, Mermaid); personal knowledge management methodology (atomic notes, PKM workflows, vault health) |
 | `ml-system-design-interviewer` | productivity | ML System Design interview framework for Principal/Staff-level candidates |
 | `podcast-generation` | user | AI-powered podcast script generation and audio synthesis using AWS TTS |
 | `protect-file-system-access` | developer-tools | PreToolUse hook blocking direct edits to AWS credentials, SSH keys, shell profiles, and lockfiles |
