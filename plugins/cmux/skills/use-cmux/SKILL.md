@@ -35,6 +35,19 @@ cmux list-panes                   # list panes in current workspace
 cmux list-pane-surfaces --pane <ref>  # list surfaces (tabs) in a pane
 ```
 
+> **`caller` vs `focused` in `identify --json`:** The output contains two context blocks — always use the right one:
+> - **`caller`** — the terminal that invoked the command. Stable across the session. Use for self-targeting: workspace ref for `set-status`/`set-progress`, surface ref for keystroke delivery.
+> - **`focused`** — the currently active/focused terminal. Changes as the user switches windows. Only use when you intentionally want to target whatever the user is looking at right now.
+>
+> `caller.surface_ref` is **non-null only when CC itself is running inside a cmux terminal** (`CMUX_WORKSPACE_ID` is set). In non-cmux terminals it returns `null`.
+>
+> ```bash
+> # Correct: use caller for stable self-targeting
+> CMUX_INFO=$(cmux identify --json)
+> SURFACE_REF=$(echo "$CMUX_INFO" | python3 -c "import json,sys; d=json.load(sys.stdin); print(d['caller']['surface_ref'])")
+> WORKSPACE_REF=$(echo "$CMUX_INFO" | python3 -c "import json,sys; d=json.load(sys.stdin); print(d['caller']['workspace_ref'])")
+> ```
+
 ### Create Terminals
 
 ```bash
@@ -66,7 +79,7 @@ cmux clear-log
 
 > **Important:** `$CMUX_WORKSPACE_ID` reflects the workspace at session start and does **not** update if the pane is moved. Always resolve the current workspace ref via `cmux identify --json` and pass `--workspace <ref>` explicitly to `set-status`, `set-progress`, `log`, and `notify` when the pane may have been relocated:
 > ```bash
-> WORKSPACE_REF=$(cmux identify --json | python3 -c "import sys,json; print(json.load(sys.stdin)['focused']['workspace_ref'])")
+> WORKSPACE_REF=$(cmux identify --json | python3 -c "import sys,json; print(json.load(sys.stdin)['caller']['workspace_ref'])")
 > cmux set-status build "Running" --icon hammer --workspace "$WORKSPACE_REF"
 > cmux set-progress 0.5 --label "Halfway" --workspace "$WORKSPACE_REF"
 > ```
@@ -228,7 +241,8 @@ For the markdown-to-HTML conversion script, use `${SKILL_DIR}/scripts/md-to-html
 ## Known Gotchas
 
 - **`new-surface` and `new-pane --type terminal` create non-functional surfaces.** Surfaces created with these commands show as `[terminal]` in `cmux tree` but reject `cmux send` and `cmux read-screen` with `Error: invalid_params: Surface is not a terminal`. Use `cmux new-split <direction>` instead — it creates a usable terminal split within an existing pane.
-- **`new-split` without `--workspace` creates the split in the focused workspace, not the caller's.** Always pass `--workspace <caller.workspace_ref>` to pin the split to the correct workspace: `cmux new-split right --workspace workspace:9`. Additionally, if the workspace is not currently focused, the resulting split is non-interactive — run `cmux select-workspace --workspace workspace:9` first.
+- **`new-split` without `--workspace` creates the split in the focused workspace, not the caller's.** Always pass `--workspace <caller.workspace_ref>` to pin the split to the correct workspace: `cmux new-split right --workspace workspace:9`. Additionally, if the workspace is not currently focused, the resulting split is non-interactive. Call `cmux select-workspace --workspace workspace:9` before **each** `new-split` call — focus is not retained between calls, so a single `select-workspace` before the first split is not sufficient.
 - **Smart split placement:** Use `right` when the workspace has a single pane; use `down --surface <last-non-CC-surface>` when it already has a horizontal split, to stack new panels vertically on the right rather than creating a cramped third column. The `watch_issues.py create-split` subcommand implements this automatically.
 - **`send` without `--workspace` fails for non-focused workspaces.** Always pass both flags together: `cmux send --surface surface:N --workspace workspace:W 'text'`. The positional form `cmux send surface:N 'text'` fails with `Surface is not a terminal` when the surface is not in the focused workspace.
 - **`send-key` ctrl key names:** Use lowercase with hyphen: `ctrl-c`, `ctrl-l`. Capital `C-c` is not recognised. `enter` and `Return` are both valid for the Enter key.
+- **`cmux send` silently falls back to the focused surface on a wrong ref.** If the target surface ref is invalid or not in the specified workspace, `cmux send` exits 0 without error and delivers input to whichever surface is currently focused. Always pre-validate the surface exists before sending: `cmux tree --workspace <ref> --json` and confirm the ref appears in `windows[].workspaces[].panes[].surfaces[].ref`.
