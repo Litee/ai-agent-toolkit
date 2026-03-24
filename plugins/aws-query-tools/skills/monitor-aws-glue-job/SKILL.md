@@ -173,7 +173,7 @@ ALWAYS embed current state and UTC time when re-creating the cron.
 Stop after 24 hours total from watch start.
 ```
 
-**Why team agents, not sub-agents?** Polling in the primary session burns context window on every cron tick. A dedicated team agent accumulates all Glue status communication, keeping the primary agent's session clean. See `watch-communication-channels` skill for full team agent polling patterns.
+**Why team agents, not sub-agents?** Polling in the primary session burns context window on every cron tick. A dedicated team agent accumulates all Glue status communication, keeping the primary agent's session clean.
 
 ---
 

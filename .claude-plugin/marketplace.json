@@ -74,7 +74,7 @@
       "description": "This plugin contains skills for querying AWS data sources: Athena SQL queries with S3 result download, parallel execution, and CTE optimization; CloudWatch Log Insights queries with real-time progress tracking; and Glue job monitoring with visible cmux split output, CloudWatch metrics (CPU, heap, records, executors), smart cross-workspace surface discovery, and state-change keystroke notifications.",
       "source": "./plugins/aws-query-tools",
       "strict": false,
-      "version": "1.1.4",
+      "version": "1.1.5",
       "category": "developer-tools",
       "keywords": ["aws", "athena", "sql", "query", "s3", "cloudwatch", "logs", "log-insights", "monitoring", "glue", "etl"],
       "skills": ["./skills/query-aws-athena", "./skills/query-aws-cloudwatch-logs-insights", "./skills/monitor-aws-glue-job"]
@@ -119,13 +119,13 @@
     },
     {
       "name": "communication",
-      "description": "This plugin contains skills for AI agents communicating through asynchronous channels. Covers message value test, signing conventions, message style, frequency, epistemic responsibility, anti-patterns, and channel-type guidelines. Also includes a channel watcher skill for monitoring chat threads, tickets, and code reviews — with a monitoring method selection hierarchy that defers to domain-specific watchers when available and falls back to team agent architecture, exponential backoff, and session-resume restoration via a SessionStart hook.",
+      "description": "This plugin contains a skill for AI agents communicating through asynchronous channels. Covers message value test, signing conventions, message style, frequency, epistemic responsibility, anti-patterns, and channel-type guidelines.",
       "source": "./plugins/communication",
       "strict": false,
-      "version": "1.0.9",
+      "version": "1.1.0",
       "category": "productivity",
-      "keywords": ["communication", "async", "messaging", "slack", "tickets", "code-review", "anti-patterns", "watcher", "polling", "backoff"],
-      "skills": ["./skills/communicate-well", "./skills/watch-communication-channels"]
+      "keywords": ["communication", "async", "messaging", "slack", "tickets", "code-review", "anti-patterns"],
+      "skills": ["./skills/communicate-well"]
     },
     {
       "name": "cmux",
