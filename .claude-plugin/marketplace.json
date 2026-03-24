@@ -50,11 +50,11 @@
       "skills": ["./skills/use-local-skills-issue-tracker"]
     },
     {
-      "name": "manage-anki-flashcards",
+      "name": "anki",
       "description": "This plugin contains a skill for working with Anki flashcard software through the AnkiConnect API. Use for creating flashcards, managing decks, searching notes/cards, syncing collections, controlling review sessions, or any Anki automation tasks.",
-      "source": "./plugins/manage-anki-flashcards",
+      "source": "./plugins/anki",
       "strict": false,
-      "version": "1.0.6",
+      "version": "1.0.7",
       "category": "productivity",
       "keywords": ["anki", "flashcards", "spaced-repetition", "learning"],
       "skills": ["./skills/manage-anki-flashcards"]
