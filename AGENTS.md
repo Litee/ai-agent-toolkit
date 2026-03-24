@@ -1,0 +1,20 @@
+## Agentic Instructions
+
+### Skill Maintenance
+
+- You MUST review `README.md` and `.claude-plugin/marketplace.json` files and keep them up to date whenever adding/removing/modifying a skill.
+- You MUST bump up plugin version in `.claude-plugin/marketplace.json` after making changes in the skill. By default, bump the patch part of the version, e.g. "1.0.0" -> "1.0.1".
+- You MUST keep skills alphabetically sorted inside `README.md`.
+- You MUST activate Python virtual environment at `.venv` to test Python scripts.
+
+### Git Workflow
+
+All changes follow this sequence — do not skip or reorder steps:
+
+1. **Create a worktree**: `git worktree add .claude/worktrees/<branch-name> -b <branch-name>`. Make all changes inside it; keep the main repo clean.
+2. **Implement and test** changes inside the worktree.
+3. **Present changes** to the user for review. Do NOT commit yet.
+4. **Commit only after** the user has reviewed and explicitly confirmed everything is OK.
+5. **Rebase onto `main`**: from inside the worktree, run `git rebase origin/main` to keep history linear.
+6. **Merge with fast-forward only**: from the main repo, run `git merge --ff-only`. Never create merge commits.
+7. **Ask for explicit confirmation** before merging any worktree branch into `main`.
