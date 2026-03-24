@@ -3,8 +3,9 @@
 
 const fs = require('fs');
 const path = require('path');
+const os = require('os');
 
-const SETTINGS_PATH = path.join(process.env.HOME, '.claude', 'settings.json');
+const SETTINGS_PATH = path.join(os.homedir(), '.claude', 'settings.json');
 
 const pluginRoot = process.env.CLAUDE_PLUGIN_ROOT;
 if (!pluginRoot) {
@@ -17,15 +18,20 @@ const scriptPath = path.join(pluginRoot, 'references', 'status-line-script.js');
 // Use the node binary that's running this script
 const nodeBin = process.execPath;
 
-const expectedCommand = `${nodeBin} ${scriptPath}`;
+// Quote paths to handle spaces in node binary or script path
+const expectedCommand = `"${nodeBin}" "${scriptPath}"`;
 
 // Read existing settings
 let settings = {};
+let rawSettings = null;
 if (fs.existsSync(SETTINGS_PATH)) {
   try {
-    settings = JSON.parse(fs.readFileSync(SETTINGS_PATH, 'utf8'));
+    rawSettings = fs.readFileSync(SETTINGS_PATH, 'utf8');
+    settings = JSON.parse(rawSettings);
   } catch (_) {
-    // Corrupt settings — treat as empty and overwrite statusLine only
+    // Corrupt settings — preserve raw file, only patch statusLine key below
+    rawSettings = null;
+    settings = {};
   }
 }
 
@@ -38,8 +44,10 @@ if (
   process.exit(0);
 }
 
-// Configure statusLine
+// Configure statusLine, preserving all other settings
 settings.statusLine = { type: 'command', command: expectedCommand };
 
+// Ensure parent directory exists
+fs.mkdirSync(path.dirname(SETTINGS_PATH), { recursive: true });
 fs.writeFileSync(SETTINGS_PATH, JSON.stringify(settings, null, 2) + '\n', 'utf8');
 process.stdout.write(`status-line configured: ${expectedCommand}\n`);

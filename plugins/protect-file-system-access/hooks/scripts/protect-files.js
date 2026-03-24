@@ -3,11 +3,12 @@
 
 const path = require('path');
 const os = require('os');
+const fs = require('fs');
 
 // ── HOME-relative protected files ─────────────────────────────────
 // Matched only when the file path is under the user's home directory.
 // Format: { pattern: instruction }
-// Pattern matching: substring match within the home-relative path.
+// Pattern matching: home-relative path must START WITH the pattern (anchored).
 // These cause a hard block (exit 2).
 const HOME_PROTECTED_FILES = {
   // ── AWS directory (all files) ──
@@ -20,6 +21,7 @@ const HOME_PROTECTED_FILES = {
 // ── HOME-relative warned files ─────────────────────────────────────
 // Matched only when the file path is under the user's home directory.
 // These allow the edit but inject a systemMessage requiring explicit permission.
+// Pattern matching: exact basename match.
 const HOME_WARN_FILES = {
   // ── Shell profiles ──
   '.bashrc': "This is a shell profile under the user's home directory. You MUST ask the user for explicit permission before modifying this file.",
@@ -45,6 +47,16 @@ const BASENAME_PROTECTED_FILES = {
 };
 // ──────────────────────────────────────────────────────────────────
 
+// Resolve a file path fully: follow symlinks if the file exists,
+// otherwise fall back to path.resolve() for normalization.
+function resolvePath(filePath) {
+  try {
+    return fs.realpathSync(filePath);
+  } catch {
+    return path.resolve(filePath);
+  }
+}
+
 let input = '';
 process.stdin.setEncoding('utf8');
 process.stdin.on('data', chunk => input += chunk);
@@ -59,18 +71,26 @@ process.stdin.on('end', () => {
 
   if (!filePath) process.exit(0);
 
+  // Resolve symlinks and normalize path components (prevents traversal bypass).
+  filePath = resolvePath(filePath);
+
   // Check home-relative rules
   const homedir = os.homedir();
-  if (filePath.startsWith(homedir)) {
+  const homedirWithSep = homedir + path.sep;
+  if (filePath === homedir || filePath.startsWith(homedirWithSep)) {
+    const homeRelative = filePath.startsWith(homedirWithSep)
+      ? filePath.slice(homedirWithSep.length)
+      : '';
+
     for (const [pattern, instruction] of Object.entries(HOME_PROTECTED_FILES)) {
-      if (filePath.includes(pattern)) {
+      if (homeRelative.startsWith(pattern)) {
         process.stderr.write(`BLOCKED: Editing '${filePath}' is not allowed (matches protected pattern '${pattern}'). ${instruction}\n`);
         process.exit(2);
       }
     }
 
     for (const [pattern, warning] of Object.entries(HOME_WARN_FILES)) {
-      if (filePath.includes(pattern)) {
+      if (path.basename(filePath) === pattern) {
         process.stdout.write(JSON.stringify({ systemMessage: warning }) + '\n');
         process.exit(0);
       }

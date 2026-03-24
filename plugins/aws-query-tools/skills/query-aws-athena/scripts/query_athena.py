@@ -86,15 +86,17 @@ class AthenaQueryExecutor:
 
         return query_execution_id
 
-    def _wait_for_query_completion(self, query_execution_id):
+    def _wait_for_query_completion(self, query_execution_id, timeout_seconds=1800):
         """
         Wait for query to complete.
 
         Args:
             query_execution_id: The ID of the query execution
+            timeout_seconds: Maximum seconds to wait before raising TimeoutError (default: 30m)
         """
         print("Waiting for query to complete...")
 
+        elapsed = 0
         while True:
             response = self.athena_client.get_query_execution(
                 QueryExecutionId=query_execution_id
@@ -105,7 +107,13 @@ class AthenaQueryExecutor:
             if status in ['SUCCEEDED', 'FAILED', 'CANCELLED']:
                 break
 
+            if elapsed >= timeout_seconds:
+                raise TimeoutError(
+                    f"Athena query {query_execution_id} did not complete within {timeout_seconds}s"
+                )
+
             time.sleep(1)
+            elapsed += 1
 
         if status == 'SUCCEEDED':
             print("✓ Query completed successfully")

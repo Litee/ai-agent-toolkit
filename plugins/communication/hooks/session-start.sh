@@ -8,6 +8,8 @@
 # Always exits 0 — never blocks session start.
 
 set -euo pipefail
+# Guarantee exit 0 — never block session start, even on unexpected errors.
+trap 'exit 0' ERR
 
 # Escape a string for embedding in a JSON value.
 escape_for_json() {
@@ -26,13 +28,6 @@ Session resumed. If you were watching any communication channels before this ses
 
 escaped_context=$(escape_for_json "$agent_instructions")
 
-cat <<EOF
-{
-  "hookSpecificOutput": {
-    "hookEventName": "SessionStart",
-    "additionalContext": "${escaped_context}"
-  }
-}
-EOF
+printf '{\n  "hookSpecificOutput": {\n    "hookEventName": "SessionStart",\n    "additionalContext": "%s"\n  }\n}\n' "${escaped_context}"
 
 exit 0

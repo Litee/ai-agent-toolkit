@@ -270,6 +270,29 @@ Examples:
     return parser.parse_args()
 
 
+def _apply_updates(settings_data: dict, version_map: dict, report: 'UpdateReport') -> bool:
+    """Apply versioned permission updates to settings_data in-place. Returns True if changed."""
+    changed = False
+
+    permissions = settings_data.setdefault('permissions', {})
+    allow_list = permissions.get('allow', [])
+    new_allow, allow_changed = clone_versioned_entries(allow_list, version_map, report)
+    if allow_changed:
+        permissions['allow'] = sorted(new_allow)
+        changed = True
+
+    deny_list = permissions.get('deny', [])
+    new_deny, deny_changed = clone_versioned_entries(deny_list, version_map, report)
+    if deny_changed:
+        permissions['deny'] = sorted(new_deny)
+        changed = True
+
+    if update_status_line(settings_data, version_map, report):
+        changed = True
+
+    return changed
+
+
 def main():
     """Main execution function."""
     args = parse_arguments()
@@ -290,57 +313,46 @@ def main():
     if not version_map:
         sys.exit(0)
 
-    # Load settings.json
-    try:
-        with open(settings_path, 'r', encoding='utf-8') as f:
-            settings_data = json.load(f)
-    except json.JSONDecodeError as e:
-        print(f"settings.json is malformed, skipping: {e}", file=sys.stderr)
-        sys.exit(0)
-    except OSError as e:
-        print(f"Could not read settings.json: {e}", file=sys.stderr)
-        sys.exit(0)
-
-    report = UpdateReport()
-    changed = False
-
-    # Process permissions.allow
-    permissions = settings_data.setdefault('permissions', {})
-    allow_list = permissions.get('allow', [])
-    new_allow, allow_changed = clone_versioned_entries(allow_list, version_map, report)
-    if allow_changed:
-        permissions['allow'] = sorted(new_allow)
-        changed = True
-
-    # Process permissions.deny
-    deny_list = permissions.get('deny', [])
-    new_deny, deny_changed = clone_versioned_entries(deny_list, version_map, report)
-    if deny_changed:
-        permissions['deny'] = sorted(new_deny)
-        changed = True
-
-    # Update statusLine.command
-    if update_status_line(settings_data, version_map, report):
-        changed = True
-
-    if not changed:
-        sys.exit(0)
-
     if args.dry_run:
+        # For dry-run, read without lock (no write will happen)
+        try:
+            with open(settings_path, 'r', encoding='utf-8') as f:
+                settings_data = json.load(f)
+        except json.JSONDecodeError as e:
+            print(f"settings.json is malformed, skipping: {e}", file=sys.stderr)
+            sys.exit(0)
+        except OSError as e:
+            print(f"Could not read settings.json: {e}", file=sys.stderr)
+            sys.exit(0)
+
+        report = UpdateReport()
+        _apply_updates(settings_data, version_map, report)
         report.print_summary()
         sys.exit(0)
 
-    # Acquire lock and write atomically
+    # Acquire lock before read to prevent TOCTOU — read-modify-write under lock
     lock_file = acquire_lock(lock_path)
     if lock_file is None:
         print("Could not acquire lock on settings.json within 2s, skipping update", file=sys.stderr)
         sys.exit(0)
 
     try:
-        # Sort allow/deny that were already updated above
-        # (sorted() was already applied; ensure deny was sorted too)
-        if deny_changed and 'deny' in permissions:
-            permissions['deny'] = sorted(permissions['deny'])
+        # Load settings.json while holding the lock
+        try:
+            with open(settings_path, 'r', encoding='utf-8') as f:
+                settings_data = json.load(f)
+        except json.JSONDecodeError as e:
+            print(f"settings.json is malformed, skipping: {e}", file=sys.stderr)
+            sys.exit(0)
+        except OSError as e:
+            print(f"Could not read settings.json: {e}", file=sys.stderr)
+            sys.exit(0)
+
+        report = UpdateReport()
+        changed = _apply_updates(settings_data, version_map, report)
+
+        if not changed:
+            sys.exit(0)
 
         tmp_path = settings_path.with_suffix('.json.tmp')
         try:

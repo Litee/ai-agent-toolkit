@@ -10,6 +10,7 @@ import argparse
 import os
 import re
 import sys
+import wave
 from pathlib import Path
 
 
@@ -79,16 +80,11 @@ def calculate_expected_duration(word_count: int, tempo_wpm: int = DEFAULT_TEMPO_
 
 def calculate_actual_duration(wav_file: str) -> float:
     """
-    Calculate actual duration of a WAV file from its size.
+    Calculate actual duration of a WAV file by reading its header.
 
-    This assumes the WAV file has the following specifications:
-    - Format: PCM 16-bit (signed, little-endian)
-    - Sample rate: 22,050 Hz (22.05 kHz)
-    - Channels: 1 (mono)
-    - Bytes per sample: 2
-
-    Formula: duration_seconds = file_size / (sample_rate × bytes_per_sample × channels)
-              = file_size / 44,100
+    Uses the wave module to read the actual sample rate, sample width,
+    and channel count from the WAV header, so the result is correct
+    for any PCM WAV regardless of format.
 
     Args:
         wav_file: Path to the WAV audio file
@@ -102,8 +98,10 @@ def calculate_actual_duration(wav_file: str) -> float:
     if not os.path.exists(wav_file):
         raise FileNotFoundError(f"WAV file not found: {wav_file}")
 
-    file_size = os.path.getsize(wav_file)
-    duration_seconds = file_size / WAV_DIVISOR
+    with wave.open(wav_file, 'rb') as wf:
+        frames = wf.getnframes()
+        rate = wf.getframerate()
+        duration_seconds = frames / float(rate)
     return round(duration_seconds, 2)
 
 

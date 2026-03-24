@@ -69,9 +69,18 @@ LIGHT = '''
 
 theme = DARK if '--dark' in sys.argv else LIGHT
 
+def _safe_href(url):
+    """Return url if safe, else '#' to block javascript: and data: URIs."""
+    stripped = url.strip().lower().replace('\t', '').replace('\n', '').replace('\r', '')
+    if stripped.startswith('javascript:') or stripped.startswith('data:'):
+        return '#'
+    return url
+
 def inline(t):
-    t = re.sub(r'\x60([^\x60]+)\x60', r'<code>\1</code>', t)
-    t = re.sub(r'\[([^\]]+)\]\(([^)]+)\)', r'<a href="\2">\1</a>', t)
+    # Escape HTML entities in raw text before applying markdown formatting
+    t = html_mod.escape(t)
+    t = re.sub(r'\x60([^\x60]+)\x60', lambda m: f'<code>{html_mod.unescape(m.group(1))}</code>', t)
+    t = re.sub(r'\[([^\]]+)\]\(([^)]+)\)', lambda m: f'<a href="{_safe_href(m.group(2))}">{m.group(1)}</a>', t)
     t = re.sub(r'\*\*([^*]+)\*\*', r'<strong>\1</strong>', t)
     t = re.sub(r'(?<![\"=])https?://[^\s<>)]+', lambda m: f'<a href="{m.group()}">{m.group()}</a>', t)
     return t

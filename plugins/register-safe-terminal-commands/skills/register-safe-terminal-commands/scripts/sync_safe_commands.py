@@ -6,6 +6,7 @@ Reads commands from TXT file and updates ~/.claude/settings.json permissions.all
 
 import sys
 import json
+import re
 import shutil
 import argparse
 from pathlib import Path
@@ -61,9 +62,11 @@ def read_safe_commands_txt(txt_file: Path) -> set[str]:
                 if not line or line.startswith('#'):
                     continue
 
-                # Handle line-end comments by taking only the part before '#'
-                if '#' in line:
-                    line = line.split('#', 1)[0].strip()
+                # Handle line-end comments: only strip when '#' follows whitespace
+                # (preserves '#' characters that are part of a command itself)
+                m = re.search(r'\s+#', line)
+                if m:
+                    line = line[:m.start()].strip()
 
                 # Add non-empty command to set
                 if line:

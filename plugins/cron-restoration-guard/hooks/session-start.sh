@@ -8,6 +8,8 @@
 # Always exits 0 — never blocks session start.
 
 set -euo pipefail
+# Guarantee exit 0 — never block session start, even on unexpected errors.
+trap 'exit 0' ERR
 
 # Escape a string for embedding in a JSON value.
 escape_for_json() {
@@ -42,13 +44,9 @@ If you find stale cron job IDs from a prior session (jobs that already fired or 
 
 escaped_context=$(escape_for_json "$agent_instructions")
 
-cat <<EOF
-{
-  "hookSpecificOutput": {
-    "hookEventName": "SessionStart",
-    "additionalContext": "${escaped_context}"
-  }
-}
-EOF
+# Print JSON using printf to safely interpolate the escaped context
+# without relying on heredoc variable expansion (which could execute
+# $() or backticks embedded in the string in future edits).
+printf '{\n  "hookSpecificOutput": {\n    "hookEventName": "SessionStart",\n    "additionalContext": "%s"\n  }\n}\n' "${escaped_context}"
 
 exit 0

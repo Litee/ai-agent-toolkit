@@ -24,6 +24,7 @@ import time
 import subprocess
 import re
 import os
+import shlex
 from pathlib import Path
 from datetime import datetime, timedelta
 
@@ -505,7 +506,7 @@ Examples:
         # Phase 5: Execute
         ec2_instance_profile = get_ec2_instance_profile_name(account_id, args.region)
         sm_arn = get_state_machine_arn(account_id, args.region)
-        speakers = " ".join(args.speaker_names)
+        speakers = " ".join(shlex.quote(name) for name in args.speaker_names)
         remote_script_path = "/tmp/script.md"
 
         download_commands = [

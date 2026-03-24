@@ -1,5 +1,4 @@
 const { execSync } = require('child_process');
-const fs = require('fs');
 const path = require('path');
 
 // ══════════════════ Feature Flags ══════════════════
@@ -66,14 +65,13 @@ function buildGitBranch(data) {
   if (!SHOW_GIT_BRANCH) return '';
   const cwd = data.workspace?.current_dir || process.cwd();
   try {
-    if (fs.existsSync(path.join(cwd, '.git'))) {
-      const branch = execSync(
-        'git symbolic-ref --short HEAD 2>/dev/null || git rev-parse --short HEAD 2>/dev/null',
-        { cwd, encoding: 'utf8' }
-      ).trim();
-      return branch || '';
-    }
-    return 'no git';
+    // Run git directly — it traverses up to find the repo root from any subdirectory.
+    // execSync timeout prevents hanging if git is slow (e.g. network mounts).
+    const branch = execSync(
+      'git symbolic-ref --short HEAD 2>/dev/null || git rev-parse --short HEAD 2>/dev/null',
+      { cwd, encoding: 'utf8', timeout: 3000 }
+    ).trim();
+    return branch || '';
   } catch (e) {
     return 'no git';
   }
@@ -82,9 +80,10 @@ function buildGitBranch(data) {
 function buildCwd(data) {
   if (!SHOW_CWD) return '';
   const cwd = data.workspace?.current_dir || process.cwd();
-  const parts = cwd.split('/');
+  const sep = path.sep;
+  const parts = cwd.split(sep);
   if (parts.length <= 4) return cwd;
-  return parts.map((p, i) => i < parts.length - 3 ? (p === '' ? '' : p[0]) : p).join('/');
+  return parts.map((p, i) => i < parts.length - 3 ? (p === '' ? '' : p[0]) : p).join(sep);
 }
 
 function buildDuration(data) {

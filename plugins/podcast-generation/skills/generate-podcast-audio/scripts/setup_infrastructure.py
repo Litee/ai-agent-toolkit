@@ -24,6 +24,8 @@ import sys
 import json
 import time
 import subprocess
+import tempfile
+import os
 from _podcast_shared import (
     log_progress,
     get_aws_account_id,
@@ -92,11 +94,10 @@ def configure_s3_lifecycle_policy(*, profile: str, bucket_name: str) -> None:
         ]
     }
 
-    config_file = f"/tmp/s3-lifecycle-{bucket_name}.json"
+    with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as tf:
+        json.dump(lifecycle_config, tf)
+        config_file = tf.name
     try:
-        with open(config_file, 'w') as f:
-            json.dump(lifecycle_config, f)
-
         result = subprocess.run([
             "aws", "s3api", "put-bucket-lifecycle-configuration",
             "--profile", profile,
@@ -114,9 +115,7 @@ def configure_s3_lifecycle_policy(*, profile: str, bucket_name: str) -> None:
 
     finally:
         try:
-            import os
-            if os.path.exists(config_file):
-                os.remove(config_file)
+            os.unlink(config_file)
         except Exception:
             pass
 
@@ -151,16 +150,18 @@ def create_lambda_execution_role(*, profile: str, region: str, account_id: str) 
             ]
         }
 
-        trust_policy_file = f"/tmp/lambda-trust-policy-{account_id}.json"
-        with open(trust_policy_file, 'w') as f:
-            json.dump(trust_policy, f)
-
-        result = subprocess.run([
-            "aws", "iam", "create-role",
-            "--profile", profile,
-            "--role-name", role_name,
-            "--assume-role-policy-document", f"file://{trust_policy_file}"
-        ], capture_output=True, text=True, timeout=30)
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as tf:
+            json.dump(trust_policy, tf)
+            trust_policy_file = tf.name
+        try:
+            result = subprocess.run([
+                "aws", "iam", "create-role",
+                "--profile", profile,
+                "--role-name", role_name,
+                "--assume-role-policy-document", f"file://{trust_policy_file}"
+            ], capture_output=True, text=True, timeout=30)
+        finally:
+            os.unlink(trust_policy_file)
 
         if result.returncode != 0:
             raise Exception(f"Failed to create Lambda role: {result.stderr}")
@@ -191,17 +192,19 @@ def create_lambda_execution_role(*, profile: str, region: str, account_id: str) 
         ]
     }
 
-    policy_file = f"/tmp/lambda-inline-policy-{account_id}.json"
-    with open(policy_file, 'w') as f:
-        json.dump(inline_policy, f)
-
-    subprocess.run([
-        "aws", "iam", "put-role-policy",
-        "--profile", profile,
-        "--role-name", role_name,
-        "--policy-name", "PodcastGenerationAccess",
-        "--policy-document", f"file://{policy_file}"
-    ], capture_output=True, text=True, timeout=30)
+    with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as tf:
+        json.dump(inline_policy, tf)
+        policy_file = tf.name
+    try:
+        subprocess.run([
+            "aws", "iam", "put-role-policy",
+            "--profile", profile,
+            "--role-name", role_name,
+            "--policy-name", "PodcastGenerationAccess",
+            "--policy-document", f"file://{policy_file}"
+        ], capture_output=True, text=True, timeout=30)
+    finally:
+        os.unlink(policy_file)
 
     if role_already_existed:
         log_progress(f"Lambda role policies ensured: {role_arn}")
@@ -243,16 +246,18 @@ def create_step_functions_role(*, profile: str, region: str, account_id: str) ->
             ]
         }
 
-        trust_policy_file = f"/tmp/sf-trust-policy-{account_id}.json"
-        with open(trust_policy_file, 'w') as f:
-            json.dump(trust_policy, f)
-
-        result = subprocess.run([
-            "aws", "iam", "create-role",
-            "--profile", profile,
-            "--role-name", role_name,
-            "--assume-role-policy-document", f"file://{trust_policy_file}"
-        ], capture_output=True, text=True, timeout=30)
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as tf:
+            json.dump(trust_policy, tf)
+            trust_policy_file = tf.name
+        try:
+            result = subprocess.run([
+                "aws", "iam", "create-role",
+                "--profile", profile,
+                "--role-name", role_name,
+                "--assume-role-policy-document", f"file://{trust_policy_file}"
+            ], capture_output=True, text=True, timeout=30)
+        finally:
+            os.unlink(trust_policy_file)
 
         if result.returncode != 0:
             raise Exception(f"Failed to create Step Functions role: {result.stderr}")
@@ -273,17 +278,19 @@ def create_step_functions_role(*, profile: str, region: str, account_id: str) ->
         ]
     }
 
-    policy_file = f"/tmp/sf-inline-policy-{account_id}.json"
-    with open(policy_file, 'w') as f:
-        json.dump(inline_policy, f)
-
-    subprocess.run([
-        "aws", "iam", "put-role-policy",
-        "--profile", profile,
-        "--role-name", role_name,
-        "--policy-name", "StepFunctionsExecution",
-        "--policy-document", f"file://{policy_file}"
-    ], capture_output=True, text=True, timeout=30)
+    with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as tf:
+        json.dump(inline_policy, tf)
+        policy_file = tf.name
+    try:
+        subprocess.run([
+            "aws", "iam", "put-role-policy",
+            "--profile", profile,
+            "--role-name", role_name,
+            "--policy-name", "StepFunctionsExecution",
+            "--policy-document", f"file://{policy_file}"
+        ], capture_output=True, text=True, timeout=30)
+    finally:
+        os.unlink(policy_file)
 
     if role_already_existed:
         log_progress(f"Step Functions role policies ensured: {role_arn}")
@@ -326,16 +333,18 @@ def create_ec2_role(*, profile: str, region: str, account_id: str) -> tuple[str,
             ]
         }
 
-        trust_policy_file = f"/tmp/ec2-trust-policy-{account_id}.json"
-        with open(trust_policy_file, 'w') as f:
-            json.dump(trust_policy, f)
-
-        result = subprocess.run([
-            "aws", "iam", "create-role",
-            "--profile", profile,
-            "--role-name", role_name,
-            "--assume-role-policy-document", f"file://{trust_policy_file}"
-        ], capture_output=True, text=True, timeout=30)
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as tf:
+            json.dump(trust_policy, tf)
+            trust_policy_file = tf.name
+        try:
+            result = subprocess.run([
+                "aws", "iam", "create-role",
+                "--profile", profile,
+                "--role-name", role_name,
+                "--assume-role-policy-document", f"file://{trust_policy_file}"
+            ], capture_output=True, text=True, timeout=30)
+        finally:
+            os.unlink(trust_policy_file)
 
         if result.returncode != 0:
             raise Exception(f"Failed to create EC2 role: {result.stderr}")
@@ -370,17 +379,19 @@ def create_ec2_role(*, profile: str, region: str, account_id: str) -> tuple[str,
         ]
     }
 
-    policy_file = f"/tmp/ec2-inline-policy-{account_id}.json"
-    with open(policy_file, 'w') as f:
-        json.dump(inline_policy, f)
-
-    subprocess.run([
-        "aws", "iam", "put-role-policy",
-        "--profile", profile,
-        "--role-name", role_name,
-        "--policy-name", "PodcastAccessPolicy",
-        "--policy-document", f"file://{policy_file}"
-    ], capture_output=True, text=True, timeout=30)
+    with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as tf:
+        json.dump(inline_policy, tf)
+        policy_file = tf.name
+    try:
+        subprocess.run([
+            "aws", "iam", "put-role-policy",
+            "--profile", profile,
+            "--role-name", role_name,
+            "--policy-name", "PodcastAccessPolicy",
+            "--policy-document", f"file://{policy_file}"
+        ], capture_output=True, text=True, timeout=30)
+    finally:
+        os.unlink(policy_file)
 
     result = subprocess.run([
         "aws", "iam", "get-instance-profile",

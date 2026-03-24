@@ -134,14 +134,14 @@ class CloudWatchLogsQueryExecutor:
 
         # Try without timezone (assume UTC)
         try:
-            dt = datetime.strptime(time_str, "%Y-%m-%dT%H:%M:%S")
+            dt = datetime.strptime(time_str, "%Y-%m-%dT%H:%M:%S").replace(tzinfo=timezone.utc)
             return int(dt.timestamp() * 1000)
         except ValueError:
             pass
 
-        # Try date only
+        # Try date only (assume UTC midnight)
         try:
-            dt = datetime.strptime(time_str, "%Y-%m-%d")
+            dt = datetime.strptime(time_str, "%Y-%m-%d").replace(tzinfo=timezone.utc)
             return int(dt.timestamp() * 1000)
         except ValueError:
             pass
@@ -189,13 +189,28 @@ class CloudWatchLogsQueryExecutor:
                         )
                     raise
             else:
-                # Validate single log group
+                # Validate single log group with exact match
                 try:
-                    self.logs_client.describe_log_groups(
+                    paginator = self.logs_client.get_paginator('describe_log_groups')
+                    page_iterator = paginator.paginate(
                         logGroupNamePrefix=log_group_pattern,
                         limit=1
                     )
+                    exact_match = False
+                    for page in page_iterator:
+                        for lg in page['logGroups']:
+                            if lg['logGroupName'] == log_group_pattern:
+                                exact_match = True
+                                break
+                        if exact_match:
+                            break
+                    if not exact_match:
+                        raise LogGroupNotFoundError(
+                            f"Log group not found: {log_group_pattern}"
+                        )
                     validated_groups.append(log_group_pattern)
+                except LogGroupNotFoundError:
+                    raise
                 except Exception as e:
                     if 'ResourceNotFoundException' in str(e):
                         raise LogGroupNotFoundError(
@@ -267,8 +282,8 @@ class CloudWatchLogsQueryExecutor:
         try:
             response = self.logs_client.start_query(
                 logGroupNames=validated_groups,
-                startTime=start_epoch,
-                endTime=end_epoch,
+                startTime=start_epoch // 1000,  # start_query expects seconds, parse_time returns ms
+                endTime=end_epoch // 1000,
                 queryString=query,
                 limit=limit
             )
