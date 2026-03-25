@@ -34,6 +34,15 @@ DEFAULT_STATE_DIR = os.path.expanduser(
 )
 STATE_MAX_AGE_HOURS = 24.0
 
+
+def _version_from_path(path: str) -> str:
+    """Derive semver from the plugin cache path, e.g. .../1.1.0/skills/..."""
+    m = re.search(r"/(\d+\.\d+\.\d+)/skills/", path)
+    return m.group(1) if m else "unknown"
+
+
+_VERSION = _version_from_path(__file__)
+
 _ISSUE_FNAME_RE = re.compile(r"^(\d{4})-[a-z0-9-]+\.json$")
 
 POLL_INTERVAL_DEFAULT = 300
@@ -411,7 +420,7 @@ def main() -> None:
         _save_state(spath, current)
         baseline = current
         print(
-            f"[{_ts()}] Initialised state ({len(current)} issues). "
+            f"[{_ts()}] Issue watcher v{_VERSION} — initialised state ({len(current)} issues). "
             f"Polling every {args.poll_interval}s.",
             flush=True,
         )
@@ -428,7 +437,7 @@ def main() -> None:
             sys.exit(0)
         else:
             print(
-                f"[{_ts()}] Resuming from saved state ({len(current)} issues). "
+                f"[{_ts()}] Issue watcher v{_VERSION} — resuming from saved state ({len(current)} issues). "
                 f"Polling every {args.poll_interval}s.",
                 flush=True,
             )
@@ -464,7 +473,7 @@ def main() -> None:
             sys.exit(0)
         else:
             print(
-                f"[{_ts()}] poll #{poll_count} | {status_summary} | no changes",
+                f"[{_ts()}] Issue watcher v{_VERSION} | poll #{poll_count} | {status_summary} | no changes",
                 flush=True,
             )
             snapshot = new_snapshot
