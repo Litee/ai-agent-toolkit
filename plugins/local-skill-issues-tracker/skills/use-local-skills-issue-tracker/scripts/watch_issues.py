@@ -22,6 +22,7 @@ import json
 import os
 import re
 import shlex
+import signal
 import sys
 import time
 from datetime import datetime, timezone
@@ -169,9 +170,96 @@ def _save_state(state_path: str, snapshot: dict) -> None:
     os.makedirs(os.path.dirname(state_path), exist_ok=True)
     tmp = f"{state_path}.{os.getpid()}.tmp"
     data = {"timestamp": _now_iso(), "snapshot": snapshot}
-    with open(tmp, "w", encoding="utf-8") as f:
-        json.dump(data, f)
-    os.replace(tmp, state_path)
+    try:
+        with open(tmp, "w", encoding="utf-8") as f:
+            json.dump(data, f)
+        os.replace(tmp, state_path)
+    except Exception:
+        try:
+            os.unlink(tmp)
+        except OSError:
+            pass
+        raise
+
+
+# ---------------------------------------------------------------------------
+# Instance guard — PID file to prevent duplicate watchers
+# ---------------------------------------------------------------------------
+
+def _pid_file_path(state_dir: str, watcher_id: str) -> str:
+    """Return the PID file path for this watcher instance."""
+    hex8 = hashlib.sha256(watcher_id.encode()).hexdigest()[:8]
+    return os.path.join(state_dir, f"watcher-{hex8}.pid")
+
+
+def _check_instance_guard(state_dir: str, watcher_id: str) -> None:
+    """Exit with an error if another process with watcher_id is already running.
+
+    Reads the PID file. If the PID is alive, prints an error to stderr and
+    exits with code 1. If the PID file is stale (process not found), execution
+    continues normally — the caller writes a fresh PID file after this returns.
+
+    os.kill(pid, 0) semantics:
+      - Succeeds (no exception)  → process exists, treat as alive.
+      - ProcessLookupError       → no such process, stale PID.
+      - PermissionError          → process exists but not owned by us, treat as alive.
+    """
+    pid_path = _pid_file_path(state_dir, watcher_id)
+    if not os.path.exists(pid_path):
+        return
+    try:
+        with open(pid_path, "r") as f:
+            pid = int(f.read().strip())
+    except (ValueError, OSError):
+        return  # Unreadable or malformed — treat as stale, overwrite later.
+    try:
+        os.kill(pid, 0)
+        # Process is alive — abort.
+        print(
+            f"[Issue Watcher] ERROR: watcher '{watcher_id}' is already running (PID {pid}).\n"
+            f"  PID file: {pid_path}\n"
+            f"  To force a restart: kill {pid} && rm {pid_path}",
+            file=sys.stderr,
+            flush=True,
+        )
+        sys.exit(1)
+    except ProcessLookupError:
+        return  # Stale PID — process is gone, continue.
+    except PermissionError:
+        # Process exists but owned by another user — treat as alive.
+        print(
+            f"[Issue Watcher] ERROR: watcher '{watcher_id}' is already running (PID {pid}).\n"
+            f"  PID file: {pid_path}\n"
+            f"  To force a restart: kill {pid} && rm {pid_path}",
+            file=sys.stderr,
+            flush=True,
+        )
+        sys.exit(1)
+
+
+def _write_pid_file(state_dir: str, watcher_id: str) -> None:
+    """Write current PID to the PID file. Fatal on OSError."""
+    pid_path = _pid_file_path(state_dir, watcher_id)
+    os.makedirs(state_dir, exist_ok=True)
+    try:
+        with open(pid_path, "w") as f:
+            f.write(str(os.getpid()))
+    except OSError as e:
+        print(
+            f"[Issue Watcher] FATAL: failed to write PID file {pid_path}: {e}",
+            file=sys.stderr, flush=True,
+        )
+        sys.exit(1)
+
+
+def _remove_pid_file(state_dir: str, watcher_id: str) -> None:
+    """Remove the PID file on clean exit."""
+    try:
+        pid_path = _pid_file_path(state_dir, watcher_id)
+        if os.path.exists(pid_path):
+            os.unlink(pid_path)
+    except OSError:
+        pass
 
 
 # ---------------------------------------------------------------------------
@@ -417,7 +505,10 @@ def main() -> None:
 
     if baseline is None:
         # No usable prior state — initialise
-        _save_state(spath, current)
+        try:
+            _save_state(spath, current)
+        except OSError as e:
+            print(f"[{_ts()}] WARN: failed to write state: {e}", flush=True)
         baseline = current
         print(
             f"[{_ts()}] Issue watcher v{_VERSION} — initialised state ({len(current)} issues). "
@@ -432,7 +523,10 @@ def main() -> None:
                 f"[{_ts()}] {len(pending)} change(s) detected since last run.",
                 flush=True,
             )
-            _save_state(spath, current)
+            try:
+                _save_state(spath, current)
+            except OSError as e:
+                print(f"[{_ts()}] WARN: failed to write state: {e}", flush=True)
             _print_changes_and_instructions(pending, baseline, current, relaunch_cmd)
             sys.exit(0)
         else:
@@ -442,41 +536,80 @@ def main() -> None:
                 flush=True,
             )
 
+    # --- Instance guard + signal handling ---
+    # KNOWN: non-atomic TOCTOU gap between _check_instance_guard and _write_pid_file.
+    # In practice this watcher is re-launched sequentially, making a race extremely unlikely.
+    _check_instance_guard(state_dir, watcher_id)
+
+    running = [True]
+    received_signal = [""]
+
+    def _handle_signal(signum, _frame):
+        running[0] = False
+        received_signal[0] = signal.Signals(signum).name
+
+    signal.signal(signal.SIGTERM, _handle_signal)
+    signal.signal(signal.SIGINT, _handle_signal)
+
+    # Write PID file after instance guard check and signal handler setup.
+    _write_pid_file(state_dir, watcher_id)
+
     # --- Poll loop ---
     started_at = time.monotonic()
     poll_count = 0
     snapshot = current
 
-    while True:
-        time.sleep(args.poll_interval)
+    try:
+        while running[0]:
+            time.sleep(args.poll_interval)
 
-        elapsed = time.monotonic() - started_at
-        if elapsed > max_runtime_seconds:
-            _print_timeout_instructions(args.max_runtime_hours, relaunch_cmd)
-            sys.exit(0)
+            if not running[0]:
+                break
 
-        poll_count += 1
-        new_snapshot = _scan_issue_files(db_root)
-        notifications = _diff_snapshots(snapshot, new_snapshot)
-        status_summary = _format_status_summary(new_snapshot)
+            elapsed = time.monotonic() - started_at
+            if elapsed > max_runtime_seconds:
+                _remove_pid_file(state_dir, watcher_id)
+                _print_timeout_instructions(args.max_runtime_hours, relaunch_cmd)
+                sys.exit(0)
 
-        if notifications:
-            _save_state(spath, new_snapshot)
-            print(
-                f"[{_ts()}] poll #{poll_count} | {status_summary} | "
-                f"{len(notifications)} change(s)",
-                flush=True,
-            )
-            _print_changes_and_instructions(
-                notifications, snapshot, new_snapshot, relaunch_cmd,
-            )
-            sys.exit(0)
-        else:
-            print(
-                f"[{_ts()}] Issue watcher v{_VERSION} | poll #{poll_count} | {status_summary} | no changes",
-                flush=True,
-            )
-            snapshot = new_snapshot
+            poll_count += 1
+            new_snapshot = _scan_issue_files(db_root)
+            notifications = _diff_snapshots(snapshot, new_snapshot)
+            status_summary = _format_status_summary(new_snapshot)
+
+            if notifications:
+                try:
+                    _save_state(spath, new_snapshot)
+                except OSError as e:
+                    print(f"[{_ts()}] WARN: failed to write state: {e}", flush=True)
+                print(
+                    f"[{_ts()}] poll #{poll_count} | {status_summary} | "
+                    f"{len(notifications)} change(s)",
+                    flush=True,
+                )
+                _remove_pid_file(state_dir, watcher_id)
+                _print_changes_and_instructions(
+                    notifications, snapshot, new_snapshot, relaunch_cmd,
+                )
+                sys.exit(0)
+            else:
+                print(
+                    f"[{_ts()}] Issue watcher v{_VERSION} | poll #{poll_count} | {status_summary} | no changes",
+                    flush=True,
+                )
+                snapshot = new_snapshot
+
+        # Exited via signal
+        sig = received_signal[0] or "unknown"
+        _remove_pid_file(state_dir, watcher_id)
+        print(
+            f"[{_ts()}] Issue watcher v{_VERSION} — exiting ({sig}).\n"
+            f"Re-launch via Bash tool with run_in_background=true:\n"
+            f"   {relaunch_cmd}",
+            flush=True,
+        )
+    finally:
+        _remove_pid_file(state_dir, watcher_id)
 
 
 if __name__ == "__main__":
