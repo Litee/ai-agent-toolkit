@@ -122,7 +122,7 @@
       "description": "This plugin contains a skill for AI agents communicating through asynchronous channels. Covers message value test, signing conventions, message style, frequency, epistemic responsibility, anti-patterns, and channel-type guidelines.",
       "source": "./plugins/communication",
       "strict": false,
-      "version": "1.1.1",
+      "version": "1.1.2",
       "category": "productivity",
       "keywords": ["communication", "async", "messaging", "slack", "tickets", "code-review", "anti-patterns"],
       "skills": ["./skills/communicate-well"]

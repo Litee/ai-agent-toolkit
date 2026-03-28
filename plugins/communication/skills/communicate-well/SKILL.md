@@ -20,8 +20,9 @@ Before posting ANY message, ask:
 3. **Would a human post this?** (If a person wouldn't bother saying it, the agent shouldn't either)
 4. **Is it actionable?** (Reader can do something with it)
 5. **Is the timing right?** (Not duplicating a message from 5 minutes ago; not posting at 3am for a non-urgent update)
+6. **Can the recipient act on this?** (They own the resource, have the access, or are the right escalation point — don't assume)
 
-If any of 1–4 is "no" — stay silent, update a field, write to a log, or add a reaction.
+If any of 1–5 is "no" — stay silent, update a field, write to a log, or add a reaction. If 6 is "no" — find the right recipient first.
 
 ---
 
@@ -149,6 +150,7 @@ A noisy agent is **worse than no agent at all** — without the agent, humans re
 | **The Ransom Note** | Holding approval hostage until unrelated improvements are made | Separate must-fix from nice-to-have; approve with follow-up items |
 | **Priority Inversion** | Blocking on style nits while missing a logic bug | Review for correctness first, style last; automate style enforcement |
 | **The Swarm** | Multiple agents sending overlapping notifications about the same event | Coordinate across agents; deduplicate before sending |
+| **The Misdirected Request** | Asking someone to take an action (unblock a pipeline, merge a CR, approve a change) without verifying they own or have access to the resource. The recipient wastes time figuring out it's not theirs. | Before requesting action, verify the recipient is the owner, approver, or oncall for the system in question. If uncertain, ask rather than assume. |
 
 ---
 
