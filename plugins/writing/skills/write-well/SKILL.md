@@ -41,6 +41,8 @@ Clear writing reflects clear thinking. If the reader is confused, the writer has
 - Replace nominalizations with verbs: "made a decision" becomes "decided." "Conducted an investigation" becomes "investigated."
 - Kill filler qualifiers: "very," "really," "quite," "rather," "basically," "actually," "essentially," "simply," "just," "easy," "obviously."
 - Never use "simply," "just," "easy," or "obviously" to describe a process -- what is obvious to you may not be to the reader, and these words make readers feel inadequate when they struggle.
+- Cut redundant pairs: "full and complete," "each and every," "first and foremost," "true and accurate." When two words mean the same thing, pick one.
+- Don't announce what you're about to say -- just say it. "I want to point out that there are two risks" becomes "There are two risks."
 
 ### 3. Use Active Voice
 
@@ -57,6 +59,7 @@ Specific beats general. Data beats assertion.
 - "Cut processing time from 3 hours to 20 minutes" not "significantly improved performance."
 - "14,200 users received errors over 47 minutes" not "some users were affected."
 - Concrete words ("dog," "server," "crashed") activate richer mental representations than abstract ones ("entity," "resource," "degraded") and are easier to remember.
+- Replace weasel words with data or a statement of intent. Weasel words -- should, might, could, often, generally, usually, probably, significant, soon, some, most -- weaken claims. "A significant proportion may be affected" becomes "This affects 23% of sellers." "We should see improvement soon" becomes "We will reduce latency by 40ms in Q2."
 
 ### 5. Use Simple Words
 
@@ -76,6 +79,10 @@ Prefer the common word. Anglo-Saxon over Latin.
 | a large number of | many |
 | in the event that | if |
 | prior to | before |
+| it is necessary that | must |
+| cannot be avoided | must |
+| for the purpose of [-ing] | to [infinitive] |
+| under circumstances in which | if |
 
 ### 6. Revise
 
@@ -120,9 +127,11 @@ Layer depth for mixed audiences:
 
 - Executive summary (for scanners) -> Section summaries -> Detailed content -> Appendices/raw data
 - TL;DR -> Full analysis -> Supporting evidence
+- **Back pocket data:** Keep supporting data one level below your appendices -- available for reference but not in the document. If the format supports references or links, point to this evidence rather than burying it. When presenting, have it ready for questions.
 
 ### Structural Rules
 
+- **Acronyms:** Spell out on first use, then abbreviate. "Customer Service Associate (CSA)" -- then "CSA" after. Limit total acronyms per document; too many force the reader to keep a mental glossary.
 - **Headings:** Use hierarchical headings. Never skip levels. Test: read only the headings -- do they tell the story?
 - **Paragraphs:** 3-5 sentences each. One idea per paragraph. Front-load the key point in the first sentence.
 - **Lists:** Use numbered lists for sequences, bullets for non-ordered items. Keep parallel grammatical structure.
@@ -142,7 +151,7 @@ Layer depth for mixed audiences:
 ### Word Choice
 
 - Use contractions in informal contexts ("don't" not "do not").
-- Write with nouns and verbs, not adjectives and adverbs.
+- Write with nouns and verbs, not adjectives and adverbs. If you keep an adjective or adverb, back it with data: "Sales grew quickly" becomes "Sales grew 450bps from $XX to $YY in Q4."
 - Avoid cliches. If you have seen the phrase a hundred times, your reader has seen it a thousand.
 - Prefer one-syllable and two-syllable words when they carry the same meaning as longer alternatives.
 
@@ -227,6 +236,7 @@ Apply in three passes:
 - [ ] Are there any AI vocabulary words that need replacing?
 - [ ] Is the document 30% shorter than the first draft?
 - [ ] Read aloud: does it sound natural?
+- [ ] When rewriting someone else's text: does the output preserve their original formatting (bullets stay bullets, prose stays prose) unless restructuring was explicitly requested?
 
 ---
 
