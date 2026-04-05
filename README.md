@@ -31,6 +31,7 @@ These skills can be installed as plugins in Claude Code.
 /plugin install cron-restoration-guard@litee-claude-code-plugins
 /plugin install file-system-tools@litee-claude-code-plugins
 /plugin install generate-image@litee-claude-code-plugins
+/plugin install large-file-handling@litee-claude-code-plugins
 /plugin install local-skill-issues-tracker@litee-claude-code-plugins
 /plugin install ml-system-design-interviewer@litee-claude-code-plugins
 /plugin install obsidian@litee-claude-code-plugins
@@ -57,6 +58,7 @@ Each plugin installs a skill that extends Claude's capabilities:
 | `cron-restoration-guard` | developer-tools | SessionStart hook (resume only) that instructs the agent to verify and re-register any cron jobs from the previous session that are no longer active |
 | `file-system-tools` | developer-tools | Free disk space by cleaning development caches, IDE artefacts, and Docker resources. Scan for bloat directories (node_modules, virtual environments, build caches) |
 | `generate-image` | user | Image generation using Amazon Nova Canvas on AWS Bedrock |
+| `large-file-handling` (`handle-large-files`) | developer-tools | Safe large file analysis without exceeding the context window: size-checking strategies, targeted extraction one-liners (Bash/Python/Node.js/PowerShell), structured data probing (JSON, CSV, XML, logs), codebase reconnaissance, and token estimation |
 | `local-skill-issues-tracker` (`use-local-skills-issue-tracker`) | developer-tools | Local JSON-based issue tracker for disconnected agents to report skill bugs and feature requests. Includes a filesystem watcher with cmux integration for live notifications on new issues, status changes, and comments |
 | `ml-system-design-interviewer` | productivity | ML System Design interview framework for Principal/Staff-level candidates |
 | `obsidian` (`use-obsidian-cli`, `use-obsidian-markdown`, `manage-personal-knowledge-in-obsidian`) | productivity | Three skills: Obsidian CLI operations (CRUD, search, tags, properties, daily notes, templates, tasks); Obsidian Flavored Markdown syntax (wikilinks, embeds, callouts, properties, math, Mermaid); personal knowledge management methodology (atomic notes, PKM workflows, vault health) |
