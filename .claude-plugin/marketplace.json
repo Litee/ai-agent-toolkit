@@ -119,13 +119,13 @@
     },
     {
       "name": "communication",
-      "description": "This plugin contains a skill for AI agents communicating through asynchronous channels. Covers message value test, signing conventions, message style, frequency, epistemic responsibility, anti-patterns, and channel-type guidelines.",
+      "description": "This plugin contains skills for AI agents communicating and writing emails. Covers async channel etiquette (message value test, signing conventions, message style, frequency, epistemic responsibility, anti-patterns, channel-type guidelines) and professional email writing (subject lines, tone calibration, difficult scenarios, follow-up strategy, AI prompting for emails).",
       "source": "./plugins/communication",
       "strict": false,
-      "version": "1.1.2",
+      "version": "1.2.0",
       "category": "productivity",
-      "keywords": ["communication", "async", "messaging", "slack", "tickets", "code-review", "anti-patterns"],
-      "skills": ["./skills/communicate-well"]
+      "keywords": ["communication", "async", "messaging", "slack", "tickets", "code-review", "anti-patterns", "email"],
+      "skills": ["./skills/communicate-well", "./skills/write-good-emails"]
     },
     {
       "name": "cmux",
