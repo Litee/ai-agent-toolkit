@@ -60,6 +60,8 @@ Specific beats general. Data beats assertion.
 - "14,200 users received errors over 47 minutes" not "some users were affected."
 - Concrete words ("dog," "server," "crashed") activate richer mental representations than abstract ones ("entity," "resource," "degraded") and are easier to remember.
 - Replace weasel words with data or a statement of intent. Weasel words -- should, might, could, often, generally, usually, probably, significant, soon, some, most -- weaken claims. "A significant proportion may be affected" becomes "This affects 23% of sellers." "We should see improvement soon" becomes "We will reduce latency by 40ms in Q2."
+- **Organize evidence before you write.** For each argument, ask: What data, examples, or expert findings support it? If you cannot name at least one concrete piece of evidence, the argument is an assertion -- cut it or find the evidence first. Anecdotal examples are acceptable only when they illustrate a broader pattern, not as the sole support.
+- **Know your reasoning direction.** Deductive: start from a general principle and show this case fits it. Inductive: show a pattern across specific cases and draw the generalization. Either works; mixing them mid-argument confuses the reader.
 
 ### 5. Use Simple Words
 
@@ -160,6 +162,24 @@ Layer depth for mixed audiences:
 - Have a consistent voice. Authoritative, conversational, technical -- pick one and commit.
 - State opinions when you have them. Hedging everything weakens the entire document.
 - Be direct. "This approach is wrong because X" is clearer than "One might argue that this approach has certain limitations."
+
+### Converting Outlines to Prose
+
+Bullet points are scaffolding, not the document. When an outline needs to become narrative:
+
+- Give each paragraph a topic sentence that states its one idea.
+- Absorb bullet content into sentences with transitions ("This reduces costs because...", "As a result...", "The second factor is...").
+- Vary sentence length around the information density -- dense evidence deserves longer sentences; transitions can be short.
+
+**Before (bullet points):**
+> The benefits of the new system include:
+> - 65% reduction in processing costs
+> - 75% decrease in time spent on expense reporting
+> - Elimination of manual data entry errors
+> - Increased employee satisfaction
+
+**After (narrative prose):**
+> The new system reduces processing costs by 65% and cuts the time employees spend on expense reporting by 75%. It eliminates manual data entry errors, which currently affect 15% of reports. Faster reimbursements and a simpler process raise employee satisfaction.
 
 ---
 

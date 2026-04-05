@@ -172,7 +172,7 @@
       "description": "Writing quality and technical design document skills. write-well covers clarity, structure, conciseness, persuasion, AI writing hygiene, and editing checklists for design docs, RFCs, emails, postmortems, and status updates. write-technical-design guides HLD/LLD drafting section-by-section with templates, architecture diagram standards, assembly checklists, and red-flag detection.",
       "source": "./plugins/writing",
       "strict": false,
-      "version": "1.0.2",
+      "version": "1.0.3",
       "category": "productivity",
       "keywords": ["writing", "editing", "clarity", "concise", "style", "document", "draft", "proofread", "rewrite", "structure", "RFC", "design doc", "postmortem", "email", "proposal", "technical-design", "HLD", "LLD", "architecture"],
       "skills": ["./skills/write-technical-design", "./skills/write-well"]
