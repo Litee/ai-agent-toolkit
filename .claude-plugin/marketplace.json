@@ -6,7 +6,7 @@
   "metadata": {
     "description": "Collection of AI agent skills for AWS CDK development, AWS documentation search, AWS querying (Athena, CloudWatch), Anki flashcard management, Obsidian vault management, audio conversion, podcast generation, safe terminal command registration, image generation, and ML system design interviews",
 
-    "version": "1.1.16",
+    "version": "1.1.17",
     "homepage": "https://github.com/Litee/ai-agent-toolkit"
   },
   "plugins": [
@@ -87,6 +87,26 @@
       "version": "1.0.5",
       "category": "developer-tools",
       "keywords": ["security", "hooks", "file-protection", "aws", "ssh"]
+    },
+    {
+      "name": "aws",
+      "description": "This plugin contains a skill for writing, configuring, debugging, and monitoring AWS Glue ETL jobs. Covers update-job gotchas, worker type sizing, CloudWatch and Observability metrics, S3 shuffle, cron-based job monitoring, per-worker progress reporting, and API call tracking via ApiCallTracker.",
+      "source": "./plugins/aws",
+      "strict": false,
+      "version": "1.0.0",
+      "category": "developer-tools",
+      "keywords": ["aws", "glue", "etl", "cloudwatch", "s3", "pyspark", "data-engineering"],
+      "skills": ["./skills/use-aws-glue"]
+    },
+    {
+      "name": "pyspark",
+      "description": "This plugin contains a skill for writing, debugging, and reviewing PySpark scripts and Spark DataFrame transformations. Covers anti-patterns (JSON inference OOM, data skew, shuffle spill, Python UDFs), coding style (import aliases, type hints, method chains, join hygiene, null handling), and Spark tuning (AQE, broadcast joins, shuffle partitions).",
+      "source": "./plugins/pyspark",
+      "strict": false,
+      "version": "1.0.0",
+      "category": "developer-tools",
+      "keywords": ["pyspark", "spark", "dataframe", "etl", "data-engineering", "python"],
+      "skills": ["./skills/use-pyspark"]
     },
     {
       "name": "status-line",
