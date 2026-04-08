@@ -62,6 +62,20 @@ Wikilinks are the core linking mechanism. They automatically update when notes a
 
 **Use wikilinks for all internal vault links.** Use standard Markdown links `[text](url)` only for external URLs.
 
+**Pipe syntax for mid-sentence lowercase.** Use `[[Canonical Name|display text]]` when Title Case would look jarring mid-sentence for non-proper-noun concepts. At sentence start or for proper nouns, the bare wikilink is fine.
+
+```
+# BAD — Title Case mid-sentence
+applies [[Gradient Descent]] to minimize loss
+
+# GOOD — pipe for lowercase display
+applies [[Gradient Descent|gradient descent]] to minimize loss
+
+# FINE — sentence start or proper noun
+[[Gradient Descent]] is an optimization algorithm...
+built on [[Apache Kafka]] for streaming
+```
+
 ### Block IDs
 
 To create a linkable block, add `^block-id` at the end of a paragraph, list item, or table row:

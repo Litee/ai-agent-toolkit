@@ -82,7 +82,7 @@ Links between notes are the core value of Obsidian. Two complementary types:
 
 **Wikilink naming conventions:**
 - Use Title Case canonical names: `[[Binary-to-Text Encoding]]`
-- Use pipe syntax for display text: `[[Consistent Hashing|consistent hashing]]`
+- Use pipe syntax for display text: `[[Consistent Hashing|consistent hashing]]` — especially mid-sentence where Title Case is jarring; at sentence start or for proper nouns, the bare wikilink is fine
 - Cap Related Topics links at ~5-7 entries; if more are needed, the cluster may warrant a dedicated index note
 
 **Maintaining graph health:**
