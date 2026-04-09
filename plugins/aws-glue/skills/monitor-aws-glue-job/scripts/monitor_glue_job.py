@@ -50,7 +50,7 @@ def _fmt_count(n: float) -> str:
     return str(n)
 
 # State file directory
-STATE_DIR = Path.home() / '.claude' / 'plugin-data' / 'aws-query-tools' / 'monitor-aws-glue-job'
+STATE_DIR = Path.home() / '.claude' / 'plugin-data' / 'aws-glue' / 'monitor-aws-glue-job'
 
 
 def now_iso() -> str:

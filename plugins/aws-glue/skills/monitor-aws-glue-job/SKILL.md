@@ -205,7 +205,7 @@ cmux send --surface "$NEW_SURFACE" "python3 ${SKILL_DIR}/scripts/monitor_glue_jo
     --surface-id <your-surface-id>\n"
 ```
 
-The state file at `~/.claude/plugin-data/aws-query-tools/query-aws-glue/` preserves all history.
+The state file at `~/.claude/plugin-data/aws-glue/monitor-aws-glue-job/` preserves all history.
 
 ### Team agent mode: session resume
 
@@ -267,7 +267,7 @@ If the monitor exits with state `CREDENTIAL_EXPIRED`:
 | `--cmux-notify` | no | off | Enable desktop notifications |
 | `--cmux-status` | no | off | Enable cmux sidebar status badge |
 
-State file: `~/.claude/plugin-data/aws-query-tools/query-aws-glue/<job>-<run-id>.json`
+State file: `~/.claude/plugin-data/aws-glue/monitor-aws-glue-job/<job>-<run-id>.json`
 
 ### `check-status` — Status Query
 
@@ -298,7 +298,7 @@ Main script with three subcommands:
 - `check-status`: Synchronous status query. Shows state, elapsed time, error, DPU-seconds. Lists all tracked jobs.
 - `stop-monitor`: Sends SIGTERM to a running monitor PID from the state file.
 
-State files: `~/.claude/plugin-data/aws-query-tools/query-aws-glue/` (auto-cleaned after 30 days)
+State files: `~/.claude/plugin-data/aws-glue/monitor-aws-glue-job/` (auto-cleaned after 30 days)
 
 ### references/best-practices.md
 

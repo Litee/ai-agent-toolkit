@@ -23,8 +23,8 @@ These skills can be installed as plugins in Claude Code.
 **Direct installation:**
 ```bash
 /plugin install anki@litee-claude-code-plugins
-/plugin install aws@litee-claude-code-plugins
 /plugin install aws-documentation@litee-claude-code-plugins
+/plugin install aws-glue@litee-claude-code-plugins
 /plugin install aws-query-tools@litee-claude-code-plugins
 /plugin install cmux@litee-claude-code-plugins
 /plugin install communication@litee-claude-code-plugins
@@ -52,9 +52,9 @@ Each plugin installs a skill that extends Claude's capabilities:
 | Plugin (Skill) | Category | Description |
 |--------|----------|-------------|
 | `anki` | productivity | Anki flashcard management through AnkiConnect API |
-| `aws` (`use-aws-glue`) | developer-tools | AWS Glue ETL job configuration, update-job gotchas, worker type sizing, CloudWatch and Observability metrics, S3 shuffle, cron-based monitoring, per-worker progress reporting, and API call tracking |
 | `aws-documentation` | developer-tools | AWS CDK expert guidance and official AWS documentation search via MCP servers |
-| `aws-query-tools` (`monitor-aws-glue-job`, `query-aws-athena`, `query-aws-cloudwatch-logs-insights`, `watch-aws-quota-requests`, `watch-aws-support-cases`) | developer-tools | AWS Athena SQL queries with S3 download and CTE optimization; CloudWatch Log Insights with real-time progress tracking; Glue job monitoring with background state-change notifications via cmux keystroke injection or team agent polling; AWS Support case monitoring with status/severity/communication change detection; Service Quotas increase request monitoring with approval/denial notifications |
+| `aws-glue` (`use-aws-glue`, `monitor-aws-glue-job`) | developer-tools | AWS Glue ETL job writing, configuration, debugging, monitoring with CloudWatch and Observability metrics, S3 shuffle, worker sizing, per-worker progress reporting, API call tracking, and live cmux split monitoring with state-change keystroke notifications |
+| `aws-query-tools` (`query-aws-athena`, `query-aws-cloudwatch-logs-insights`, `watch-aws-quota-requests`, `watch-aws-support-cases`) | developer-tools | AWS Athena SQL queries with S3 download and CTE optimization; CloudWatch Log Insights with real-time progress tracking; AWS Support case monitoring with status/severity/communication change detection; Service Quotas increase request monitoring with approval/denial notifications |
 | `cmux` (`use-cmux`) | developer-tools | Terminal multiplexer integration: orchestrate sessions, browser automation, progress reporting; SessionStart hook prints cmux context and LLM behavioural instructions when running inside cmux |
 | `communication` (`communicate-well`, `write-good-emails`) | productivity | Async communication guidelines for AI agents: value test, message style, frequency, anti-patterns, and channel-type rules; professional email writing: subject lines, tone calibration, difficult scenarios, follow-up strategy, and AI prompting for emails |
 | `convert-audio` | user | Audio format conversion using ffmpeg (MP3, WAV, AAC, FLAC, Opus, OGG), bitrate/speed adjustment, and metadata tagging (ID3 tags) |
