@@ -55,11 +55,11 @@ ${SKILL_DIR}/scripts/sync_safe_commands.py
 
 This will:
 1. Read commands from `references/safe_terminal_commands.txt`
-2. Update `~/.claude/settings.json` with commands in `permissions.allow` array
-3. Format each command as `Bash(command:*)`
+2. Migrate any deprecated `Bash(command:*)` entries to `Bash(command *)`
+3. Add any new commands from the reference file in `Bash(command *)` format
 4. Sort permissions alphabetically
 5. Create a backup of settings before writing
-6. Report added/unchanged commands
+6. Report added/migrated/unchanged commands
 
 #### Advanced Options
 
@@ -89,15 +89,15 @@ When synced, commands are stored in `~/.claude/settings.json` as:
 {
   "permissions": {
     "allow": [
-      "Bash(git status:*)",
-      "Bash(ls:*)",
-      "Bash(aws s3 ls:*)"
+      "Bash(git status *)",
+      "Bash(ls *)",
+      "Bash(aws s3 ls *)"
     ]
   }
 }
 ```
 
-The `Bash(command:*)` format tells Claude Code to automatically approve any bash command matching that pattern.
+The `Bash(command *)` format tells Claude Code to automatically approve any bash command matching that pattern.
 
 ## Workflow
 

@@ -6,7 +6,7 @@
   "metadata": {
     "description": "Collection of AI agent skills for AWS CDK development, AWS documentation search, AWS querying (Athena, CloudWatch), Anki flashcard management, Obsidian vault management, audio conversion, podcast generation, safe terminal command registration, image generation, and ML system design interviews",
 
-    "version": "1.1.18",
+    "version": "1.1.19",
     "homepage": "https://github.com/Litee/ai-agent-toolkit"
   },
   "plugins": [
@@ -122,7 +122,7 @@
       "description": "This plugin auto-syncs safe terminal commands to Claude Code settings on session start, and contains a skill for manual sync with dry-run and verbose options. Use when configuring which bash commands Claude Code can execute without requiring approval.",
       "source": "./plugins/register-safe-terminal-commands",
       "strict": false,
-      "version": "1.1.4",
+      "version": "1.1.5",
       "category": "developer-tools",
       "keywords": ["terminal", "bash", "permissions", "safety"],
       "skills": ["./skills/register-safe-terminal-commands"]

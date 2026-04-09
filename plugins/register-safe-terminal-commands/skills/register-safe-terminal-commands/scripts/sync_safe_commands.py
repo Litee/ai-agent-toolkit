@@ -17,23 +17,30 @@ from dataclasses import dataclass, field
 class SyncReport:
     """Report of synchronization changes made to settings."""
     added: list[str] = field(default_factory=list)
+    migrated: list[str] = field(default_factory=list)
     unchanged: list[str] = field(default_factory=list)
 
     @property
     def total_changes(self) -> int:
-        """Total number of changes (added)."""
-        return len(self.added)
+        """Total number of changes (added + migrated)."""
+        return len(self.added) + len(self.migrated)
 
     def print_summary(self, verbose: bool = False) -> None:
         """Print a detailed summary of changes."""
         print(f"\n📊 Sync Report:")
         print(f"  ✅ Added: {len(self.added)} commands")
+        print(f"  🔄 Migrated: {len(self.migrated)} commands (deprecated :* -> space format)")
         print(f"  ⚪ Unchanged: {len(self.unchanged)} commands")
 
         if self.added:
             print(f"\n  📁 Added commands:")
             for command in sorted(self.added):
                 print(f"    + {command}")
+
+        if self.migrated:
+            print(f"\n  🔄 Migrated commands:")
+            for command in sorted(self.migrated):
+                print(f"    ~ {command}")
 
         if verbose and self.unchanged:
             print(f"\n  ⚪ Unchanged commands:")
@@ -108,6 +115,21 @@ def add_bash_command_to_settings(settings_data: dict, command: str) -> None:
     bash_permission = f"Bash({command} *)"
     if bash_permission not in settings_data['permissions']['allow']:
         settings_data['permissions']['allow'].append(bash_permission)
+
+
+def migrate_deprecated_format(settings_data: dict) -> list[str]:
+    """Migrate Bash(command:*) entries to Bash(command *) in-place.
+
+    Returns a list of command strings that were migrated.
+    """
+    migrated = []
+    allow_list = settings_data.get('permissions', {}).get('allow', [])
+    for i, permission in enumerate(allow_list):
+        if isinstance(permission, str) and permission.startswith('Bash(') and permission.endswith(':*)'):
+            command = permission[5:-3]  # strip "Bash(" and ":*)"
+            allow_list[i] = f"Bash({command} *)"
+            migrated.append(command)
+    return migrated
 
 
 def sort_permissions_allow(settings_data: dict) -> None:
@@ -185,6 +207,11 @@ def main():
         settings_data = {}
         settings_file.parent.mkdir(parents=True, exist_ok=True)
 
+    # Migrate deprecated Bash(command:*) -> Bash(command *) format
+    migrated_commands = migrate_deprecated_format(settings_data)
+    if migrated_commands:
+        print(f"🔄 Migrating {len(migrated_commands)} deprecated :* entries to space format...")
+
     # Extract existing bash commands from settings
     json_commands = extract_bash_commands_from_settings(settings_data)
     print(f"📊 Found {len(json_commands)} bash commands in settings file")
@@ -196,6 +223,7 @@ def main():
     # Create sync report
     report = SyncReport(
         added=list(commands_to_add),
+        migrated=migrated_commands,
         unchanged=list(unchanged_commands)
     )
 
@@ -211,12 +239,12 @@ def main():
     sorted_allow = sorted(current_allow)
     needs_sorting = current_allow != sorted_allow
 
-    if commands_to_add or needs_sorting:
+    if commands_to_add or migrated_commands or needs_sorting:
         # Sort permissions.allow array alphabetically before saving
         sort_permissions_allow(settings_data)
 
         if args.dry_run:
-            print(f"\n🔍 DRY RUN: Would update settings file (sorted alphabetically): {settings_file}")
+            print(f"\n🔍 DRY RUN: Would update settings file (migrate + sort alphabetically): {settings_file}")
             print(f"   No changes were actually made.")
         else:
             # Create backup before writing
