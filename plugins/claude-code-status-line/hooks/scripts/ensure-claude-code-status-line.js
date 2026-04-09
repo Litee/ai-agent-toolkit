@@ -13,7 +13,7 @@ if (!pluginRoot) {
   process.exit(0);
 }
 
-const scriptPath = path.join(pluginRoot, 'references', 'status-line-script.js');
+const scriptPath = path.join(pluginRoot, 'references', 'claude-code-status-line-script.js');
 
 // Use the node binary that's running this script
 const nodeBin = process.execPath;
@@ -50,4 +50,4 @@ settings.statusLine = { type: 'command', command: expectedCommand };
 // Ensure parent directory exists
 fs.mkdirSync(path.dirname(SETTINGS_PATH), { recursive: true });
 fs.writeFileSync(SETTINGS_PATH, JSON.stringify(settings, null, 2) + '\n', 'utf8');
-process.stdout.write(`status-line configured: ${expectedCommand}\n`);
+process.stdout.write(`claude-code-status-line configured: ${expectedCommand}\n`);

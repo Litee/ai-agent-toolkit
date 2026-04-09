@@ -7,7 +7,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node ${CLAUDE_PLUGIN_ROOT}/hooks/scripts/ensure-status-line.js",
+            "command": "node ${CLAUDE_PLUGIN_ROOT}/hooks/scripts/ensure-claude-code-status-line.js",
             "timeout": 10
           }
         ]

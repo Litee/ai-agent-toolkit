@@ -26,6 +26,7 @@ These skills can be installed as plugins in Claude Code.
 /plugin install aws-documentation@litee-claude-code-plugins
 /plugin install aws-glue@litee-claude-code-plugins
 /plugin install aws-query-tools@litee-claude-code-plugins
+/plugin install claude-code-status-line@litee-claude-code-plugins
 /plugin install cmux@litee-claude-code-plugins
 /plugin install communication@litee-claude-code-plugins
 /plugin install convert-audio@litee-claude-code-plugins
@@ -40,7 +41,6 @@ These skills can be installed as plugins in Claude Code.
 /plugin install protect-file-system-access@litee-claude-code-plugins
 /plugin install pyspark@litee-claude-code-plugins
 /plugin install register-safe-terminal-commands@litee-claude-code-plugins
-/plugin install status-line@litee-claude-code-plugins
 /plugin install update-versioned-permissions@litee-claude-code-plugins
 /plugin install writing@litee-claude-code-plugins
 ```
@@ -55,6 +55,7 @@ Each plugin installs a skill that extends Claude's capabilities:
 | `aws-documentation` | developer-tools | AWS CDK expert guidance and official AWS documentation search via MCP servers |
 | `aws-glue` (`use-aws-glue`, `monitor-aws-glue-job`) | developer-tools | AWS Glue ETL job writing, configuration, debugging, monitoring with CloudWatch and Observability metrics, S3 shuffle, worker sizing, per-worker progress reporting, API call tracking, and live cmux split monitoring with state-change keystroke notifications |
 | `aws-query-tools` (`query-aws-athena`, `query-aws-cloudwatch-logs-insights`, `watch-aws-quota-requests`, `watch-aws-support-cases`) | developer-tools | AWS Athena SQL queries with S3 download and CTE optimization; CloudWatch Log Insights with real-time progress tracking; AWS Support case monitoring with status/severity/communication change detection; Service Quotas increase request monitoring with approval/denial notifications |
+| `claude-code-status-line` | developer-tools | SessionStart hook that configures Claude Code statusline to display context usage, token counts, cost, model ID, git branch, and working directory |
 | `cmux` (`use-cmux`) | developer-tools | Terminal multiplexer integration: orchestrate sessions, browser automation, progress reporting; SessionStart hook prints cmux context and LLM behavioural instructions when running inside cmux |
 | `communication` (`communicate-well`, `write-good-emails`) | productivity | Async communication guidelines for AI agents: value test, message style, frequency, anti-patterns, and channel-type rules; professional email writing: subject lines, tone calibration, difficult scenarios, follow-up strategy, and AI prompting for emails |
 | `convert-audio` | user | Audio format conversion using ffmpeg (MP3, WAV, AAC, FLAC, Opus, OGG), bitrate/speed adjustment, and metadata tagging (ID3 tags) |
@@ -69,7 +70,6 @@ Each plugin installs a skill that extends Claude's capabilities:
 | `protect-file-system-access` | developer-tools | PreToolUse hook blocking direct edits to AWS credentials, SSH keys, shell profiles, and lockfiles |
 | `pyspark` (`use-pyspark`) | developer-tools | PySpark anti-patterns (JSON inference OOM, data skew, shuffle spill, Python UDFs), coding style guide (import aliases, type hints, method chains, join hygiene, null handling), and Spark tuning (AQE, broadcast joins, shuffle partitions) |
 | `register-safe-terminal-commands` | developer-tools | SessionStart hook that auto-syncs safe terminal commands to Claude Code settings; skill available for manual dry-run/verbose sync |
-| `status-line` | developer-tools | SessionStart hook that configures Claude Code statusline to display context usage, token counts, cost, model ID, git branch, and working directory |
 | `update-versioned-permissions` | developer-tools | SessionStart hook that auto-clones stale versioned plugin path entries in permissions when plugins are upgraded; additive-only, also updates statusLine.command to latest installed version |
 | `writing` (`write-technical-design`, `write-well`) | productivity | Two skills: technical design document drafting (HLD/LLD templates, section standards, architecture diagrams, assembly checklists, red-flag detection); universal writing quality (clarity, structure, conciseness, AI writing hygiene, editing checklists, format-aware guidance for design docs, RFCs, emails, postmortems, and status updates) |
 
