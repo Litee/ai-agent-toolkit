@@ -4,9 +4,9 @@
     "name": "litee"
   },
   "metadata": {
-    "description": "Collection of AI agent skills for AWS CDK development, AWS documentation search, AWS querying (Athena), CloudWatch Logs Insights querying, Anki flashcard management, Obsidian vault management, audio conversion, podcast generation, safe terminal command registration, image generation, and ML system design interviews",
+    "description": "Collection of AI agent skills for AWS CDK development, AWS documentation search, AWS Athena SQL querying, CloudWatch Logs Insights querying, Anki flashcard management, Obsidian vault management, audio conversion, podcast generation, safe terminal command registration, image generation, and ML system design interviews",
 
-    "version": "1.1.21",
+    "version": "1.1.22",
     "homepage": "https://github.com/Litee/ai-agent-toolkit"
   },
   "plugins": [
@@ -70,6 +70,16 @@
       "skills": ["./skills/use-obsidian-cli", "./skills/use-obsidian-markdown", "./skills/manage-personal-knowledge-in-obsidian"]
     },
     {
+      "name": "aws-athena",
+      "description": "This plugin contains a skill for executing AWS Athena SQL queries, downloading results from S3, running queries in parallel, and optimizing query performance with Common Table Expressions (CTEs).",
+      "source": "./plugins/aws-athena",
+      "strict": false,
+      "version": "1.0.0",
+      "category": "developer-tools",
+      "keywords": ["aws", "athena", "sql", "query", "s3"],
+      "skills": ["./skills/query-aws-athena"]
+    },
+    {
       "name": "aws-glue",
       "description": "This plugin contains skills for AWS Glue ETL jobs: writing, configuring, debugging, and monitoring Glue jobs with update-job gotchas, worker type sizing, CloudWatch and Observability metrics, S3 shuffle, per-worker progress reporting, API call tracking via ApiCallTracker, and live job monitoring with long-poll-with-exit, cmux-keystrokes, and tmux-keystrokes modes, resilient credential handling, and CloudWatch metrics (CPU, heap, records, executors).",
       "source": "./plugins/aws-glue",
@@ -91,13 +101,13 @@
     },
     {
       "name": "aws-query-tools",
-      "description": "This plugin contains skills for querying AWS data sources: Athena SQL queries with S3 result download, parallel execution, and CTE optimization; AWS Support case monitoring with status, severity, and communication change detection; and Service Quotas increase request monitoring with approval/denial notifications.",
+      "description": "This plugin contains skills for querying AWS data sources: AWS Support case monitoring with status, severity, and communication change detection; and Service Quotas increase request monitoring with approval/denial notifications.",
       "source": "./plugins/aws-query-tools",
       "strict": false,
-      "version": "1.4.0",
+      "version": "1.4.1",
       "category": "developer-tools",
-      "keywords": ["aws", "athena", "sql", "query", "s3", "monitoring", "support", "cases", "service-quotas", "quotas"],
-      "skills": ["./skills/query-aws-athena", "./skills/watch-aws-quota-requests", "./skills/watch-aws-support-cases"]
+      "keywords": ["aws", "monitoring", "support", "cases", "service-quotas", "quotas"],
+      "skills": ["./skills/watch-aws-quota-requests", "./skills/watch-aws-support-cases"]
     },
     {
       "name": "protect-file-system-access",
