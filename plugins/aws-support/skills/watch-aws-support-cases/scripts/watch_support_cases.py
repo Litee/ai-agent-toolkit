@@ -10,7 +10,7 @@ Two delivery modes:
   cmux-keystrokes        Poll and send change events as keystrokes to a CC surface.
                          Runs indefinitely until killed.
 
-State persisted at: ~/.claude/plugin-data/aws-query-tools/watch-aws-support-cases/
+State persisted at: ~/.claude/plugin-data/aws-support/watch-aws-support-cases/
 
 Requires Business or Enterprise AWS support plan (SubscriptionRequiredException on Basic/Developer).
 Support API is global but endpoint is us-east-1 only.
@@ -36,7 +36,7 @@ import random
 # Constants
 # ---------------------------------------------------------------------------
 
-STATE_DIR = Path.home() / '.claude' / 'plugin-data' / 'aws-query-tools' / 'watch-aws-support-cases'
+STATE_DIR = Path.home() / '.claude' / 'plugin-data' / 'aws-support' / 'watch-aws-support-cases'
 _HEARTBEAT_INTERVAL = 300   # 5 minutes
 _VERSION_CHECK_INTERVAL = 3600  # 1 hour
 

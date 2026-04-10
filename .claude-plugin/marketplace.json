@@ -6,7 +6,7 @@
   "metadata": {
     "description": "Collection of AI agent skills for AWS CDK development, AWS documentation search, AWS Athena SQL querying, CloudWatch Logs Insights querying, Anki flashcard management, Obsidian vault management, audio conversion, podcast generation, safe terminal command registration, image generation, and ML system design interviews",
 
-    "version": "1.1.22",
+    "version": "1.1.23",
     "homepage": "https://github.com/Litee/ai-agent-toolkit"
   },
   "plugins": [
@@ -101,13 +101,23 @@
     },
     {
       "name": "aws-query-tools",
-      "description": "This plugin contains skills for querying AWS data sources: AWS Support case monitoring with status, severity, and communication change detection; and Service Quotas increase request monitoring with approval/denial notifications.",
+      "description": "This plugin contains a skill for monitoring AWS Service Quotas increase requests with approval/denial notifications.",
       "source": "./plugins/aws-query-tools",
       "strict": false,
-      "version": "1.4.1",
+      "version": "1.5.0",
       "category": "developer-tools",
-      "keywords": ["aws", "monitoring", "support", "cases", "service-quotas", "quotas"],
-      "skills": ["./skills/watch-aws-quota-requests", "./skills/watch-aws-support-cases"]
+      "keywords": ["aws", "monitoring", "service-quotas", "quotas"],
+      "skills": ["./skills/watch-aws-quota-requests"]
+    },
+    {
+      "name": "aws-support",
+      "description": "This plugin contains a skill for monitoring AWS Support cases for status changes, severity changes, and new communications with long-poll, cmux, and tmux delivery modes. Requires Business or Enterprise AWS support plan.",
+      "source": "./plugins/aws-support",
+      "strict": false,
+      "version": "1.0.0",
+      "category": "developer-tools",
+      "keywords": ["aws", "support", "cases", "monitoring"],
+      "skills": ["./skills/watch-aws-support-cases"]
     },
     {
       "name": "protect-file-system-access",

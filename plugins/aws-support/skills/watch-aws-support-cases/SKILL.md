@@ -279,8 +279,8 @@ credentials recover, it sends a "Credentials recovered" message and resumes norm
 
 \* Exactly one of `--case-ids` or `--all-open` is required.
 
-State file: `~/.claude/plugin-data/aws-query-tools/watch-aws-support-cases/state-<watcher-id>.json`
-PID file: `~/.claude/plugin-data/aws-query-tools/watch-aws-support-cases/watcher-<watcher-id>.pid`
+State file: `~/.claude/plugin-data/aws-support/watch-aws-support-cases/state-<watcher-id>.json`
+PID file: `~/.claude/plugin-data/aws-support/watch-aws-support-cases/watcher-<watcher-id>.pid`
 
 ### `status` — Show Watcher State
 
