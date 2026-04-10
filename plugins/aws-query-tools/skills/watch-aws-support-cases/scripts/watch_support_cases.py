@@ -187,22 +187,21 @@ class SupportClient:
         return session.client('support', region_name='us-east-1')
 
     def describe_cases(self, case_ids: list[str], include_resolved: bool = True) -> list[dict]:
-        """Describe one or more cases by ID. Paginates automatically."""
+        """Describe one or more cases by ID.
+
+        The AWS Support DescribeCases API does not support pagination when caseIdList is
+        specified (InvalidParameterCombinationException). Batches into groups of 10 (API max).
+        """
         client = self._client()
         results = []
-        kwargs: dict = {
-            'caseIdList': case_ids,
-            'includeResolvedCases': include_resolved,
-            'includeCommunications': True,
-            'maxResults': 100,
-        }
-        while True:
-            resp = client.describe_cases(**kwargs)
+        for i in range(0, len(case_ids), 10):
+            batch = case_ids[i:i + 10]
+            resp = client.describe_cases(
+                caseIdList=batch,
+                includeResolvedCases=include_resolved,
+                includeCommunications=True,
+            )
             results.extend(resp.get('cases', []))
-            next_token = resp.get('nextToken')
-            if not next_token:
-                break
-            kwargs['nextToken'] = next_token
         return results
 
     def describe_communications(self, case_id: str) -> list[dict]:
