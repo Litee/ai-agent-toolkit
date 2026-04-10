@@ -386,25 +386,25 @@ def _remove_pid_file(state_dir: str, watcher_id: str) -> None:
 # Change detection
 # ---------------------------------------------------------------------------
 
-def _it_prefix(ver: str) -> str:
-    """Return '[Issue Tracker vX.Y.Z]' or '[Issue Tracker]' when version is unknown."""
-    return f"[Issue Tracker v{ver}]" if ver else "[Issue Tracker]"
+def _it_prefix() -> str:
+    """Return '[Issue Tracker vX.Y.Z]' using the watcher's own version."""
+    return f"[Issue Tracker v{_VERSION}]" if _VERSION and _VERSION != "unknown" else "[Issue Tracker]"
 
 
 def _diff_snapshots(old: dict, new: dict) -> list:
     """Compare two snapshots and return a list of human-readable change strings.
 
-    Each entry is prefixed with '[Issue Tracker vX.Y.Z]' (or '[Issue Tracker]'
-    when the skill version is not recorded) so callers can forward lines verbatim.
+    Each entry is prefixed with '[Issue Tracker vX.Y.Z]' so callers can forward
+    lines verbatim. The version is the watcher's own version, not the skill version.
     """
     notifications = []
+    pfx = _it_prefix()
 
     old_paths = set(old.keys())
     new_paths = set(new.keys())
 
     for path in new_paths - old_paths:
         info = new[path]
-        pfx = _it_prefix(info.get("skill_version", ""))
         notifications.append(
             f"{pfx} New issue #{info['issue_id']} for '{info['skill']}': "
             f"\"{info['title']}\" (status: {info['status']})"
@@ -419,7 +419,6 @@ def _diff_snapshots(old: dict, new: dict) -> list:
         n = new[path]
         if n["mtime_ns"] == o["mtime_ns"]:
             continue
-        pfx = _it_prefix(n.get("skill_version", ""))
         if n["status"] != o["status"]:
             notifications.append(
                 f"{pfx} Issue #{n['issue_id']} ('{n['skill']}') "
