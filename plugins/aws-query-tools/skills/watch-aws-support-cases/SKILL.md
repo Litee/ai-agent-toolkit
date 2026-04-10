@@ -3,11 +3,11 @@ name: watch-aws-support-cases
 description: >
   Monitor AWS Support cases for status changes, severity changes, and new communications.
   Use when watching open support cases, tracking case resolution, or getting notified about
-  AWS support replies. Supports two modes: background long-poll-with-exit (re-launch in loop)
-  and visible cmux split with keystroke notifications. Requires Business or Enterprise AWS
-  support plan. Triggers on "watch support case", "monitor AWS support", "track support ticket",
-  "notify on support reply", "watch case status", "support case update", or any request to
-  monitor AWS Support cases.
+  AWS support replies. Supports three modes: background long-poll-with-exit (re-launch in loop),
+  visible cmux split with keystroke notifications, and tmux-keystrokes (no cmux dependency).
+  Requires Business or Enterprise AWS support plan. Triggers on "watch support case",
+  "monitor AWS support", "track support ticket", "notify on support reply", "watch case status",
+  "support case update", or any request to monitor AWS Support cases.
 ---
 
 # AWS Support Case Watcher
@@ -19,6 +19,7 @@ description: >
   - `SubscriptionRequiredException` is raised on Basic and Developer plans
 - AWS credentials configured (`--profile` recommended)
 - **cmux** — optional, required only for `cmux-keystrokes` mode
+- **tmux** — optional, required only for `tmux-keystrokes` mode
 
 ## Overview
 
@@ -30,10 +31,34 @@ This skill solves it two ways:
 | Environment | Approach |
 |-------------|----------|
 | **cmux** (recommended) | `watch --mode cmux-keystrokes` runs in a visible terminal split. On every change, it sends a keystroke message to the Claude Code terminal, waking the LLM to act. Poll output is visible in the split — no tokens consumed watching it. |
-| **No cmux** | `watch --mode long-poll-with-exit` (default). Runs in background, exits with JSON when changes are detected. Re-launch in a loop after processing output. Or use a team agent with `CronCreate` for hands-off polling. |
+| **tmux** | `watch --mode tmux-keystrokes` — same as cmux-keystrokes but uses `tmux send-keys` for delivery. No cmux dependency. Requires `--tmux-pane` (e.g. `main:0.0`). |
+| **No cmux/tmux** | `watch --mode long-poll-with-exit` (default). Runs in background, exits with JSON when changes are detected. Re-launch in a loop after processing output. Or use a team agent with `CronCreate` for hands-off polling. |
 
 The Support API is global but its endpoint is `us-east-1` only — the `--region` flag is
 accepted for completeness but the client always calls `us-east-1`.
+
+---
+
+## Quick Start with tmux
+
+### 1. Find your tmux pane
+
+```bash
+tmux list-panes -a -F "#{session_name}:#{window_index}.#{pane_index} #{pane_title}"
+# Identify the pane running Claude Code — e.g. main:0.0
+```
+
+### 2. Launch the watcher
+
+```bash
+python3 ${SKILL_DIR}/scripts/watch_support_cases.py watch \
+    --case-ids case-123456-2026-abcd \
+    --profile my-aws-profile \
+    --mode tmux-keystrokes \
+    --tmux-pane main:0.0
+```
+
+The watcher sends events directly to the specified tmux pane. No cmux needed.
 
 ---
 
@@ -73,7 +98,8 @@ The watcher:
 ```
 [Support] #1234567890 ('ELB health check failing') status: opened -> pending-customer-action (10:05 UTC)
 [Support] #1234567890 ('ELB health check failing') new 1 communication(s) (10:42 UTC)
-[Support Watcher v1.0.0] 2 consecutive AWS credential errors. Refresh credentials, then re-launch: ...
+[Support Watcher] 5 consecutive AWS credential errors — backing off. Refresh credentials; watcher will recover automatically.
+[Support Watcher] AWS credentials recovered after 5 errors. Resuming normal polling.
 ```
 
 ### 3. Optional flags
@@ -134,16 +160,14 @@ When changes are detected, the watcher prints JSON to stdout and exits 0:
 **Important:** Always re-launch the watcher before processing events. This prevents missing
 changes that arrive while you're processing the previous batch.
 
-### Credential expiry (exit code 2)
+### Credential errors (long-poll mode)
 
-```json
-{
-  "error": "CREDENTIAL_EXPIRED",
-  "message": "2 consecutive AWS credential errors. Refresh credentials and re-launch.",
-  "watcher_id": "a1b2c3d4",
-  "instruction": "Refresh credentials, then re-launch: python3 ..."
-}
-```
+The watcher never exits on credential errors. It backs off linearly
+(`min(60 * consecutive_errors, 3600)` seconds) and keeps retrying. After 5 consecutive
+failures it logs a warning to stderr. When credentials recover, it resumes normally.
+
+Refresh credentials (`aws sso login`, `aws-vault exec`, etc.) and the watcher will pick
+them up on the next poll attempt — no restart needed.
 
 ### Team Agent Monitoring (hands-off background polling)
 
@@ -225,9 +249,10 @@ Use `--profile` to specify which AWS credentials profile to use.
 credentials (STS/SSO) are refreshed automatically as long as the underlying profile refreshes
 them (e.g. `aws-vault`, `aws sso login`).
 
-If exit code 2 (CREDENTIAL_EXPIRED):
-1. Refresh credentials
-2. Re-launch using the `instruction` field in the JSON output
+**Credential errors:** The watcher never exits on credential errors. It backs off linearly
+(`min(60 * consecutive_errors, 3600)` seconds) and keeps retrying. After 5 consecutive
+failures it notifies via the bridge (cmux/tmux) or logs to stderr (long-poll). When
+credentials recover, it sends a "Credentials recovered" message and resumes normally.
 
 ---
 
@@ -241,7 +266,7 @@ If exit code 2 (CREDENTIAL_EXPIRED):
 | `--all-open` | yes* | — | Auto-discover all non-terminal cases |
 | `--profile` | yes | — | AWS credentials profile |
 | `--region` | no | `us-east-1` | AWS region (Support API uses us-east-1 regardless) |
-| `--mode` | no | `long-poll-with-exit` | `long-poll-with-exit` or `cmux-keystrokes` |
+| `--mode` | no | `long-poll-with-exit` | `long-poll-with-exit`, `cmux-keystrokes`, or `tmux-keystrokes` |
 | `--poll-interval-seconds` | no | `300` | Poll frequency: min 60, max 3600 |
 | `--watcher-id` | no | auto-generated | Reuse existing state from a previous run |
 | `--max-runtime-hours` | no | `24` | Max runtime before auto-exit |
@@ -249,6 +274,7 @@ If exit code 2 (CREDENTIAL_EXPIRED):
 | `--cmux-workspace` | no | auto-detected | cmux workspace ref |
 | `--cmux-notify` | no | off | Enable desktop notifications |
 | `--cmux-status` | no | off | Enable cmux sidebar status badge |
+| `--tmux-pane` | tmux only | — | tmux pane target (e.g. `main:0.0`) |
 | `--keep-watcher-running` | no | off | Keep watcher split open after exit |
 
 \* Exactly one of `--case-ids` or `--all-open` is required.
@@ -277,7 +303,10 @@ PID file: `~/.claude/plugin-data/aws-query-tools/watch-aws-support-cases/watcher
 ### scripts/watch_support_cases.py
 
 Main script with three subcommands:
-- `watch`: Polling watcher. Supports `long-poll-with-exit` (background JSON output) and `cmux-keystrokes` (visible split with keystroke delivery). Full cmux fallback chain. Configurable max runtime.
+- `watch`: Polling watcher. Supports `long-poll-with-exit` (background JSON output),
+  `cmux-keystrokes` (visible split with keystroke delivery), and `tmux-keystrokes` (no
+  cmux dependency). Resilient credential handling (linear backoff, no forced exit). SIGUSR1
+  causes clean shutdown (exit 0) in continuous modes. Configurable max runtime.
 - `status`: Read-only state inspection. Show one watcher or list all.
 - `stop`: Send SIGTERM to a live watcher PID.
 

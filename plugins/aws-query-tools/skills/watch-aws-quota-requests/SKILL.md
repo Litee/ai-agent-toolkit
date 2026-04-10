@@ -3,8 +3,9 @@ name: watch-aws-quota-requests
 description: >
   Monitor AWS Service Quotas increase requests for status changes. Use when tracking quota
   increase requests, waiting for quota approvals, or monitoring pending quota changes across
-  regions. Two delivery modes: long-poll-with-exit (background, exits on change, re-launch
-  in a loop) and cmux-keystrokes (continuous, sends events to CC surface). Triggers on
+  regions. Three delivery modes: long-poll-with-exit (background, exits on change, re-launch
+  in a loop), cmux-keystrokes (continuous, sends events to CC surface via cmux), and
+  tmux-keystrokes (continuous, sends events to CC surface via tmux). Triggers on
   "watch quota request", "monitor service quota", "track quota increase", "quota approval
   status", "watch quota status", "notify when quota approved", or any request to monitor
   AWS Service Quotas requests.
@@ -22,6 +23,7 @@ baseline state across launches via watcher-id so it never re-delivers already-se
 - IAM permissions: `servicequotas:GetRequestedServiceQuotaChange`,
   `servicequotas:ListRequestedServiceQuotaChanges`
 - **cmux** optional (required for `cmux-keystrokes` mode only)
+- **tmux** optional (required for `tmux-keystrokes` mode only)
 
 ## Overview
 
@@ -33,11 +35,36 @@ This skill solves it two ways:
 | Environment | Approach |
 |-------------|----------|
 | **long-poll-with-exit** (default) | Watcher runs in the background via `run_in_background: true`. Exits the moment a status change is detected, printing JSON to stdout. LLM reads the output, re-launches with the same `--watcher-id`, then processes events. Minimal monitoring gap. |
-| **cmux-keystrokes** | Watcher runs in a visible split. On every status change, sends a keystroke to the CC surface, waking the LLM to act. Runs indefinitely until max-runtime or signal. |
+| **cmux-keystrokes** | Watcher runs in a visible cmux split. On every status change, sends a keystroke to the CC surface, waking the LLM to act. Runs indefinitely until max-runtime or signal. |
+| **tmux-keystrokes** | Same as cmux-keystrokes but uses `tmux send-keys` for delivery — no cmux dependency. Requires `--tmux-pane` (e.g. `main:0.1`). |
 
 Note: Service Quota requests are **per-region** (unlike Support which is global). Always
 specify `--region` to ensure you are querying the correct endpoint. Omitting `--region`
 uses the profile's default region.
+
+---
+
+## Quick Start with tmux
+
+### 1. Find your tmux pane
+
+```bash
+tmux list-panes -a -F "#{session_name}:#{window_index}.#{pane_index} #{pane_title}"
+# Identify the pane running Claude Code — e.g. main:0.0
+```
+
+### 2. Launch the watcher
+
+```bash
+python3 ${SKILL_DIR}/scripts/watch_quota_requests.py watch \
+    --request-ids req-abc123 req-def456 \
+    --profile myprofile \
+    --region us-east-1 \
+    --mode tmux-keystrokes \
+    --tmux-pane main:0.0
+```
+
+The watcher sends events directly to the specified tmux pane. No cmux needed.
 
 ---
 
@@ -228,9 +255,11 @@ profile handles refresh.
 **Regional note:** Service Quota requests are per-region. A request submitted in `us-west-2`
 will not appear when querying `us-east-1`. Always pass `--region` explicitly.
 
-If the watcher exits with `CREDENTIAL_EXPIRED`:
-1. Refresh credentials (`aws sso login`, `aws-vault`, etc.)
-2. Re-launch with the same `--watcher-id`
+**Credential errors:** The watcher never exits on credential errors. It backs off linearly
+(`min(60 * consecutive_errors, 3600)` seconds) and keeps retrying. After 5 consecutive
+failures, it sends a one-time notification via the bridge (cmux/tmux modes) or logs to
+stderr (long-poll mode). When credentials recover, it sends a "Credentials recovered"
+message and resumes normal polling.
 
 ---
 
@@ -244,7 +273,7 @@ If the watcher exits with `CREDENTIAL_EXPIRED`:
 | `--all-pending` | yes (unless `--request-ids`) | — | Watch all PENDING/CASE_OPENED requests |
 | `--profile` | yes | — | AWS credentials profile |
 | `--region` | no | profile default | AWS region (quotas are per-region) |
-| `--mode` | no | `long-poll-with-exit` | `long-poll-with-exit` or `cmux-keystrokes` |
+| `--mode` | no | `long-poll-with-exit` | `long-poll-with-exit`, `cmux-keystrokes`, or `tmux-keystrokes` |
 | `--poll-interval-seconds` | no | 600 | Poll frequency: min 60, max 3600 |
 | `--watcher-id` | no | auto-generated | 8-char hex; pass to resume a previous run |
 | `--max-runtime-hours` | no | 24 | Max runtime before watcher exits requesting restart |
@@ -252,6 +281,7 @@ If the watcher exits with `CREDENTIAL_EXPIRED`:
 | `--cmux-workspace` | no | auto-detected | cmux workspace ref; auto-detected via `cmux identify` |
 | `--cmux-notify` | no | off | Enable desktop notifications |
 | `--cmux-status` | no | off | Enable cmux sidebar status badge |
+| `--tmux-pane` | required for tmux mode | — | tmux pane target (e.g. `main:0.0`) |
 | `--keep-watcher-running` | no | off | Keep watcher split open after exit (default: auto-close after 3s) |
 
 State file: `~/.claude/plugin-data/aws-query-tools/watch-aws-quota-requests/watcher-<id>.json`
@@ -278,8 +308,10 @@ State file: `~/.claude/plugin-data/aws-query-tools/watch-aws-quota-requests/watc
 
 Main script with three subcommands:
 - `watch`: Polling monitor. Seeds baselines on first launch. Exits on change (long-poll)
-  or sends keystrokes continuously (cmux). Handles throttling, credential expiry, and
-  24-hour timeout. Removes terminal-state requests from the watch list automatically.
+  or sends keystrokes continuously (cmux/tmux). Handles throttling, resilient credential
+  errors (linear backoff, no forced exit), and 24-hour timeout. Removes terminal-state
+  requests from the watch list automatically. SIGUSR1 causes clean shutdown (exit 0) in
+  continuous modes.
 - `status`: Read-only state inspection. Lists all tracked watchers or shows a specific one.
 - `stop`: Sends SIGTERM to a running watcher PID from its state file.
 

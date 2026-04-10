@@ -41,6 +41,7 @@ import time
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 from typing import Optional
+import random
 
 
 # ---------------------------------------------------------------------------
@@ -377,6 +378,65 @@ class CmuxBridge:
 
 
 # ---------------------------------------------------------------------------
+# TmuxBridge
+# ---------------------------------------------------------------------------
+
+class TmuxBridge:
+    """Sends keystrokes to a tmux pane. No-ops for cmux-specific features."""
+
+    def __init__(self, tmux_pane: str):
+        self.tmux_pane = tmux_pane
+        self.enable_notify = False
+        self.enable_status = False
+
+    def _run(self, cmd: list, timeout: int = 5) -> bool:
+        try:
+            result = subprocess.run(cmd, capture_output=True, timeout=timeout)
+            return result.returncode == 0
+        except Exception:
+            return False
+
+    def send_to_claude(self, message: str) -> bool:
+        """Send text as a keystroke line to the tmux pane. Retries up to 10 times."""
+        cmd = ['tmux', 'send-keys', '-t', self.tmux_pane, message + '\n', 'Enter']
+        for attempt in range(11):
+            if self._run(cmd):
+                return True
+            if attempt < 10:
+                print(
+                    f"[{ts()}] WARN: tmux send-keys failed (attempt {attempt + 1}/11), "
+                    f"retrying in 3s ...",
+                    file=sys.stderr, flush=True,
+                )
+                time.sleep(3)
+        print(
+            f"[{ts()}] ERROR: tmux send-keys failed after 11 attempts. Pane: {self.tmux_pane!r}.",
+            file=sys.stderr, flush=True,
+        )
+        return False
+
+    def notify(self, title: str, body: str):
+        self._run(['tmux', 'display-message', '-t', self.tmux_pane, f"{title}: {body}"])
+
+    def set_status(self, *_a, **_kw) -> None:
+        pass  # no-op: tmux has no sidebar status
+
+    def clear_status(self, *_a, **_kw) -> None:
+        pass  # no-op
+
+
+def _throttle_sleep(poll_interval: int) -> int:
+    """Sleep with jitter on throttle, then return doubled poll interval (capped at 3600s)."""
+    sleep_time = 3.5 * 60 + random.uniform(-30, 30)
+    print(
+        f"[{ts()}] Throttle cool-down: sleeping {sleep_time:.0f}s then doubling interval.",
+        file=sys.stderr, flush=True,
+    )
+    time.sleep(sleep_time)
+    return min(poll_interval * 2, 3600)
+
+
+# ---------------------------------------------------------------------------
 # QuotaRequestWatcher — polling loop
 # ---------------------------------------------------------------------------
 
@@ -387,7 +447,7 @@ class QuotaRequestWatcher:
         self,
         client: ServiceQuotaClient,
         state: WatcherState,
-        bridge: Optional[CmuxBridge],
+        bridge: Optional[CmuxBridge | TmuxBridge],
         mode: str,
         poll_interval: int,
         max_runtime_hours: int,
@@ -401,11 +461,22 @@ class QuotaRequestWatcher:
         self.max_runtime_seconds = max_runtime_hours * 3600
         self.watcher_id = watcher_id
         self._running = True
+        self._received_signal = ''
+        self._cred_notified = False
         signal.signal(signal.SIGTERM, self._handle_signal)
         signal.signal(signal.SIGINT, self._handle_signal)
+        if mode in ('cmux-keystrokes', 'tmux-keystrokes'):
+            signal.signal(signal.SIGUSR1, self._handle_sigusr1)
 
-    def _handle_signal(self, *_: object) -> None:
+    def _handle_signal(self, signum: int, _: object) -> None:
         self._running = False
+        self._received_signal = signal.Signals(signum).name
+
+    def _handle_sigusr1(self, *_: object) -> None:
+        """Handle SIGUSR1 from Claude Code background task manager (exit code 0, not 144)."""
+        print(f"[{ts()}] Received SIGUSR1 — exiting cleanly.", file=sys.stderr, flush=True)
+        _remove_pid_file(self.watcher_id)
+        sys.exit(0)
 
     def _snapshot(self, req: dict) -> dict:
         """Build a baseline snapshot dict from a quota request API response."""
@@ -542,33 +613,46 @@ class QuotaRequestWatcher:
             for req_id in list(active_ids):
                 try:
                     req = self.client.get_requested_change(req_id)
+                    if consecutive_credential_errors > 0:
+                        if self._cred_notified and self.mode in ('cmux-keystrokes', 'tmux-keystrokes') and self.bridge:
+                            self.bridge.send_to_claude(
+                                f"[Quota Watcher v{_VERSION}] Credentials recovered — resuming normal polling."
+                            )
+                        self._cred_notified = False
                     consecutive_credential_errors = 0
                     consecutive_poll_errors = 0
                 except Exception as e:
                     err_str = str(e)
 
                     if any(k in err_str for k in ('ExpiredToken', 'InvalidClientTokenId',
-                                                   'ExpiredTokenException', 'AuthFailure')):
+                                                   'ExpiredTokenException', 'AuthFailure',
+                                                   'TokenExpiredException', 'NotAuthorizedException',
+                                                   'InvalidSignatureException')):
                         consecutive_credential_errors += 1
                         print(
                             f"[{ts()}] Credential error #{consecutive_credential_errors} for {req_id}: {e}",
                             file=sys.stderr, flush=True,
                         )
-                        if consecutive_credential_errors >= 2:
-                            self._handle_credential_error(err_str, active_ids)
-                        else:
-                            time.sleep(30)
+                        if consecutive_credential_errors >= 5 and not self._cred_notified:
+                            msg = (
+                                f"[Quota Watcher v{_VERSION}] {consecutive_credential_errors} consecutive "
+                                f"AWS credential errors. Refresh credentials (run: aws sso login or mwinit)."
+                            )
+                            if self.mode in ('cmux-keystrokes', 'tmux-keystrokes') and self.bridge:
+                                self.bridge.send_to_claude(msg)
+                            else:
+                                print(f"[{ts()}] WARN: {msg}", file=sys.stderr, flush=True)
+                            self._cred_notified = True
+                        time.sleep(min(60 * consecutive_credential_errors, 3600))
                         continue
 
                     if any(k in err_str for k in ('ThrottlingException', 'Throttling',
                                                    'TooManyRequestsException')):
-                        new_interval = min(self.poll_interval * 2, 3600)
                         print(
-                            f"[{ts()}] WARN: Throttled — doubling poll interval "
-                            f"({self.poll_interval}s -> {new_interval}s)",
+                            f"[{ts()}] WARN: Throttled — applying jittered backoff.",
                             file=sys.stderr, flush=True,
                         )
-                        self.poll_interval = new_interval
+                        self.poll_interval = _throttle_sleep(self.poll_interval)
                         continue
 
                     if any(k in err_str for k in ('NoSuchResourceException', 'NoSuchResource')):
@@ -623,12 +707,20 @@ class QuotaRequestWatcher:
                 delivered = self._deliver_events(all_events, active_ids)
                 if not delivered:
                     restart_cmd = self._build_restart_cmd(active_ids)
-                    surface_id = self.bridge.surface_id if self.bridge else '?'
-                    print(
-                        f"Surface {surface_id} unreachable. Get fresh refs via `cmux identify --json` and re-launch:\n"
-                        f"  {restart_cmd}",
-                        file=sys.stderr, flush=True,
-                    )
+                    if isinstance(self.bridge, TmuxBridge):
+                        pane = self.bridge.tmux_pane if self.bridge else '?'
+                        print(
+                            f"tmux pane {pane} unreachable. Check pane ID and re-launch:\n"
+                            f"  {restart_cmd}",
+                            file=sys.stderr, flush=True,
+                        )
+                    else:
+                        surface_id = self.bridge.surface_id if self.bridge else '?'
+                        print(
+                            f"Surface {surface_id} unreachable. Get fresh refs via `cmux identify --json` and re-launch:\n"
+                            f"  {restart_cmd}",
+                            file=sys.stderr, flush=True,
+                        )
                     _remove_pid_file(self.watcher_id)
                     sys.exit(1)
                 # long-poll-with-exit exits after first delivery
@@ -663,25 +755,40 @@ class QuotaRequestWatcher:
             if self.mode == 'cmux-keystrokes' and self.bridge:
                 self.bridge.send_to_claude(done_msg)
         else:
-            print(f"[{ts()}] Watcher stopped (signal received).", file=sys.stderr, flush=True)
-            print(f"[{ts()}] Re-launch to resume monitoring: watcher-id={self.watcher_id}", file=sys.stderr, flush=True)
+            sig = self._received_signal or 'signal'
+            restart_cmd = self._build_restart_cmd(active_ids)
+            print(
+                f"[Quota Watcher v{_VERSION}] Exiting ({sig}).\n"
+                f"Re-launch:\n  {restart_cmd}",
+                file=sys.stderr, flush=True,
+            )
 
         self.state.write(current_status='WATCHER_STOPPED')
         _remove_pid_file(self.watcher_id)
 
     def _build_restart_cmd(self, remaining_ids: list) -> str:
         """Build a minimal re-launch command string."""
+        import shlex
         ids_str = ' '.join(remaining_ids)
         cmd = (
-            f"python3 {__file__} watch "
+            f"python3 {shlex.quote(__file__)} watch "
             f"--request-ids {ids_str} "
-            f"--profile {self.client.profile} "
+            f"--profile {shlex.quote(self.client.profile)} "
             f"--watcher-id {self.watcher_id} "
             f"--mode {self.mode} "
             f"--poll-interval-seconds {self.poll_interval}"
         )
         if self.client.region:
-            cmd += f" --region {self.client.region}"
+            cmd += f" --region {shlex.quote(self.client.region)}"
+        if self.mode == 'cmux-keystrokes' and self.bridge and isinstance(self.bridge, CmuxBridge):
+            cmd += f" --cmux-surface {shlex.quote(self.bridge.surface_id)}"
+            if self.bridge.workspace_ref:
+                cmd += f" --cmux-workspace {shlex.quote(self.bridge.workspace_ref)}"
+        elif self.mode == 'tmux-keystrokes' and self.bridge and isinstance(self.bridge, TmuxBridge):
+            cmd += f" --tmux-pane {shlex.quote(self.bridge.tmux_pane)}"
+        socket_path = os.environ.get('CMUX_SOCKET_PATH', '')
+        if socket_path:
+            cmd = f'CMUX_SOCKET_PATH={shlex.quote(socket_path)} {cmd}'
         return cmd
 
     def _deliver_events(self, events: list, remaining_ids: list) -> bool:
@@ -719,6 +826,10 @@ class QuotaRequestWatcher:
                     self.bridge.set_status(status_key, new_status, color='#B71C1C')
                 elif new_status:
                     self.bridge.set_status(status_key, new_status)
+        elif self.mode == 'tmux-keystrokes' and self.bridge:
+            for event in events:
+                if not self.bridge.send_to_claude(event['formatted']):
+                    return False
         return True
 
     def _handle_timeout(self, active_ids: list):
@@ -744,34 +855,6 @@ class QuotaRequestWatcher:
         else:
             if self.bridge:
                 self.bridge.send_to_claude(timeout_msg)
-
-    def _handle_credential_error(self, err_str: str, active_ids: list) -> None:
-        """Handle consecutive credential errors — exit with code 2."""
-        restart_cmd = self._build_restart_cmd(active_ids)
-        msg = (
-            f"2 consecutive AWS credential errors. "
-            f"Refresh credentials and re-launch."
-        )
-        self.state.write(current_status='CREDENTIAL_EXPIRED', error_message=err_str)
-        _remove_pid_file(self.watcher_id)
-
-        if self.mode == 'long-poll-with-exit':
-            print(json.dumps({
-                'error': 'CREDENTIAL_EXPIRED',
-                'message': msg,
-                'watcher_id': self.watcher_id,
-                'instruction': f"Refresh credentials, then re-launch: {restart_cmd}",
-            }))
-            sys.stdout.flush()
-            sys.exit(2)
-        else:
-            if self.bridge:
-                self.bridge.send_to_claude(
-                    f"[Quota Watcher] CREDENTIAL_EXPIRED. {msg} Re-launch: {restart_cmd}"
-                )
-                self.bridge.notify('Quota Watcher', 'AWS credentials expired')
-            print(f"[{ts()}] CREDENTIAL_EXPIRED: {msg}", file=sys.stderr, flush=True)
-            sys.exit(2)
 
 
 # ---------------------------------------------------------------------------
@@ -866,7 +949,7 @@ def cmd_watch(args):
 
     state = WatcherState(watcher_id)
 
-    # Set up cmux bridge
+    # Set up bridge
     bridge = None
     own_surface_id = None
 
@@ -895,6 +978,27 @@ def cmd_watch(args):
             mode=mode,
             surface_id=args.cmux_surface,
             workspace_ref=workspace_ref,
+            poll_interval_seconds=poll_interval,
+            started_at=now_iso(),
+        )
+    elif mode == 'tmux-keystrokes':
+        if not args.tmux_pane:
+            print(
+                "Error: --tmux-pane is required for --mode tmux-keystrokes.",
+                file=sys.stderr,
+            )
+            _remove_pid_file(watcher_id)
+            sys.exit(1)
+        bridge = TmuxBridge(tmux_pane=args.tmux_pane)
+
+        state.write(
+            watcher_id=watcher_id,
+            profile=args.profile,
+            region=args.region or '',
+            mode=mode,
+            surface_id=None,
+            workspace_ref=None,
+            tmux_pane=args.tmux_pane,
             poll_interval_seconds=poll_interval,
             started_at=now_iso(),
         )
@@ -928,6 +1032,8 @@ def cmd_watch(args):
                 f"(will auto-close on exit; use --keep-watcher-running to prevent)",
                 flush=True,
             )
+    elif mode == 'tmux-keystrokes':
+        print(f"Target tmux pane: {args.tmux_pane}", flush=True)
     print(flush=True)
 
     watcher = QuotaRequestWatcher(
@@ -1087,6 +1193,10 @@ Examples:
   watch_quota_requests.py watch --request-ids req-abc123 --profile myprofile \\
       --mode cmux-keystrokes --cmux-surface surface:80
 
+  # tmux-keystrokes mode (sends keystrokes to a tmux pane)
+  watch_quota_requests.py watch --request-ids req-abc123 --profile myprofile \\
+      --mode tmux-keystrokes --tmux-pane %0
+
   # List all tracked watchers
   watch_quota_requests.py status --list
 
@@ -1122,7 +1232,7 @@ Examples:
     p_watch.add_argument('--region', default=None, help='AWS region (uses profile default if not set)')
     p_watch.add_argument(
         '--mode',
-        choices=['long-poll-with-exit', 'cmux-keystrokes'],
+        choices=['long-poll-with-exit', 'cmux-keystrokes', 'tmux-keystrokes'],
         default='long-poll-with-exit',
         help='Delivery mode (default: long-poll-with-exit)',
     )
@@ -1165,6 +1275,13 @@ Examples:
         '--cmux-status',
         action='store_true',
         help='Enable cmux sidebar status badge updates (cmux-keystrokes mode only)',
+    )
+    p_watch.add_argument(
+        '--tmux-pane',
+        default=None,
+        help='tmux pane ID to send keystrokes to (e.g. %%0). '
+             'Required for --mode tmux-keystrokes. '
+             "Get from: tmux display-message -p '#{pane_id}' or $TMUX_PANE",
     )
     p_watch.add_argument(
         '--keep-watcher-running',
