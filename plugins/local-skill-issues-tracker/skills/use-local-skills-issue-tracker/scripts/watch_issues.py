@@ -209,7 +209,7 @@ def _scan_issue_files(db_root: str) -> dict:
 
     Returns {file_path: {"mtime_ns": int, "issue_id": str, "status": str,
                           "title": str, "description": str,
-                          "comments": list, "skill": str}}
+                          "comments": list, "skill": str, "skill_version": str}}
     """
     snapshot = {}
     db_path = Path(db_root)
@@ -233,6 +233,7 @@ def _scan_issue_files(db_root: str) -> dict:
                     "description": issue.get("description", ""),
                     "comments": issue.get("comments", []),
                     "skill": issue.get("skill", ""),
+                    "skill_version": issue.get("skill_version", ""),
                 }
             except (OSError, json.JSONDecodeError) as exc:
                 print(f"[{_ts()}] WARN: Could not read {f.name}: {exc}", flush=True)
@@ -385,8 +386,17 @@ def _remove_pid_file(state_dir: str, watcher_id: str) -> None:
 # Change detection
 # ---------------------------------------------------------------------------
 
+def _it_prefix(ver: str) -> str:
+    """Return '[Issue Tracker vX.Y.Z]' or '[Issue Tracker]' when version is unknown."""
+    return f"[Issue Tracker v{ver}]" if ver else "[Issue Tracker]"
+
+
 def _diff_snapshots(old: dict, new: dict) -> list:
-    """Compare two snapshots and return a list of human-readable change strings."""
+    """Compare two snapshots and return a list of human-readable change strings.
+
+    Each entry is prefixed with '[Issue Tracker vX.Y.Z]' (or '[Issue Tracker]'
+    when the skill version is not recorded) so callers can forward lines verbatim.
+    """
     notifications = []
 
     old_paths = set(old.keys())
@@ -394,23 +404,25 @@ def _diff_snapshots(old: dict, new: dict) -> list:
 
     for path in new_paths - old_paths:
         info = new[path]
+        pfx = _it_prefix(info.get("skill_version", ""))
         notifications.append(
-            f"New issue #{info['issue_id']} for '{info['skill']}': "
+            f"{pfx} New issue #{info['issue_id']} for '{info['skill']}': "
             f"\"{info['title']}\" (status: {info['status']})"
         )
 
     for path in old_paths - new_paths:
         fname = os.path.basename(path)
-        notifications.append(f"Issue file removed: {fname}")
+        notifications.append(f"[Issue Tracker] Issue file removed: {fname}")
 
     for path in old_paths & new_paths:
         o = old[path]
         n = new[path]
         if n["mtime_ns"] == o["mtime_ns"]:
             continue
+        pfx = _it_prefix(n.get("skill_version", ""))
         if n["status"] != o["status"]:
             notifications.append(
-                f"Issue #{n['issue_id']} ('{n['skill']}') "
+                f"{pfx} Issue #{n['issue_id']} ('{n['skill']}') "
                 f"status changed: {o['status']} -> {n['status']}"
             )
         old_count = len(o["comments"])
@@ -420,20 +432,20 @@ def _diff_snapshots(old: dict, new: dict) -> list:
                 text = c.get("text", "")
                 preview = text[:80] + ("..." if len(text) > 80 else "")
                 notifications.append(
-                    f"New comment on issue #{n['issue_id']} "
+                    f"{pfx} New comment on issue #{n['issue_id']} "
                     f"('{n['skill']}'): \"{preview}\""
                 )
         if new_count < old_count:
             notifications.append(
-                f"Issue #{n['issue_id']} ('{n['skill']}') — comment removed"
+                f"{pfx} Issue #{n['issue_id']} ('{n['skill']}') — comment removed"
             )
         if n["description"] != o["description"]:
             notifications.append(
-                f"Issue #{n['issue_id']} ('{n['skill']}') — description updated"
+                f"{pfx} Issue #{n['issue_id']} ('{n['skill']}') — description updated"
             )
         if n["title"] != o["title"]:
             notifications.append(
-                f"Issue #{n['issue_id']} ('{n['skill']}') — "
+                f"{pfx} Issue #{n['issue_id']} ('{n['skill']}') — "
                 f"title changed to \"{n['title']}\""
             )
 
@@ -575,7 +587,7 @@ def _deliver_via_bridge(
 ) -> bool:
     """Send each notification line via bridge. Returns False if bridge becomes unreachable."""
     for note in notifications:
-        if not bridge.send_to_claude(f"[Issue Tracker] {note}"):
+        if not bridge.send_to_claude(note):
             print(
                 f"{surface_label} unreachable. Re-launch:\n  {relaunch_cmd}",
                 file=sys.stderr, flush=True,
