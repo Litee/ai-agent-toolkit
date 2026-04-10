@@ -4,9 +4,9 @@
     "name": "litee"
   },
   "metadata": {
-    "description": "Collection of AI agent skills for AWS CDK development, AWS documentation search, AWS querying (Athena, CloudWatch), Anki flashcard management, Obsidian vault management, audio conversion, podcast generation, safe terminal command registration, image generation, and ML system design interviews",
+    "description": "Collection of AI agent skills for AWS CDK development, AWS documentation search, AWS querying (Athena), CloudWatch Logs Insights querying, Anki flashcard management, Obsidian vault management, audio conversion, podcast generation, safe terminal command registration, image generation, and ML system design interviews",
 
-    "version": "1.1.20",
+    "version": "1.1.21",
     "homepage": "https://github.com/Litee/ai-agent-toolkit"
   },
   "plugins": [
@@ -80,14 +80,24 @@
       "skills": ["./skills/use-aws-glue", "./skills/watch-aws-glue-job"]
     },
     {
+      "name": "aws-cloudwatch",
+      "description": "This plugin contains a skill for querying Amazon CloudWatch Logs using Log Insights queries with real-time progress tracking, flexible time ranges, multiple output formats (JSON, CSV, table), and multi-log-group support.",
+      "source": "./plugins/aws-cloudwatch",
+      "strict": false,
+      "version": "1.0.0",
+      "category": "developer-tools",
+      "keywords": ["aws", "cloudwatch", "logs", "log-insights", "query", "monitoring"],
+      "skills": ["./skills/query-aws-cloudwatch-logs-insights"]
+    },
+    {
       "name": "aws-query-tools",
-      "description": "This plugin contains skills for querying AWS data sources: Athena SQL queries with S3 result download, parallel execution, and CTE optimization; CloudWatch Log Insights queries with real-time progress tracking; AWS Support case monitoring with status, severity, and communication change detection; and Service Quotas increase request monitoring with approval/denial notifications.",
+      "description": "This plugin contains skills for querying AWS data sources: Athena SQL queries with S3 result download, parallel execution, and CTE optimization; AWS Support case monitoring with status, severity, and communication change detection; and Service Quotas increase request monitoring with approval/denial notifications.",
       "source": "./plugins/aws-query-tools",
       "strict": false,
-      "version": "1.3.1",
+      "version": "1.4.0",
       "category": "developer-tools",
-      "keywords": ["aws", "athena", "sql", "query", "s3", "cloudwatch", "logs", "log-insights", "monitoring", "support", "cases", "service-quotas", "quotas"],
-      "skills": ["./skills/query-aws-athena", "./skills/query-aws-cloudwatch-logs-insights", "./skills/watch-aws-quota-requests", "./skills/watch-aws-support-cases"]
+      "keywords": ["aws", "athena", "sql", "query", "s3", "monitoring", "support", "cases", "service-quotas", "quotas"],
+      "skills": ["./skills/query-aws-athena", "./skills/watch-aws-quota-requests", "./skills/watch-aws-support-cases"]
     },
     {
       "name": "protect-file-system-access",

@@ -23,6 +23,7 @@ These skills can be installed as plugins in Claude Code.
 **Direct installation:**
 ```bash
 /plugin install anki@litee-claude-code-plugins
+/plugin install aws-cloudwatch@litee-claude-code-plugins
 /plugin install aws-documentation@litee-claude-code-plugins
 /plugin install aws-glue@litee-claude-code-plugins
 /plugin install aws-query-tools@litee-claude-code-plugins
@@ -52,9 +53,10 @@ Each plugin installs a skill that extends Claude's capabilities:
 | Plugin (Skill) | Category | Description |
 |--------|----------|-------------|
 | `anki` | productivity | Anki flashcard management through AnkiConnect API |
+| `aws-cloudwatch` (`query-aws-cloudwatch-logs-insights`) | developer-tools | CloudWatch Log Insights queries with real-time progress tracking, flexible time ranges, multiple output formats (JSON, CSV, table), and multi-log-group support |
 | `aws-documentation` | developer-tools | AWS CDK expert guidance and official AWS documentation search via MCP servers |
 | `aws-glue` (`use-aws-glue`, `watch-aws-glue-job`) | developer-tools | AWS Glue ETL job writing, configuration, debugging, monitoring with CloudWatch and Observability metrics, S3 shuffle, worker sizing, per-worker progress reporting, API call tracking, and live job monitoring (long-poll, cmux, and tmux modes) with resilient credential handling |
-| `aws-query-tools` (`query-aws-athena`, `query-aws-cloudwatch-logs-insights`, `watch-aws-quota-requests`, `watch-aws-support-cases`) | developer-tools | AWS Athena SQL queries with S3 download and CTE optimization; CloudWatch Log Insights with real-time progress tracking; AWS Support case monitoring with status/severity/communication change detection (long-poll, cmux, and tmux modes); Service Quotas increase request monitoring with approval/denial notifications (long-poll, cmux, and tmux modes) |
+| `aws-query-tools` (`query-aws-athena`, `watch-aws-quota-requests`, `watch-aws-support-cases`) | developer-tools | AWS Athena SQL queries with S3 download and CTE optimization; AWS Support case monitoring with status/severity/communication change detection (long-poll, cmux, and tmux modes); Service Quotas increase request monitoring with approval/denial notifications (long-poll, cmux, and tmux modes) |
 | `claude-code-status-line` | developer-tools | SessionStart hook that configures Claude Code statusline to display context usage, token counts, cost, model ID, git branch, and working directory |
 | `cmux` (`use-cmux`) | developer-tools | Terminal multiplexer integration: orchestrate sessions, browser automation, progress reporting; SessionStart hook prints cmux context and LLM behavioural instructions when running inside cmux |
 | `communication` (`communicate-well`, `write-good-emails`) | productivity | Async communication guidelines for AI agents: value test, message style, frequency, anti-patterns, and channel-type rules; professional email writing: subject lines, tone calibration, difficult scenarios, follow-up strategy, and AI prompting for emails |
