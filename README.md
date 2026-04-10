@@ -27,7 +27,7 @@ These skills can be installed as plugins in Claude Code.
 /plugin install aws-cloudwatch@litee-claude-code-plugins
 /plugin install aws-documentation@litee-claude-code-plugins
 /plugin install aws-glue@litee-claude-code-plugins
-/plugin install aws-query-tools@litee-claude-code-plugins
+/plugin install aws-quota-service@litee-claude-code-plugins
 /plugin install aws-support@litee-claude-code-plugins
 /plugin install claude-code-status-line@litee-claude-code-plugins
 /plugin install cmux-terminal@litee-claude-code-plugins
@@ -59,7 +59,7 @@ Each plugin installs a skill that extends Claude's capabilities:
 | `aws-cloudwatch` (`query-aws-cloudwatch-logs-insights`) | developer-tools | CloudWatch Log Insights queries with real-time progress tracking, flexible time ranges, multiple output formats (JSON, CSV, table), and multi-log-group support |
 | `aws-documentation` | developer-tools | AWS CDK expert guidance and official AWS documentation search via MCP servers |
 | `aws-glue` (`use-aws-glue`, `watch-aws-glue-job`) | developer-tools | AWS Glue ETL job writing, configuration, debugging, monitoring with CloudWatch and Observability metrics, S3 shuffle, worker sizing, per-worker progress reporting, API call tracking, and live job monitoring (long-poll, cmux, and tmux modes) with resilient credential handling |
-| `aws-query-tools` (`watch-aws-quota-requests`) | developer-tools | Service Quotas increase request monitoring with approval/denial notifications (long-poll, cmux, and tmux modes) |
+| `aws-quota-service` (`watch-aws-quota-requests`) | developer-tools | AWS Service Quotas increase request monitoring with approval/denial notifications (long-poll, cmux, and tmux modes) |
 | `aws-support` (`watch-aws-support-cases`) | developer-tools | AWS Support case monitoring with status/severity/communication change detection (long-poll, cmux, and tmux modes). Requires Business or Enterprise AWS support plan |
 | `claude-code-status-line` | developer-tools | SessionStart hook that configures Claude Code statusline to display context usage, token counts, cost, model ID, git branch, and working directory |
 | `cmux-terminal` (`use-cmux-terminal`) | developer-tools | Terminal multiplexer integration: orchestrate sessions, browser automation, progress reporting; SessionStart hook prints cmux context and LLM behavioural instructions when running inside cmux |

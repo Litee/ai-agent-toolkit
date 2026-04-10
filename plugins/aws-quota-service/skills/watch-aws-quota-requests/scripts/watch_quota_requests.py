@@ -10,7 +10,7 @@ Two delivery modes:
                         Runs continuously until max-runtime or signal.
 
 State persisted at:
-  ~/.claude/plugin-data/aws-query-tools/watch-aws-quota-requests/
+  ~/.claude/plugin-data/aws-quota-service/watch-aws-quota-requests/
 
 Usage:
     # Long-poll mode (no cmux required)
@@ -52,7 +52,7 @@ STATE_DIR = (
     Path.home()
     / '.claude'
     / 'plugin-data'
-    / 'aws-query-tools'
+    / 'aws-quota-service'
     / 'watch-aws-quota-requests'
 )
 

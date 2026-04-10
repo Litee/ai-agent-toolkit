@@ -284,7 +284,7 @@ message and resumes normal polling.
 | `--tmux-pane` | required for tmux mode | — | tmux pane target (e.g. `main:0.0`) |
 | `--keep-watcher-running` | no | off | Keep watcher split open after exit (default: auto-close after 3s) |
 
-State file: `~/.claude/plugin-data/aws-query-tools/watch-aws-quota-requests/watcher-<id>.json`
+State file: `~/.claude/plugin-data/aws-quota-service/watch-aws-quota-requests/watcher-<id>.json`
 
 ### `status` — Show watcher state
 
@@ -315,7 +315,7 @@ Main script with three subcommands:
 - `status`: Read-only state inspection. Lists all tracked watchers or shows a specific one.
 - `stop`: Sends SIGTERM to a running watcher PID from its state file.
 
-State files: `~/.claude/plugin-data/aws-query-tools/watch-aws-quota-requests/`
+State files: `~/.claude/plugin-data/aws-quota-service/watch-aws-quota-requests/`
 (auto-cleaned after 30 days)
 
 ### references/best-practices.md
