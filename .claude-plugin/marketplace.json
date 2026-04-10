@@ -158,14 +158,14 @@
       "skills": ["./skills/communicate-well", "./skills/write-good-emails"]
     },
     {
-      "name": "cmux",
+      "name": "cmux-terminal",
       "description": "This plugin contains a skill for orchestrating terminal sessions, browser automation, and progress reporting inside the cmux terminal multiplexer. Also includes a SessionStart hook that detects whether the session is running in cmux and prints workspace/surface context and LLM behavioural instructions.",
-      "source": "./plugins/cmux",
+      "source": "./plugins/cmux-terminal",
       "strict": false,
-      "version": "1.0.8",
+      "version": "1.0.9",
       "category": "developer-tools",
       "keywords": ["cmux", "terminal", "multiplexer", "browser", "automation", "sessions", "splits"],
-      "skills": ["./skills/use-cmux"]
+      "skills": ["./skills/use-cmux-terminal"]
     },
     {
       "name": "file-system-tools",

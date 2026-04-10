@@ -28,7 +28,7 @@ These skills can be installed as plugins in Claude Code.
 /plugin install aws-glue@litee-claude-code-plugins
 /plugin install aws-query-tools@litee-claude-code-plugins
 /plugin install claude-code-status-line@litee-claude-code-plugins
-/plugin install cmux@litee-claude-code-plugins
+/plugin install cmux-terminal@litee-claude-code-plugins
 /plugin install communication@litee-claude-code-plugins
 /plugin install convert-audio@litee-claude-code-plugins
 /plugin install cron-restoration-guard@litee-claude-code-plugins
@@ -58,7 +58,7 @@ Each plugin installs a skill that extends Claude's capabilities:
 | `aws-glue` (`use-aws-glue`, `watch-aws-glue-job`) | developer-tools | AWS Glue ETL job writing, configuration, debugging, monitoring with CloudWatch and Observability metrics, S3 shuffle, worker sizing, per-worker progress reporting, API call tracking, and live job monitoring (long-poll, cmux, and tmux modes) with resilient credential handling |
 | `aws-query-tools` (`query-aws-athena`, `watch-aws-quota-requests`, `watch-aws-support-cases`) | developer-tools | AWS Athena SQL queries with S3 download and CTE optimization; AWS Support case monitoring with status/severity/communication change detection (long-poll, cmux, and tmux modes); Service Quotas increase request monitoring with approval/denial notifications (long-poll, cmux, and tmux modes) |
 | `claude-code-status-line` | developer-tools | SessionStart hook that configures Claude Code statusline to display context usage, token counts, cost, model ID, git branch, and working directory |
-| `cmux` (`use-cmux`) | developer-tools | Terminal multiplexer integration: orchestrate sessions, browser automation, progress reporting; SessionStart hook prints cmux context and LLM behavioural instructions when running inside cmux |
+| `cmux-terminal` (`use-cmux-terminal`) | developer-tools | Terminal multiplexer integration: orchestrate sessions, browser automation, progress reporting; SessionStart hook prints cmux context and LLM behavioural instructions when running inside cmux |
 | `communication` (`communicate-well`, `write-good-emails`) | productivity | Async communication guidelines for AI agents: value test, message style, frequency, anti-patterns, and channel-type rules; professional email writing: subject lines, tone calibration, difficult scenarios, follow-up strategy, and AI prompting for emails |
 | `convert-audio` | user | Audio format conversion using ffmpeg (MP3, WAV, AAC, FLAC, Opus, OGG), bitrate/speed adjustment, and metadata tagging (ID3 tags) |
 | `cron-restoration-guard` | developer-tools | SessionStart hook (resume only) that instructs the agent to verify and re-register any cron jobs from the previous session that are no longer active |

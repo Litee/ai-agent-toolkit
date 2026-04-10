@@ -11,7 +11,7 @@
 
 When fixing skill issues from the issue tracker:
 
-- **Each issue gets its own worktree**, named after the issue (e.g. `fix-use-cmux-0008`). Exception: closely related issues that touch the same file(s) and would produce a coherent single commit may share one worktree.
+- **Each issue gets its own worktree**, named after the issue (e.g. `fix-use-cmux-terminal-0008`). Exception: closely related issues that touch the same file(s) and would produce a coherent single commit may share one worktree.
 - **Use sub-agents** to fix issues in parallel. Dispatch one sub-agent per worktree so the main session stays uncluttered and independent issues are worked on concurrently.
 - **Mark an issue `done` only after its fix is merged into `main`.** Do NOT set status to `done` when a fix is committed to a worktree branch — only after the branch is successfully merged.
 
