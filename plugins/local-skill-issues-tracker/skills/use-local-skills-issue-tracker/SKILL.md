@@ -104,13 +104,17 @@ python3 ${SKILL_DIR}/scripts/skill_issues_cli.py --db-root <path> show --skill <
 
 ## Watch Issues (background mode)
 
-The watcher polls issue JSON files on disk, prints a heartbeat every poll cycle, and
-**exits on the first change detected** — printing full change details and re-launch
-instructions. It is designed for Claude Code's `run_in_background` Bash mode.
+The watcher polls issue JSON files on disk and notifies on changes. Three delivery modes:
+
+| Mode | Behaviour |
+|------|-----------|
+| `long-poll-with-exit` | Exits on first change. Designed for `run_in_background`. Re-launch after each notification. |
+| `cmux-keystrokes` | Sends change events as keystrokes to a cmux surface. Runs indefinitely until max-runtime or signal. |
+| `tmux-keystrokes` | Sends change events as keystrokes to a tmux pane. Runs indefinitely until max-runtime or signal. |
 
 ### Quick Start
 
-Launch in the background via the Bash tool with `run_in_background: true`:
+**long-poll-with-exit** (default — for `run_in_background`):
 
 ```bash
 python3 ${SKILL_DIR}/scripts/watch_issues.py --db-root <path>
@@ -122,15 +126,36 @@ The output will contain:
 2. Full JSON of the changed issues
 3. Instructions to re-launch before processing the changes
 
+**cmux-keystrokes** (runs indefinitely, sends keystrokes to a cmux surface):
+
+```bash
+python3 ${SKILL_DIR}/scripts/watch_issues.py --db-root <path> \
+    --mode cmux-keystrokes --cmux-surface surface:3
+```
+
+**tmux-keystrokes** (runs indefinitely, sends keystrokes to a tmux pane):
+
+```bash
+python3 ${SKILL_DIR}/scripts/watch_issues.py --db-root <path> \
+    --mode tmux-keystrokes --tmux-pane %0
+```
+
 ### Parameters
 
 | Parameter | Default | Description |
 |-----------|---------|-------------|
 | `--db-root` | *(required)* | Root directory of the issue tracker |
+| `--mode` | `long-poll-with-exit` | Delivery mode: `long-poll-with-exit`, `cmux-keystrokes`, or `tmux-keystrokes` |
 | `--poll-interval` | 300s | Poll interval in seconds (10–3600) |
 | `--max-runtime-hours` | 24h | Hard timeout before the watcher exits and asks to be re-launched |
 | `--state-dir` | `~/.claude/plugin-data/local-skill-issues-tracker/use-local-skills-issue-tracker` | Directory for the persistent state files |
 | `--watcher-id` | current working directory | Stable identifier for this watcher instance. Each unique ID gets its own state file, so multiple Claude Code sessions watching the same tracker all receive events independently. Always included in the printed re-launch command. |
+| `--cmux-surface` | *(required for cmux mode)* | cmux surface ref to send keystrokes to. Get from: `cmux identify --json` → `caller.surface_ref` |
+| `--cmux-workspace` | auto-detected | cmux workspace ref (auto-detected via `cmux identify` if omitted) |
+| `--cmux-notify` | false | Enable desktop notifications via cmux on changes |
+| `--cmux-status` | false | Enable cmux sidebar status badge |
+| `--keep-watcher-running` | false | Keep the watcher split open after exit (default: auto-close after 3s) |
+| `--tmux-pane` | *(required for tmux mode)* | tmux pane ID to send keystrokes to (e.g. `%0`). Get from: `tmux display-message -p '#{pane_id}'` or `$TMUX_PANE` |
 
 ### State Persistence
 

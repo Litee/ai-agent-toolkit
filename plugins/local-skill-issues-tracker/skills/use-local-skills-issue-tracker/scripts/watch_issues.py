@@ -1,15 +1,11 @@
 #!/usr/bin/env python3
-"""Issue tracker watcher — background poll-and-exit model.
+"""Issue tracker watcher — poll-and-notify model.
 
-Polls the skill issue tracker JSON files on disk. Prints a heartbeat every
-poll cycle. On the first change detected (or on timeout), prints the change
-details and re-launch instructions, then exits.
-
-Designed for Claude Code's run_in_background Bash mode — the LLM launches
-this script in the background and re-launches it after each notification.
-
-Usage:
-    python3 watch_issues.py [options]
+Polls the skill issue tracker JSON files on disk. On change detected:
+  long-poll-with-exit  Print change details and re-launch instructions, then exit.
+                       Designed for Claude Code run_in_background mode.
+  cmux-keystrokes      Send changes as keystrokes to a cmux surface. Runs indefinitely.
+  tmux-keystrokes      Send changes as keystrokes to a tmux pane. Runs indefinitely.
 
 State is persisted to a JSON file so no events are missed between runs.
 If the state file is fresh (< 24h), the previous snapshot is used as the
@@ -23,6 +19,7 @@ import os
 import re
 import shlex
 import signal
+import subprocess
 import sys
 import time
 from datetime import datetime, timezone
@@ -34,6 +31,7 @@ DEFAULT_STATE_DIR = os.path.expanduser(
     "~/.claude/plugin-data/local-skill-issues-tracker/use-local-skills-issue-tracker"
 )
 STATE_MAX_AGE_HOURS = 24.0
+_HEARTBEAT_INTERVAL = 300  # 5 minutes (keystrokes modes)
 
 
 def _version_from_path(path: str) -> str:
@@ -67,6 +65,139 @@ def _now_iso() -> str:
 def _script_path() -> str:
     """Absolute path of this script, resolved through symlinks."""
     return str(Path(sys.argv[0]).resolve())
+
+
+# ---------------------------------------------------------------------------
+# CmuxBridge
+# ---------------------------------------------------------------------------
+
+class CmuxBridge:
+    """Sends keystrokes and optional notifications to cmux surfaces."""
+
+    def __init__(
+        self,
+        surface_id: str,
+        workspace_ref: Optional[str] = None,
+        enable_notify: bool = False,
+        enable_status: bool = False,
+    ):
+        self.surface_id = surface_id
+        self.workspace_ref = workspace_ref
+        self.enable_notify = enable_notify
+        self.enable_status = enable_status
+
+    def _run(self, cmd: list, timeout: int = 5) -> bool:
+        try:
+            result = subprocess.run(cmd, capture_output=True, timeout=timeout)
+            return result.returncode == 0
+        except Exception:
+            return False
+
+    def send_to_claude(self, message: str) -> bool:
+        """Send text as keystrokes to the Claude Code surface.
+
+        Tries direct send first, then with --workspace flag.
+        Returns True on success, False on failure (caller should exit).
+        """
+        if self._run(['cmux', 'send', '--surface', self.surface_id, message + '\n']):
+            return True
+        if self.workspace_ref:
+            if self._run(['cmux', 'send', '--surface', self.surface_id,
+                         '--workspace', self.workspace_ref, message + '\n']):
+                return True
+        return False
+
+    def notify(self, title: str, body: str):
+        if not self.enable_notify:
+            return
+        self._run(['cmux', 'notify', '--title', title, '--body', body])
+
+    def set_status(self, key: str, value: str, color: Optional[str] = None):
+        if not self.enable_status:
+            return
+        cmd = ['cmux', 'set-status', key, value]
+        if color:
+            cmd += ['--color', color]
+        self._run(cmd)
+
+    def clear_status(self, key: str):
+        if not self.enable_status:
+            return
+        self._run(['cmux', 'clear-status', key])
+
+
+# ---------------------------------------------------------------------------
+# TmuxBridge
+# ---------------------------------------------------------------------------
+
+class TmuxBridge:
+    """Sends keystrokes to a tmux pane. No-ops for cmux-specific features."""
+
+    def __init__(self, tmux_pane: str):
+        self.tmux_pane = tmux_pane
+        self.enable_notify = False
+        self.enable_status = False
+
+    def _run(self, cmd: list, timeout: int = 5) -> bool:
+        try:
+            result = subprocess.run(cmd, capture_output=True, timeout=timeout)
+            return result.returncode == 0
+        except Exception:
+            return False
+
+    def send_to_claude(self, message: str) -> bool:
+        """Send text as a keystroke line to the tmux pane. Retries up to 10 times."""
+        cmd = ['tmux', 'send-keys', '-t', self.tmux_pane, message + '\n', 'Enter']
+        for attempt in range(11):
+            if self._run(cmd):
+                return True
+            if attempt < 10:
+                print(
+                    f"[{_ts()}] WARN: tmux send-keys failed (attempt {attempt + 1}/11), "
+                    f"retrying in 3s ...",
+                    file=sys.stderr, flush=True,
+                )
+                time.sleep(3)
+        print(
+            f"[{_ts()}] ERROR: tmux send-keys failed after 11 attempts. Pane: {self.tmux_pane!r}.",
+            file=sys.stderr, flush=True,
+        )
+        return False
+
+    def notify(self, title: str, body: str):
+        self._run(['tmux', 'display-message', '-t', self.tmux_pane, f"{title}: {body}"])
+
+    def set_status(self, *_a, **_kw) -> None:
+        pass  # no-op: tmux has no sidebar status
+
+    def clear_status(self, *_a, **_kw) -> None:
+        pass  # no-op
+
+
+# ---------------------------------------------------------------------------
+# cmux detection helpers
+# ---------------------------------------------------------------------------
+
+def _detect_own_surface() -> Optional[str]:
+    try:
+        result = subprocess.run(['cmux', 'identify', '--json'], capture_output=True, timeout=5)
+        if result.returncode == 0:
+            data = json.loads(result.stdout)
+            return data.get('caller', {}).get('surface_ref')
+    except Exception:
+        pass
+    return os.environ.get('CMUX_SURFACE_ID')
+
+
+def _detect_workspace_ref() -> Optional[str]:
+    try:
+        result = subprocess.run(['cmux', 'identify', '--json'], capture_output=True, timeout=5)
+        if result.returncode == 0:
+            data = json.loads(result.stdout)
+            return data.get('caller', {}).get('workspace_ref')
+    except Exception:
+        pass
+    return os.environ.get('CMUX_WORKSPACE_ID')
 
 
 # ---------------------------------------------------------------------------
@@ -193,17 +324,7 @@ def _pid_file_path(state_dir: str, watcher_id: str) -> str:
 
 
 def _check_instance_guard(state_dir: str, watcher_id: str) -> None:
-    """Exit with an error if another process with watcher_id is already running.
-
-    Reads the PID file. If the PID is alive, prints an error to stderr and
-    exits with code 1. If the PID file is stale (process not found), execution
-    continues normally — the caller writes a fresh PID file after this returns.
-
-    os.kill(pid, 0) semantics:
-      - Succeeds (no exception)  → process exists, treat as alive.
-      - ProcessLookupError       → no such process, stale PID.
-      - PermissionError          → process exists but not owned by us, treat as alive.
-    """
+    """Exit with an error if another process with watcher_id is already running."""
     pid_path = _pid_file_path(state_dir, watcher_id)
     if not os.path.exists(pid_path):
         return
@@ -214,7 +335,6 @@ def _check_instance_guard(state_dir: str, watcher_id: str) -> None:
         return  # Unreadable or malformed — treat as stale, overwrite later.
     try:
         os.kill(pid, 0)
-        # Process is alive — abort.
         print(
             f"[Issue Watcher] ERROR: watcher '{watcher_id}' is already running (PID {pid}).\n"
             f"  PID file: {pid_path}\n"
@@ -226,7 +346,6 @@ def _check_instance_guard(state_dir: str, watcher_id: str) -> None:
     except ProcessLookupError:
         return  # Stale PID — process is gone, continue.
     except PermissionError:
-        # Process exists but owned by another user — treat as alive.
         print(
             f"[Issue Watcher] ERROR: watcher '{watcher_id}' is already running (PID {pid}).\n"
             f"  PID file: {pid_path}\n"
@@ -343,10 +462,17 @@ def _build_relaunch_cmd(
     max_runtime_hours: float,
     state_dir: str,
     watcher_id: str,
+    mode: str = "long-poll-with-exit",
+    cmux_surface: Optional[str] = None,
+    cmux_workspace: Optional[str] = None,
+    cmux_notify: bool = False,
+    cmux_status: bool = False,
+    keep_watcher_running: bool = False,
+    tmux_pane: Optional[str] = None,
 ) -> str:
     """Build a shell-safe re-launch command with all non-default args made explicit."""
     cmd = f"python3 {shlex.quote(_script_path())}"
-    # --db-root is always required, so always include it
+    # --db-root is always required
     cmd += f" --db-root {shlex.quote(db_root)}"
     if poll_interval != POLL_INTERVAL_DEFAULT:
         cmd += f" --poll-interval {poll_interval}"
@@ -356,6 +482,23 @@ def _build_relaunch_cmd(
         cmd += f" --state-dir {shlex.quote(state_dir)}"
     # Always include --watcher-id: re-launch may occur from a different CWD
     cmd += f" --watcher-id {shlex.quote(watcher_id)}"
+    if mode != "long-poll-with-exit":
+        cmd += f" --mode {shlex.quote(mode)}"
+    if cmux_surface:
+        cmd += f" --cmux-surface {shlex.quote(cmux_surface)}"
+    if cmux_workspace:
+        cmd += f" --cmux-workspace {shlex.quote(cmux_workspace)}"
+    if cmux_notify:
+        cmd += " --cmux-notify"
+    if cmux_status:
+        cmd += " --cmux-status"
+    if keep_watcher_running:
+        cmd += " --keep-watcher-running"
+    if tmux_pane:
+        cmd += f" --tmux-pane {shlex.quote(tmux_pane)}"
+    socket_path = os.environ.get('CMUX_SOCKET_PATH', '')
+    if socket_path:
+        cmd = f'CMUX_SOCKET_PATH={shlex.quote(socket_path)} {cmd}'
     return cmd
 
 
@@ -422,6 +565,26 @@ def _print_timeout_instructions(max_runtime_hours: float, relaunch_cmd: str) -> 
     print(SEP, flush=True)
 
 
+def _deliver_via_bridge(
+    bridge,
+    notifications: list,
+    surface_label: str,
+    relaunch_cmd: str,
+    state_dir: str,
+    watcher_id: str,
+) -> bool:
+    """Send each notification line via bridge. Returns False if bridge becomes unreachable."""
+    for note in notifications:
+        if not bridge.send_to_claude(f"[Issue Tracker] {note}"):
+            print(
+                f"{surface_label} unreachable. Re-launch:\n  {relaunch_cmd}",
+                file=sys.stderr, flush=True,
+            )
+            _remove_pid_file(state_dir, watcher_id)
+            return False
+    return True
+
+
 # ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
@@ -430,15 +593,19 @@ def main() -> None:
     parser = argparse.ArgumentParser(
         prog="watch_issues.py",
         description=(
-            "Poll the skill issue tracker and exit on the first change detected.\n"
-            "Designed for Claude Code run_in_background mode: the LLM re-launches\n"
-            "this script after each notification."
+            "Poll the skill issue tracker and deliver change notifications.\n\n"
+            "Modes:\n"
+            "  long-poll-with-exit  Exit on first change (for run_in_background).\n"
+            "  cmux-keystrokes      Send changes as keystrokes to a cmux surface.\n"
+            "  tmux-keystrokes      Send changes as keystrokes to a tmux pane."
         ),
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=(
             "examples:\n"
             "  %(prog)s --db-root /path/to/tracker\n"
-            "  %(prog)s --db-root /path/to/tracker --poll-interval 60\n"
+            "  %(prog)s --db-root /path/to/tracker --mode cmux-keystrokes"
+            " --cmux-surface surface:3\n"
+            "  %(prog)s --db-root /path/to/tracker --mode tmux-keystrokes --tmux-pane %%0\n"
         ),
     )
     parser.add_argument(
@@ -479,6 +646,55 @@ def main() -> None:
             "command printed on exit."
         ),
     )
+    parser.add_argument(
+        "--mode",
+        choices=["long-poll-with-exit", "cmux-keystrokes", "tmux-keystrokes"],
+        default="long-poll-with-exit",
+        help="Delivery mode (default: long-poll-with-exit)",
+    )
+
+    # cmux-only flags
+    cmux_group = parser.add_argument_group(
+        "cmux flags (only valid with --mode cmux-keystrokes)"
+    )
+    cmux_group.add_argument(
+        "--cmux-surface",
+        metavar="SURFACE_REF",
+        help="cmux surface ref of the CC session (required for cmux mode). "
+             "Get from: cmux identify --json -> caller.surface_ref",
+    )
+    cmux_group.add_argument(
+        "--cmux-workspace",
+        metavar="WORKSPACE_REF",
+        help="cmux workspace ref (auto-detected via cmux identify if omitted)",
+    )
+    cmux_group.add_argument(
+        "--cmux-notify",
+        action="store_true",
+        help="Enable desktop notifications via cmux on changes",
+    )
+    cmux_group.add_argument(
+        "--cmux-status",
+        action="store_true",
+        help="Enable cmux sidebar status badge",
+    )
+    cmux_group.add_argument(
+        "--keep-watcher-running",
+        action="store_true",
+        help="Keep the watcher split open after exit (default: auto-close after 3s)",
+    )
+
+    # tmux-only flags
+    tmux_group = parser.add_argument_group(
+        "tmux flags (only valid with --mode tmux-keystrokes)"
+    )
+    tmux_group.add_argument(
+        "--tmux-pane",
+        metavar="PANE_ID",
+        help="tmux pane ID to send keystrokes to (e.g. %%0). Required for tmux mode. "
+             "Get from: tmux display-message -p '#{pane_id}' or $TMUX_PANE",
+    )
+
     args = parser.parse_args()
 
     if not (POLL_INTERVAL_MIN <= args.poll_interval <= POLL_INTERVAL_MAX):
@@ -489,22 +705,43 @@ def main() -> None:
         )
         sys.exit(1)
 
+    # Mode-specific validation
+    if args.mode == "cmux-keystrokes" and not args.cmux_surface:
+        print("Error: --cmux-surface is required when --mode cmux-keystrokes.", file=sys.stderr)
+        sys.exit(1)
+    if args.mode == "tmux-keystrokes" and not args.tmux_pane:
+        print("Error: --tmux-pane is required when --mode tmux-keystrokes.", file=sys.stderr)
+        sys.exit(1)
+
     db_root = os.path.expanduser(args.db_root)
     state_dir = os.path.expanduser(args.state_dir)
     watcher_id = args.watcher_id if args.watcher_id is not None else os.getcwd()
     spath = _state_path(state_dir, watcher_id)
     max_runtime_seconds = int(args.max_runtime_hours * 3600)
+    mode = args.mode
+
+    # Resolve cmux workspace for cmux mode
+    cmux_workspace = None
+    if mode == "cmux-keystrokes":
+        cmux_workspace = args.cmux_workspace or _detect_workspace_ref()
 
     relaunch_cmd = _build_relaunch_cmd(
         db_root, args.poll_interval, args.max_runtime_hours, state_dir, watcher_id,
+        mode=mode,
+        cmux_surface=args.cmux_surface,
+        cmux_workspace=cmux_workspace,
+        cmux_notify=args.cmux_notify,
+        cmux_status=args.cmux_status,
+        keep_watcher_running=args.keep_watcher_running,
+        tmux_pane=args.tmux_pane,
     )
 
     # --- Load or initialise baseline snapshot ---
     baseline = _load_state(spath)
     current = _scan_issue_files(db_root)
+    startup_pending: list = []
 
     if baseline is None:
-        # No usable prior state — initialise
         try:
             _save_state(spath, current)
         except OSError as e:
@@ -516,23 +753,24 @@ def main() -> None:
             flush=True,
         )
     else:
-        # Check for changes that happened while the watcher was not running
-        pending = _diff_snapshots(baseline, current)
-        if pending:
+        startup_pending = _diff_snapshots(baseline, current)
+        if startup_pending:
             print(
-                f"[{_ts()}] {len(pending)} change(s) detected since last run.",
+                f"[{_ts()}] {len(startup_pending)} change(s) detected since last run.",
                 flush=True,
             )
             try:
                 _save_state(spath, current)
             except OSError as e:
                 print(f"[{_ts()}] WARN: failed to write state: {e}", flush=True)
-            _print_changes_and_instructions(pending, baseline, current, relaunch_cmd)
-            sys.exit(0)
+            if mode == "long-poll-with-exit":
+                _print_changes_and_instructions(startup_pending, baseline, current, relaunch_cmd)
+                sys.exit(0)
+            # keystrokes modes: fall through to bridge setup, then deliver startup_pending
         else:
             print(
-                f"[{_ts()}] Issue watcher v{_VERSION} — resuming from saved state ({len(current)} issues). "
-                f"Polling every {args.poll_interval}s.",
+                f"[{_ts()}] Issue watcher v{_VERSION} — resuming from saved state "
+                f"({len(current)} issues). Polling every {args.poll_interval}s.",
                 flush=True,
             )
 
@@ -551,13 +789,84 @@ def main() -> None:
     signal.signal(signal.SIGTERM, _handle_signal)
     signal.signal(signal.SIGINT, _handle_signal)
 
-    # Write PID file after instance guard check and signal handler setup.
+    # SIGUSR1 for keystrokes modes — exit cleanly (exit code 0, not 144)
+    if mode in ("cmux-keystrokes", "tmux-keystrokes"):
+        def _handle_sigusr1(_signum, _frame):
+            """Handle SIGUSR1 from Claude Code background task manager."""
+            print(f"[{_ts()}] Received SIGUSR1 — exiting cleanly.", file=sys.stderr, flush=True)
+            _remove_pid_file(state_dir, watcher_id)
+            sys.exit(0)
+        signal.signal(signal.SIGUSR1, _handle_sigusr1)
+
     _write_pid_file(state_dir, watcher_id)
+
+    # --- Bridge setup ---
+    bridge = None
+    own_surface_id = None
+    surface_label = ""
+
+    if mode == "cmux-keystrokes":
+        bridge = CmuxBridge(
+            surface_id=args.cmux_surface,
+            workspace_ref=cmux_workspace,
+            enable_notify=args.cmux_notify,
+            enable_status=args.cmux_status,
+        )
+        surface_label = f"Surface {args.cmux_surface}"
+        if not args.keep_watcher_running:
+            own_surface_id = _detect_own_surface()
+        if own_surface_id:
+            print(
+                f"[{_ts()}] Watcher split: {own_surface_id} "
+                f"(auto-close on exit; use --keep-watcher-running to prevent)",
+                file=sys.stderr, flush=True,
+            )
+        # Send startup confirmation
+        if not bridge.send_to_claude(
+            f"[Issue Watcher v{_VERSION}] Started. ID: {watcher_id} | DB: {db_root}"
+        ):
+            print(
+                f"Surface {args.cmux_surface} unreachable. "
+                f"Get fresh refs via `cmux identify --json` and re-launch:\n"
+                f"  {relaunch_cmd}",
+                file=sys.stderr, flush=True,
+            )
+            _remove_pid_file(state_dir, watcher_id)
+            sys.exit(1)
+        # Deliver any changes detected at startup
+        if startup_pending:
+            if not _deliver_via_bridge(
+                bridge, startup_pending, surface_label, relaunch_cmd, state_dir, watcher_id
+            ):
+                sys.exit(1)
+
+    elif mode == "tmux-keystrokes":
+        bridge = TmuxBridge(tmux_pane=args.tmux_pane)
+        surface_label = f"tmux pane {args.tmux_pane}"
+        # Send startup confirmation
+        if not bridge.send_to_claude(
+            f"[Issue Watcher v{_VERSION}] Started. ID: {watcher_id} | DB: {db_root}"
+        ):
+            print(
+                f"tmux pane {args.tmux_pane} unreachable. "
+                f"Check pane ID and re-launch:\n"
+                f"  {relaunch_cmd}",
+                file=sys.stderr, flush=True,
+            )
+            _remove_pid_file(state_dir, watcher_id)
+            sys.exit(1)
+        # Deliver any changes detected at startup
+        if startup_pending:
+            if not _deliver_via_bridge(
+                bridge, startup_pending, surface_label, relaunch_cmd, state_dir, watcher_id
+            ):
+                sys.exit(1)
 
     # --- Poll loop ---
     started_at = time.monotonic()
     poll_count = 0
     snapshot = current
+    last_heartbeat = time.monotonic()
 
     try:
         while running[0]:
@@ -569,7 +878,16 @@ def main() -> None:
             elapsed = time.monotonic() - started_at
             if elapsed > max_runtime_seconds:
                 _remove_pid_file(state_dir, watcher_id)
-                _print_timeout_instructions(args.max_runtime_hours, relaunch_cmd)
+                if mode == "long-poll-with-exit":
+                    _print_timeout_instructions(args.max_runtime_hours, relaunch_cmd)
+                else:
+                    msg = (
+                        f"[Issue Watcher v{_VERSION}] Max runtime ({args.max_runtime_hours}h) "
+                        f"reached. Re-launch: {relaunch_cmd}"
+                    )
+                    if bridge:
+                        bridge.send_to_claude(msg)
+                    print(msg, file=sys.stderr, flush=True)
                 sys.exit(0)
 
             poll_count += 1
@@ -582,26 +900,53 @@ def main() -> None:
                     _save_state(spath, new_snapshot)
                 except OSError as e:
                     print(f"[{_ts()}] WARN: failed to write state: {e}", flush=True)
+
                 print(
                     f"[{_ts()}] poll #{poll_count} | {status_summary} | "
                     f"{len(notifications)} change(s)",
                     flush=True,
                 )
-                _remove_pid_file(state_dir, watcher_id)
-                _print_changes_and_instructions(
-                    notifications, snapshot, new_snapshot, relaunch_cmd,
-                )
-                sys.exit(0)
+
+                if mode == "long-poll-with-exit":
+                    _remove_pid_file(state_dir, watcher_id)
+                    _print_changes_and_instructions(
+                        notifications, snapshot, new_snapshot, relaunch_cmd,
+                    )
+                    sys.exit(0)
+                else:
+                    # Deliver via bridge, continue running
+                    if not _deliver_via_bridge(
+                        bridge, notifications, surface_label, relaunch_cmd,
+                        state_dir, watcher_id,
+                    ):
+                        sys.exit(1)
+                    snapshot = new_snapshot
             else:
-                print(
-                    f"[{_ts()}] Issue watcher v{_VERSION} | poll #{poll_count} | {status_summary} | no changes",
-                    flush=True,
-                )
+                if mode == "long-poll-with-exit":
+                    print(
+                        f"[{_ts()}] Issue watcher v{_VERSION} | poll #{poll_count} | "
+                        f"{status_summary} | no changes",
+                        flush=True,
+                    )
+                else:
+                    # Heartbeat every 5 minutes in keystrokes modes
+                    now_mono = time.monotonic()
+                    if now_mono - last_heartbeat >= _HEARTBEAT_INTERVAL:
+                        print(
+                            f"[{_ts()}] Issue watcher v{_VERSION} | poll #{poll_count} | "
+                            f"{status_summary} | no changes",
+                            flush=True,
+                        )
+                        last_heartbeat = now_mono
                 snapshot = new_snapshot
 
         # Exited via signal
         sig = received_signal[0] or "unknown"
         _remove_pid_file(state_dir, watcher_id)
+        if mode in ("cmux-keystrokes", "tmux-keystrokes") and bridge:
+            bridge.send_to_claude(
+                f"[Issue Watcher v{_VERSION}] Exiting ({sig}). Re-launch: {relaunch_cmd}"
+            )
         print(
             f"[{_ts()}] Issue watcher v{_VERSION} — exiting ({sig}).\n"
             f"Re-launch via Bash tool with run_in_background=true:\n"
@@ -610,6 +955,12 @@ def main() -> None:
         )
     finally:
         _remove_pid_file(state_dir, watcher_id)
+        if own_surface_id:
+            time.sleep(3)
+            subprocess.run(
+                ['cmux', 'close-surface', '--surface', own_surface_id],
+                capture_output=True, timeout=5,
+            )
 
 
 if __name__ == "__main__":
