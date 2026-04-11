@@ -6,7 +6,7 @@
   "metadata": {
     "description": "Collection of AI agent skills for AWS CDK development, AWS documentation search, AWS Athena SQL querying, CloudWatch Logs Insights querying, Anki flashcard management, Obsidian vault management, audio conversion, podcast generation, safe terminal command registration, image generation, and ML system design interviews",
 
-    "version": "1.1.23",
+    "version": "1.1.24",
     "homepage": "https://github.com/Litee/ai-agent-toolkit"
   },
   "plugins": [
@@ -189,13 +189,13 @@
     },
     {
       "name": "file-system-tools",
-      "description": "This plugin contains skills for freeing disk space on developer machines and scanning for bloat directories. Cleans package manager caches, IDE build artefacts, and Docker resources. Scans for node_modules, virtual environments, and build caches. Use when disk is full, cleaning caches, reclaiming storage, or finding bloat.",
+      "description": "This plugin contains skills for freeing disk space on developer machines, scanning for bloat directories, and safely analyzing large files without exceeding the context window. Cleans package manager caches, IDE build artefacts, and Docker resources. Scans for node_modules, virtual environments, and build caches. Covers size-checking strategies, targeted extraction with Bash/Python/Node.js one-liners, structured data analysis (JSON, CSV, XML, logs), and token estimation. Use when disk is full, cleaning caches, reclaiming storage, finding bloat, or working with large files.",
       "source": "./plugins/file-system-tools",
       "strict": false,
-      "version": "1.0.2",
+      "version": "1.1.0",
       "category": "developer-tools",
-      "keywords": ["disk", "cache", "cleanup", "storage", "free-space"],
-      "skills": ["./skills/free-disk-space"]
+      "keywords": ["disk", "cache", "cleanup", "storage", "free-space", "large-files", "context-window", "extraction", "analysis"],
+      "skills": ["./skills/free-disk-space", "./skills/handle-large-files"]
     },
     {
       "name": "generate-image",
@@ -206,16 +206,6 @@
       "category": "user",
       "keywords": ["aws", "bedrock", "nova-canvas", "image-generation", "text-to-image", "ai-art"],
       "skills": ["./skills/generate-image"]
-    },
-    {
-      "name": "large-file-handling",
-      "description": "This plugin contains a skill for safely analyzing, extracting from, and navigating large files without exceeding the LLM context window. Covers size-checking strategies, targeted extraction with Bash/Python/Node.js/PowerShell one-liners, structured data analysis (JSON, CSV, XML, logs), codebase reconnaissance, and token estimation.",
-      "source": "./plugins/large-file-handling",
-      "strict": false,
-      "version": "1.0.0",
-      "category": "developer-tools",
-      "keywords": ["large-files", "context-window", "extraction", "analysis", "one-liners", "json", "csv", "logs", "tokens"],
-      "skills": ["./skills/handle-large-files"]
     },
     {
       "name": "writing",
