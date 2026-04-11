@@ -387,14 +387,14 @@ def _remove_pid_file(state_dir: str, watcher_id: str) -> None:
 # ---------------------------------------------------------------------------
 
 def _it_prefix() -> str:
-    """Return '[Issue Tracker vX.Y.Z]' using the watcher's own version."""
-    return f"[Issue Tracker v{_VERSION}]" if _VERSION and _VERSION != "unknown" else "[Issue Tracker]"
+    """Return '[Local Issue Tracker vX.Y.Z]' using the watcher's own version."""
+    return f"[Local Issue Tracker v{_VERSION}]" if _VERSION and _VERSION != "unknown" else "[Local Issue Tracker]"
 
 
 def _diff_snapshots(old: dict, new: dict) -> list:
     """Compare two snapshots and return a list of human-readable change strings.
 
-    Each entry is prefixed with '[Issue Tracker vX.Y.Z]' so callers can forward
+    Each entry is prefixed with '[Local Issue Tracker vX.Y.Z]' so callers can forward
     lines verbatim. The version is the watcher's own version, not the skill version.
     """
     notifications = []
@@ -412,7 +412,7 @@ def _diff_snapshots(old: dict, new: dict) -> list:
 
     for path in old_paths - new_paths:
         fname = os.path.basename(path)
-        notifications.append(f"[Issue Tracker] Issue file removed: {fname}")
+        notifications.append(f"[Local Issue Tracker] Issue file removed: {fname}")
 
     for path in old_paths & new_paths:
         o = old[path]
