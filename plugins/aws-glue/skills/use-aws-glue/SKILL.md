@@ -1,6 +1,6 @@
 ---
 name: use-aws-glue
-description: "This skill should be used when writing, configuring, debugging, or monitoring AWS Glue ETL jobs. Triggers on AWS Glue, Glue job, glue update-job, GlueVersion, WorkerType, NumberOfWorkers, Glue CloudWatch metrics, Glue observability metrics, Glue job monitoring, S3 shuffle in Glue, worker type sizing, DPU right-sizing, G.025X, G.1X, G.2X, G.4X, G.8X, Parquet row count verification via pyarrow, Glue CloudWatch logs, /aws-glue/jobs/output, ApiCallTracker, Glue job naming, Glue cron monitor, Glue best practices, Glue anti-patterns, enable-metrics, enable-observability-metrics, or Glue job progress reporting. For generic PySpark coding patterns (style, anti-patterns, joins, AQE, broadcast joins, shuffle partitions), see the use-pyspark skill."
+description: "This skill should be used when writing, configuring, debugging, or monitoring AWS Glue ETL jobs. Triggers on AWS Glue, Glue job, glue update-job, GlueVersion, WorkerType, NumberOfWorkers, Glue CloudWatch metrics, Glue observability metrics, Glue job monitoring, S3 shuffle in Glue, worker type sizing, DPU right-sizing, G.025X, G.1X, G.2X, G.4X, G.8X, Parquet row count verification via pyarrow, Glue CloudWatch logs, /aws-glue/jobs/output, ApiCallTracker, Glue job naming, Glue cron monitor, Glue best practices, Glue anti-patterns, enable-metrics, enable-observability-metrics, Glue job progress reporting, Glue exit code 137, Glue OOM, Glue small files problem, groupFiles, groupSize, coalesce output Parquet, Glue Flex jobs, Spark UI Glue, VPC endpoint Glue S3, Glue timeout MaxConcurrentRuns, Glue troubleshooting, Glue job timeout 2880, Glue YARN container killed, Glue no space left on device, Glue connect timed out, Glue straggler task. For generic PySpark coding patterns (style, anti-patterns, joins, AQE, broadcast joins, shuffle partitions), see the use-pyspark skill."
 ---
 
 # Use AWS Glue
@@ -21,6 +21,64 @@ aws glue get-job --job-name my-job --query 'Job' --output json > /tmp/job.json
 # Edit /tmp/job.json as needed, then:
 aws glue update-job --job-name my-job --job-update file:///tmp/job.json
 ```
+
+---
+
+### 2. Not setting a job timeout — the default is 48 hours
+
+Glue jobs default to `Timeout: 2880` minutes (48 hours). A runaway job — infinite loop, stuck waiting on a throttled API, deadlocked executor — will consume DPUs for two full days before Glue kills it. The bill arrives before you notice.
+
+**Fix:** Always set `--timeout` (in minutes) on every `create-job` and `update-job` call. Use 2–3× the expected job runtime as a safety margin. For ad-hoc jobs with unknown runtime, 60–120 minutes is a sane conservative default.
+
+```bash
+# Set timeout at job creation
+aws glue create-job \
+  --name "$JOB_NAME" \
+  --timeout 120 \
+  ...
+
+# Or override per run (takes precedence over job-level timeout)
+aws glue start-job-run \
+  --job-name "$JOB_NAME" \
+  --timeout 90 \
+  ...
+```
+
+---
+
+### 3. Ignoring `MaxConcurrentRuns` — causes silent queuing or "max exceeded" failures
+
+The default `MaxConcurrentRuns` is `1`. Submitting a second run while one is active fails with `ConcurrentRunsExceededException`. This is especially confusing when the previous run appears to have completed in the console but is still in a transitional state internally.
+
+**Fix:** Be explicit about concurrency. For ad-hoc jobs meant to run one-at-a-time, leave it at `1` (the default) but catch the exception and wait. For jobs designed for parallel execution, set it deliberately via `ExecutionProperty`:
+
+```bash
+aws glue create-job \
+  --name "$JOB_NAME" \
+  --execution-property '{"MaxConcurrentRuns": 3}' \
+  ...
+```
+
+When polling for job completion and you hit `Max concurrent runs exceeded`, wait 30–60 seconds and check `get-job-runs` to see if the previous run is still in `RUNNING` or `STOPPING` state before retrying.
+
+---
+
+### 4. Attaching a Glue job to a VPC without S3/Glue VPC endpoints
+
+When a Glue job runs inside a VPC subnet, it needs to reach S3 (for data and the script) and the Glue service API. Without a route to these services, the job hangs on connection attempts and eventually fails with `Unable to execute HTTP request... connect timed out` or `Error: Could not find S3 endpoint or NAT gateway for subnetId`.
+
+**Fix:** Before submitting a VPC-attached job, verify that the subnet has one of the following:
+- **S3 gateway endpoint** in the VPC route table (free, recommended)
+- **NAT gateway** in the VPC (costs money, but covers all public AWS endpoints)
+
+```bash
+# Check whether S3 VPC endpoint exists in the target VPC
+aws ec2 describe-vpc-endpoints \
+  --filters "Name=vpc-id,Values=$VPC_ID" "Name=service-name,Values=com.amazonaws.$REGION.s3" \
+  --query 'VpcEndpoints[*].[VpcEndpointId,State]' --output table
+```
+
+If no endpoint exists and no NAT gateway is present, add an S3 gateway endpoint to the VPC before running the job.
 
 ---
 
@@ -301,6 +359,135 @@ Best for: jobs with large aggregations or wide joins where `glue.ALL.spillBytesT
 For Glue jobs that call external services (SageMaker, DynamoDB, REST), use a thread-safe `ApiCallTracker` class that logs per-operation TPS, success/failure counts, and p50/p99 latency every 5 minutes and at partition end. Integrate via `mapPartitions`.
 
 Load `${SKILL_DIR}/references/api-call-tracker.md` for the full `ApiCallTracker` implementation and `mapPartitions` integration example.
+
+---
+
+### 13. Handle the small files problem on read with `groupFiles`
+
+Reading thousands of small S3 files (< 128 MB each) makes each file a separate Spark partition. With enough files this causes: (a) driver OOM from tracking too many tasks, (b) excessive task scheduling overhead, (c) slow overall throughput. This is common after days of incremental appends produce many tiny objects.
+
+**Fix:** Set `groupFiles` and `groupSize` options to coalesce small files into larger partitions at read time:
+
+```python
+from awsglue.context import GlueContext
+
+glueContext = GlueContext(SparkContext.getOrCreate())
+
+# When reading from the Glue Data Catalog
+dyf = glueContext.create_dynamic_frame.from_catalog(
+    database="my_db",
+    table_name="my_table",
+    additional_options={
+        "groupFiles": "inPartition",   # group files within a partition prefix
+        "groupSize": "134217728",      # 128 MB target group size in bytes
+    }
+)
+
+# When reading directly from S3
+dyf = glueContext.create_dynamic_frame.from_options(
+    connection_type="s3",
+    connection_options={
+        "paths": ["s3://my-bucket/my-prefix/"],
+        "groupFiles": "inPartition",
+        "groupSize": "134217728",
+    },
+    format="parquet",
+)
+```
+
+`groupFiles` values: `"inPartition"` (groups within a partition key prefix, safe for partitioned datasets) or `"none"` (default, no grouping).
+
+**When NOT to use:** If your files are already large (> 128 MB each), grouping adds overhead with no benefit.
+
+---
+
+### 14. Coalesce output to avoid the small files problem on write
+
+Default Spark output partitioning often produces hundreds or thousands of tiny Parquet files. This degrades downstream Athena, Redshift Spectrum, and S3 Select performance significantly — each file requires a separate S3 GET, and query planners struggle with too many small row groups.
+
+**Fix:** Reduce output partition count before writing. Target 128 MB–1 GB per output file.
+
+```python
+# coalesce: fewer partitions, no full shuffle — use when reducing partition count
+df.coalesce(10).write.parquet("s3://my-bucket/output/")
+
+# repartition: full shuffle — use when you also need to partition by a key
+df.repartition(10, "partition_col").write \
+  .partitionBy("partition_col") \
+  .parquet("s3://my-bucket/output/")
+```
+
+**Rule of thumb:** `output_file_count = total_data_size_bytes / target_file_size_bytes`. For 10 GB output targeting 256 MB files: `10 GB / 256 MB ≈ 40` partitions.
+
+Use `coalesce` when only reducing partition count (avoids the shuffle cost of `repartition`). Use `repartition` when also re-keying data for `partitionBy`.
+
+---
+
+### 15. Use Flex execution for non-urgent batch jobs (~34% cost savings)
+
+Glue Flex jobs run on spare Glue capacity. They cost ~34% less than standard jobs but may wait in a queue before starting, and may be restarted mid-run if capacity is reclaimed.
+
+**When to use:** Nightly/weekly batch loads, historical backfills, dev/test runs — any job where a delay of minutes to an hour is acceptable and idempotency makes restarts safe.
+
+**When NOT to use:** Real-time or near-real-time pipelines, jobs with a strict delivery SLA, or jobs without idempotent writes.
+
+```bash
+aws glue create-job \
+  --name "$JOB_NAME" \
+  --execution-class FLEX \
+  --worker-type G.1X \
+  --number-of-workers 10 \
+  ...
+```
+
+Note: Flex is only available for Glue ETL jobs (not streaming). Not available for G.025X worker type.
+
+---
+
+### 16. Enable the Spark UI for post-mortem debugging
+
+The Spark web UI exposes stage-level DAG execution, task distribution, shuffle read/write sizes, GC pressure, and executor time breakdowns. This is far more detailed than CloudWatch metrics alone and is essential for diagnosing stragglers, data skew, and OOM causes.
+
+Glue backs up Spark event logs to S3 every 30 seconds, so you can view the UI during a run or after completion.
+
+```bash
+# Add to DefaultArguments at job creation
+aws glue create-job \
+  --name "$JOB_NAME" \
+  --default-arguments '{
+    "--enable-spark-ui": "true",
+    "--spark-event-logs-path": "s3://my-bucket/spark-ui-logs/"
+  }' \
+  ...
+```
+
+After the job runs, view the UI in the Glue Studio console (job run → **Run Details** → **Spark UI**), or spin up a local Spark history server pointing at the same S3 path:
+
+```bash
+# Local Spark history server (requires Spark installed locally)
+SPARK_NO_DAEMONIZE=true spark-class org.apache.spark.deploy.history.HistoryServer \
+  -Dspark.history.fs.logDirectory=s3://my-bucket/spark-ui-logs/
+```
+
+---
+
+## Troubleshooting
+
+Quick reference for common Glue job failures. Check CloudWatch logs first (`/aws-glue/jobs/error` for driver errors, `/aws-glue/jobs/output` for driver stdout).
+
+| Error / Symptom | Likely Cause | Fix |
+|---|---|---|
+| `Command failed with exit code 137` | OOM — YARN killed the container for exceeding memory | Scale up worker type (G.1X → G.2X). Check `glue.ALL.jvm.heap.usage` metric. Reduce partition size or avoid `collect()` / `toPandas()` on the driver. |
+| `Command failed with exit code 1` | Unhandled Python exception in the script | Check `/aws-glue/jobs/error` log stream for the traceback. Common causes: import error, bad S3 path, schema mismatch, missing argument. |
+| `Container killed by YARN for exceeding memory limits` | Executor OOM from large partitions, skewed joins, or too much data collected to the driver | Repartition data, avoid `collect()`, use `groupFiles`/`groupSize` for small-file input, or scale up worker type. |
+| `No space left on device` | Local disk full from shuffle spill | Enable S3 shuffle (`--write-shuffle-files-to-s3 true`, `--write-shuffle-spills-to-s3 true`). See Best Practice #11. |
+| `Unable to execute HTTP request... connect timed out` | VPC networking: no S3 gateway endpoint or NAT gateway in the subnet | Add an S3 gateway VPC endpoint to the subnet's route table. See Anti-Pattern #4. |
+| Job enters `TIMEOUT` state | Job ran past the `Timeout` setting (default 2880 min / 48 hours if unset) | Set a tighter `--timeout` on the job or per-run. See Anti-Pattern #2. |
+| Job runs for hours with no progress / straggler task | Data skew causing one task to process most of the data | Enable Spark UI to inspect task distribution. Use `groupFiles` for small-file inputs. Repartition skewed keys with salting (see `use-pyspark` skill). |
+| `ConcurrentRunsExceededException: Max concurrent runs exceeded` | A previous run is still active or in a transitional state | Check `aws glue get-job-runs` for runs in `RUNNING` or `STOPPING` state. Wait for completion or increase `MaxConcurrentRuns`. See Anti-Pattern #3. |
+| `ThrottlingException` on Glue API calls | Polling too frequently or too many concurrent API calls | Use exponential backoff. Poll at 5 min then every 10–60 min (see Best Practice #5), not every few seconds. |
+| CloudWatch output logs missing for short jobs | Jobs completing in < ~2 min may not flush the log stream | Use pyarrow footer metadata (Best Practice #1) or post-write `spark.read.parquet().count()` for verification. See Best Practice #2. |
+| `Error: Could not find S3 endpoint or NAT gateway for subnetId` | VPC job has no route to S3 | Same as `connect timed out` — add an S3 gateway endpoint. See Anti-Pattern #4. |
 
 ---
 
