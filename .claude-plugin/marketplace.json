@@ -6,7 +6,7 @@
   "metadata": {
     "description": "Collection of AI agent skills for AWS CDK development, AWS documentation search, AWS Athena SQL querying, CloudWatch Logs Insights querying, Anki flashcard management, Obsidian vault management, audio conversion, podcast generation, safe terminal command registration, image generation, and ML system design interviews",
 
-    "version": "1.1.24",
+    "version": "1.1.25",
     "homepage": "https://github.com/Litee/ai-agent-toolkit"
   },
   "plugins": [
@@ -81,10 +81,10 @@
     },
     {
       "name": "aws-glue",
-      "description": "This plugin contains skills for AWS Glue ETL jobs: writing, configuring, debugging, and monitoring Glue jobs with update-job gotchas, worker type sizing, CloudWatch and Observability metrics, S3 shuffle, per-worker progress reporting, API call tracking via ApiCallTracker, and live job monitoring with long-poll-with-exit, cmux-keystrokes, and tmux-keystrokes modes, resilient credential handling, and CloudWatch metrics (CPU, heap, records, executors).",
+      "description": "This plugin contains skills for AWS Glue ETL jobs: writing, configuring, debugging, and monitoring Glue jobs with update-job gotchas, worker type sizing, CloudWatch and Observability metrics, S3 shuffle, per-worker progress reporting, API call tracking via ApiCallTracker, live job monitoring with long-poll-with-exit, cmux-keystrokes, and tmux-keystrokes modes, resilient credential handling, VPC endpoint validation, Flex job cost savings, Spark UI setup, small files (groupFiles/coalesce), timeout anti-patterns, MaxConcurrentRuns gotchas, and a troubleshooting quick-reference.",
       "source": "./plugins/aws-glue",
       "strict": false,
-      "version": "1.1.0",
+      "version": "1.1.1",
       "category": "developer-tools",
       "keywords": ["aws", "glue", "etl", "cloudwatch", "s3", "pyspark", "data-engineering", "monitoring"],
       "skills": ["./skills/use-aws-glue", "./skills/watch-aws-glue-job"]
@@ -226,6 +226,16 @@
       "category": "productivity",
       "keywords": ["ml", "machine-learning", "interview", "system-design", "hiring", "evaluation"],
       "skills": ["./skills/ml-system-design-interviewer"]
+    },
+    {
+      "name": "skill-creator-extra-tips",
+      "description": "This plugin contains a skill with supplementary guidance for the skill-creator skill: portability best practices, file naming conventions, the ${SKILL_DIR} placeholder, context management (three-level loading), self-containment rules, and automated tooling references. Use when creating distributable skills, avoiding hardcoded paths, or learning skill quality best practices.",
+      "source": "./plugins/skill-creator-extra-tips",
+      "strict": false,
+      "version": "1.0.0",
+      "category": "developer-tools",
+      "keywords": ["skill", "skill-creator", "portability", "best-practices", "naming-conventions", "skill-dir"],
+      "skills": ["./skills/skill-creator-extra-tips"]
     },
     {
       "name": "update-versioned-permissions",
