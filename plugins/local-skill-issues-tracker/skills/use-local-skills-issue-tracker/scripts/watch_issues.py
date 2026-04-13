@@ -825,7 +825,13 @@ def main() -> None:
         )
         surface_label = f"Surface {args.cmux_surface}"
         if not args.keep_watcher_running:
-            own_surface_id = _detect_own_surface()
+            detected = _detect_own_surface()
+            # Only treat the detected surface as the watcher's own split when it is
+            # different from --cmux-surface.  When running as a background task the
+            # caller surface is the CC terminal itself (same as --cmux-surface), so
+            # we must not auto-close it on exit.
+            if detected and detected != args.cmux_surface:
+                own_surface_id = detected
         if own_surface_id:
             print(
                 f"[{_ts()}] Watcher split: {own_surface_id} "
