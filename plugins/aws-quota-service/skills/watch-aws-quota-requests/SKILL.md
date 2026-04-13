@@ -35,7 +35,7 @@ This skill solves it two ways:
 | Environment | Approach |
 |-------------|----------|
 | **long-poll-with-exit** (default) | Watcher runs in the background via `run_in_background: true`. Exits the moment a status change is detected, printing JSON to stdout. LLM reads the output, re-launches with the same `--watcher-id`, then processes events. Minimal monitoring gap. |
-| **cmux-keystrokes** | Watcher runs in a visible cmux split. On every status change, sends a keystroke to the CC surface, waking the LLM to act. Runs indefinitely until max-runtime or signal. |
+| **cmux-keystrokes** | Watcher runs as a background task. On every status change, sends a keystroke to the CC surface via cmux, waking the LLM to act. Runs indefinitely until max-runtime or signal. |
 | **tmux-keystrokes** | Same as cmux-keystrokes but uses `tmux send-keys` for delivery — no cmux dependency. Requires `--tmux-pane` (e.g. `main:0.1`). |
 
 Note: Service Quota requests are **per-region** (unlike Support which is global). Always
@@ -70,7 +70,7 @@ The watcher sends events directly to the specified tmux pane. No cmux needed.
 
 ## Quick Start with cmux
 
-### 1. Identify your surface and workspace
+### 1. Identify your surface
 
 ```bash
 cmux identify --json
@@ -78,20 +78,17 @@ cmux identify --json
 # Example: {"caller": {"surface_ref": "surface:80", "workspace_ref": "workspace:47"}, ...}
 ```
 
-### 2. Create a visible split and launch the watcher
+### 2. Launch the watcher as a background task
+
+Run with `run_in_background: true` on the Bash tool call:
 
 ```bash
-# Step 1: create split — outputs the new surface ref directly
-NEW_SURFACE=$(cmux new-split right | awk '{print $2}')
-
-# Step 2: run the watcher in the split
-cmux send --surface "$NEW_SURFACE" "source /path/to/.venv/bin/activate && \
 python3 ${SKILL_DIR}/scripts/watch_quota_requests.py watch \
     --request-ids req-abc123 req-def456 \
     --profile myprofile \
     --region us-east-1 \
     --mode cmux-keystrokes \
-    --cmux-surface surface:80\n"
+    --cmux-surface surface:80
 ```
 
 The watcher:
@@ -111,7 +108,7 @@ The watcher:
     --cmux-notify        # Desktop notification on each status change
     --cmux-status        # Sidebar status badge
     --poll-interval-seconds 300   # Override poll interval (min 60, max 3600)
-    --keep-watcher-running        # Keep the watcher split open after exit (default: auto-close after 3s)
+    --keep-watcher-running        # Keep watcher process alive after completion (default: exit after 3s)
 ```
 
 ### 4. Stopping the watcher early
@@ -125,8 +122,6 @@ Or list live watchers first:
 ```bash
 python3 ${SKILL_DIR}/scripts/watch_quota_requests.py stop --list
 ```
-
-The watcher split also accepts Ctrl+C directly.
 
 ---
 
@@ -282,7 +277,7 @@ message and resumes normal polling.
 | `--cmux-notify` | no | off | Enable desktop notifications |
 | `--cmux-status` | no | off | Enable cmux sidebar status badge |
 | `--tmux-pane` | required for tmux mode | — | tmux pane target (e.g. `main:0.0`) |
-| `--keep-watcher-running` | no | off | Keep watcher split open after exit (default: auto-close after 3s) |
+| `--keep-watcher-running` | no | off | Keep watcher process alive after completion (default: exit after 3s) |
 
 State file: `~/.claude/plugin-data/aws-quota-service/watch-aws-quota-requests/watcher-<id>.json`
 

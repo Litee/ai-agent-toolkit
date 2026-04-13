@@ -154,7 +154,7 @@ python3 ${SKILL_DIR}/scripts/watch_issues.py --db-root <path> \
 | `--cmux-workspace` | auto-detected | cmux workspace ref (auto-detected via `cmux identify` if omitted) |
 | `--cmux-notify` | false | Enable desktop notifications via cmux on changes |
 | `--cmux-status` | false | Enable cmux sidebar status badge |
-| `--keep-watcher-running` | false | Keep the watcher split open after exit (default: auto-close after 3s) |
+| `--keep-watcher-running` | false | Keep watcher process alive after completion (default: exit after 3s) |
 | `--tmux-pane` | *(required for tmux mode)* | tmux pane ID to send keystrokes to (e.g. `%0`). Get from: `tmux display-message -p '#{pane_id}'` or `$TMUX_PANE` |
 
 ### State Persistence

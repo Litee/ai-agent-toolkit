@@ -4,7 +4,7 @@ description: >
   Monitor AWS Glue job execution for state changes with background notifications.
   Use when watching long-running Glue jobs, checking Glue job status, or setting
   up background Glue job monitoring. Supports three modes: background long-poll-with-exit
-  (re-launch in loop, no cmux/tmux needed), visible cmux split with keystroke notifications,
+  (re-launch in loop, no cmux/tmux needed), cmux-keystrokes (background watcher with keystroke delivery),
   and tmux-keystrokes (no cmux dependency). Includes CloudWatch metrics (CPU, heap, records,
   executors). Triggers on "watch glue job", "monitor glue run", "check glue status",
   "glue job finished", "background glue monitor", or any request to track an AWS Glue job run.
@@ -30,7 +30,7 @@ This skill solves it three ways:
 | Environment | Approach |
 |-------------|----------|
 | **No cmux/tmux** (default) | `watch --mode long-poll-with-exit`. Runs in background, exits with JSON when the job state changes. Re-launch in a loop after processing output. |
-| **cmux** (recommended) | `watch --mode cmux-keystrokes` runs in a visible terminal split. On every state change, it sends a keystroke message to the Claude Code terminal, waking the LLM to act. Poll output is visible in the split — no tokens consumed watching it. |
+| **cmux** (recommended) | `watch --mode cmux-keystrokes` runs as a background task. On every state change, it sends a keystroke message to the Claude Code surface via cmux, waking the LLM to act. Poll output goes to the background task log — no tokens consumed watching it. |
 | **tmux** | `watch --mode tmux-keystrokes` — same as cmux-keystrokes but uses `tmux send-keys` for delivery. No cmux dependency. Requires `--tmux-pane` (e.g. `main:0.0`). |
 
 This skill monitors existing job runs. Use other skills (e.g. `use-aws-glue`) for job submission.
@@ -107,7 +107,7 @@ The watcher sends events directly to the specified tmux pane. No cmux needed.
 
 ## Quick Start with cmux
 
-### 1. Identify your surface and workspace
+### 1. Identify your surface
 
 ```bash
 cmux identify --json
@@ -115,30 +115,25 @@ cmux identify --json
 # Example: {"caller": {"surface_ref": "surface:80", "workspace_ref": "workspace:47"}, ...}
 ```
 
-### 2. Create a visible split and launch the watcher
+### 2. Launch the watcher as a background task
+
+Run with `run_in_background: true` on the Bash tool call:
 
 ```bash
-# Step 1: create a side-by-side split
-NEW_SURFACE=$(cmux new-split right | awk '{print $2}')
-
-# Step 2: send the watch command to the split
-cmux send --surface "$NEW_SURFACE" "source /path/to/.venv/bin/activate && \
 python3 ${SKILL_DIR}/scripts/watch_glue_job.py watch \
     --job-name my-etl-job \
     --run-id jr_abc1234567890abc \
     --profile my-aws-profile \
     --mode cmux-keystrokes \
-    --cmux-surface surface:80\n"
+    --cmux-surface surface:80
 ```
 
 The watcher:
 - Polls Glue every 5 minutes (configurable via `--poll-interval-seconds`)
-- Prints a timestamped status line with CloudWatch metrics on every poll (visible in the split)
 - Sends a keystroke to `--cmux-surface` on every state change
 - Runs for up to 24 hours (configurable via `--max-runtime-hours`)
-- Auto-closes the watcher split on exit (unless `--keep-watcher-running`)
 
-**Example poll output in the watcher split:**
+**Example poll output (in background task log):**
 ```
 [10:05 UTC] RUNNING | exec: 19m 2s | DPU-s: 1,140 | cpu: workers: 42% / driver: 8% | heap: 31% | rec: 12.4M in / 9.1M out | exec: 8/10
 ```
@@ -158,7 +153,7 @@ The watcher:
     --cmux-notify                # Desktop notification on each state change
     --cmux-status                # Sidebar status badge (key: glue-<watcher-id-prefix>)
     --poll-interval-seconds 60   # Override poll interval (min 60, max 3600)
-    --keep-watcher-running       # Keep the watcher split open after exit (default: auto-close after 3s)
+    --keep-watcher-running       # Keep watcher process alive after completion (default: exit after 3s)
     --max-runtime-hours 48       # Override 24h default
 ```
 
@@ -168,8 +163,6 @@ The watcher:
 python3 ${SKILL_DIR}/scripts/watch_glue_job.py stop --list
 python3 ${SKILL_DIR}/scripts/watch_glue_job.py stop --watcher-id a1b2c3d4
 ```
-
-Or send Ctrl+C directly to the watcher split.
 
 ---
 
@@ -256,7 +249,7 @@ credentials recover, it sends a "Credentials recovered" message and resumes norm
 | `--cmux-workspace` | no | auto-detected | cmux workspace ref |
 | `--cmux-notify` | no | off | Enable desktop notifications |
 | `--cmux-status` | no | off | Enable cmux sidebar status badge |
-| `--keep-watcher-running` | no | off | Keep watcher split open after exit |
+| `--keep-watcher-running` | no | off | Keep watcher process alive after completion (default: exit after 3s) |
 | `--tmux-pane` | tmux only | — | tmux pane target (e.g. `main:0.0`) |
 
 State file: `~/.claude/plugin-data/aws-glue/watch-aws-glue-job/state-<watcher-id>.json`
@@ -288,7 +281,7 @@ PID file: `~/.claude/plugin-data/aws-glue/watch-aws-glue-job/watcher-<watcher-id
 
 Main script with three subcommands:
 - `watch`: Polling watcher. Supports `long-poll-with-exit` (background JSON output, exits on
-  state change), `cmux-keystrokes` (visible split with keystroke delivery), and
+  state change), `cmux-keystrokes` (background task with keystroke delivery to cmux surface), and
   `tmux-keystrokes` (no cmux dependency). Resilient credential handling (linear backoff, no
   forced exit). SIGUSR1 causes clean shutdown (exit 0) in continuous modes. CloudWatch metrics
   (CPU, heap, records, executors) on every poll. Configurable max runtime.

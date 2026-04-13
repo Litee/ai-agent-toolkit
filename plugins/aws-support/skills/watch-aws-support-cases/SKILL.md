@@ -4,7 +4,7 @@ description: >
   Monitor AWS Support cases for status changes, severity changes, and new communications.
   Use when watching open support cases, tracking case resolution, or getting notified about
   AWS support replies. Supports three modes: background long-poll-with-exit (re-launch in loop),
-  visible cmux split with keystroke notifications, and tmux-keystrokes (no cmux dependency).
+  cmux-keystrokes (background watcher with keystroke delivery), and tmux-keystrokes (no cmux dependency).
   Requires Business or Enterprise AWS support plan. Triggers on "watch support case",
   "monitor AWS support", "track support ticket", "notify on support reply", "watch case status",
   "support case update", or any request to monitor AWS Support cases.
@@ -30,7 +30,7 @@ This skill solves it two ways:
 
 | Environment | Approach |
 |-------------|----------|
-| **cmux** (recommended) | `watch --mode cmux-keystrokes` runs in a visible terminal split. On every change, it sends a keystroke message to the Claude Code terminal, waking the LLM to act. Poll output is visible in the split — no tokens consumed watching it. |
+| **cmux** (recommended) | `watch --mode cmux-keystrokes` runs as a background task. On every change, it sends a keystroke message to the Claude Code surface via cmux, waking the LLM to act. Poll output goes to the background task log — no tokens consumed watching it. |
 | **tmux** | `watch --mode tmux-keystrokes` — same as cmux-keystrokes but uses `tmux send-keys` for delivery. No cmux dependency. Requires `--tmux-pane` (e.g. `main:0.0`). |
 | **No cmux/tmux** | `watch --mode long-poll-with-exit` (default). Runs in background, exits with JSON when changes are detected. Re-launch in a loop after processing output. Or use a team agent with `CronCreate` for hands-off polling. |
 
@@ -64,7 +64,7 @@ The watcher sends events directly to the specified tmux pane. No cmux needed.
 
 ## Quick Start with cmux
 
-### 1. Identify your surface and workspace
+### 1. Identify your surface
 
 ```bash
 cmux identify --json
@@ -72,27 +72,22 @@ cmux identify --json
 # Example: {"caller": {"surface_ref": "surface:80", "workspace_ref": "workspace:47"}, ...}
 ```
 
-### 2. Create a visible split and launch the watcher
+### 2. Launch the watcher as a background task
+
+Run with `run_in_background: true` on the Bash tool call:
 
 ```bash
-# Step 1: create a side-by-side split
-NEW_SURFACE=$(cmux new-split right | awk '{print $2}')
-
-# Step 2: send the watch command to the split
-cmux send --surface "$NEW_SURFACE" "source /path/to/.venv/bin/activate && \
 python3 ${SKILL_DIR}/scripts/watch_support_cases.py watch \
     --case-ids case-123456-2026-abcd \
     --profile my-aws-profile \
     --mode cmux-keystrokes \
-    --cmux-surface surface:80\n"
+    --cmux-surface surface:80
 ```
 
 The watcher:
 - Polls every 5 minutes (configurable via `--poll-interval-seconds`)
-- Prints a timestamped heartbeat every 5 minutes (visible in the split)
 - Sends a keystroke to `--cmux-surface` on every status, severity, or communication change
 - Runs for up to 24 hours (configurable via `--max-runtime-hours`)
-- Auto-closes the watcher split on exit (unless `--keep-watcher-running`)
 
 **Example messages the LLM will receive:**
 ```
@@ -108,7 +103,7 @@ The watcher:
     --cmux-notify                # Desktop notification on each change
     --cmux-status                # Sidebar status badge
     --poll-interval-seconds 60   # Override poll interval (min 60, max 3600)
-    --keep-watcher-running       # Keep split open after exit
+    --keep-watcher-running       # Keep watcher process alive after completion (default: exit after 3s)
     --max-runtime-hours 48       # Override 24h default
 ```
 
@@ -118,8 +113,6 @@ The watcher:
 python3 ${SKILL_DIR}/scripts/watch_support_cases.py stop --list
 python3 ${SKILL_DIR}/scripts/watch_support_cases.py stop --watcher-id a1b2c3d4
 ```
-
-Or send Ctrl+C directly to the watcher split.
 
 ---
 
@@ -275,7 +268,7 @@ credentials recover, it sends a "Credentials recovered" message and resumes norm
 | `--cmux-notify` | no | off | Enable desktop notifications |
 | `--cmux-status` | no | off | Enable cmux sidebar status badge |
 | `--tmux-pane` | tmux only | — | tmux pane target (e.g. `main:0.0`) |
-| `--keep-watcher-running` | no | off | Keep watcher split open after exit |
+| `--keep-watcher-running` | no | off | Keep watcher process alive after completion (default: exit after 3s) |
 
 \* Exactly one of `--case-ids` or `--all-open` is required.
 
@@ -304,7 +297,7 @@ PID file: `~/.claude/plugin-data/aws-support/watch-aws-support-cases/watcher-<wa
 
 Main script with three subcommands:
 - `watch`: Polling watcher. Supports `long-poll-with-exit` (background JSON output),
-  `cmux-keystrokes` (visible split with keystroke delivery), and `tmux-keystrokes` (no
+  `cmux-keystrokes` (background task with keystroke delivery to cmux surface), and `tmux-keystrokes` (no
   cmux dependency). Resilient credential handling (linear backoff, no forced exit). SIGUSR1
   causes clean shutdown (exit 0) in continuous modes. Configurable max runtime.
 - `status`: Read-only state inspection. Show one watcher or list all.
