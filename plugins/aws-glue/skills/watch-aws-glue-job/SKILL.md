@@ -4,8 +4,8 @@ description: >
   Monitor AWS Glue job execution for state changes with background notifications.
   Use when watching long-running Glue jobs, checking Glue job status, or setting
   up background Glue job monitoring. Supports three modes: background long-poll-with-exit
-  (re-launch in loop, no cmux/tmux needed), cmux-keystrokes (background watcher with keystroke delivery),
-  and tmux-keystrokes (no cmux dependency). Includes CloudWatch metrics (CPU, heap, records,
+  (re-launch in loop, no cmux/tmux needed), cmux-keystrokes (background task, sends keystrokes
+  to Claude Code terminal), and tmux-keystrokes (no cmux dependency). Includes CloudWatch metrics (CPU, heap, records,
   executors). Triggers on "watch glue job", "monitor glue run", "check glue status",
   "glue job finished", "background glue monitor", or any request to track an AWS Glue job run.
 ---
@@ -30,7 +30,7 @@ This skill solves it three ways:
 | Environment | Approach |
 |-------------|----------|
 | **No cmux/tmux** (default) | `watch --mode long-poll-with-exit`. Runs in background, exits with JSON when the job state changes. Re-launch in a loop after processing output. |
-| **cmux** (recommended) | `watch --mode cmux-keystrokes` runs as a background task. On every state change, it sends a keystroke message to the Claude Code surface via cmux, waking the LLM to act. Poll output goes to the background task log — no tokens consumed watching it. |
+| **cmux** (recommended) | `watch --mode cmux-keystrokes` runs as a background task. On every state change, it sends a keystroke to the Claude Code terminal, waking the LLM to act. Poll output goes to the background task log — no cmux split needed. |
 | **tmux** | `watch --mode tmux-keystrokes` — same as cmux-keystrokes but uses `tmux send-keys` for delivery. No cmux dependency. Requires `--tmux-pane` (e.g. `main:0.0`). |
 
 This skill monitors existing job runs. Use other skills (e.g. `use-aws-glue`) for job submission.
@@ -107,38 +107,40 @@ The watcher sends events directly to the specified tmux pane. No cmux needed.
 
 ## Quick Start with cmux
 
-### 1. Identify your surface
+### 1. Get your surface and workspace refs
 
 ```bash
-cmux identify --json
-# Use caller.surface_ref (NOT focused.surface_ref — focused changes as you switch tabs)
-# Example: {"caller": {"surface_ref": "surface:80", "workspace_ref": "workspace:47"}, ...}
+CMUX_INFO=$(cmux identify --json)
+SURFACE_REF=$(echo "$CMUX_INFO" | python3 -c "import json,sys; d=json.load(sys.stdin); print(d['caller']['surface_ref'])")
+WORKSPACE_REF=$(echo "$CMUX_INFO" | python3 -c "import json,sys; d=json.load(sys.stdin); print(d['caller']['workspace_ref'])")
 ```
 
-### 2. Launch the watcher as a background task
+Always use `caller.surface_ref` — not `focused.surface_ref`, which drifts as you switch tabs.
 
-Run with `run_in_background: true` on the Bash tool call:
+### 2. Launch the watcher in background
+
+Use `run_in_background: true` on the Bash tool call (never use `&` or `nohup`):
 
 ```bash
+CMUX_SOCKET_PATH="$HOME/Library/Application Support/cmux/cmux.sock" \
 python3 ${SKILL_DIR}/scripts/watch_glue_job.py watch \
     --job-name my-etl-job \
     --run-id jr_abc1234567890abc \
     --profile my-aws-profile \
     --mode cmux-keystrokes \
-    --cmux-surface surface:80
+    --cmux-surface "$SURFACE_REF" \
+    --cmux-workspace "$WORKSPACE_REF"
 ```
 
-The watcher:
-- Polls Glue every 5 minutes (configurable via `--poll-interval-seconds`)
-- Sends a keystroke to `--cmux-surface` on every state change
-- Runs for up to 24 hours (configurable via `--max-runtime-hours`)
+The watcher runs as a background task and sends keystrokes to your Claude Code terminal on every
+state change. Poll output goes to the background task log — no cmux split needed.
 
 **Example poll output (in background task log):**
 ```
 [10:05 UTC] RUNNING | exec: 19m 2s | DPU-s: 1,140 | cpu: workers: 42% / driver: 8% | heap: 31% | rec: 12.4M in / 9.1M out | exec: 8/10
 ```
 
-**Example messages the LLM will receive:**
+**Example keystrokes received:**
 ```
 [Glue] my-etl-job (jr_abc12345) | STARTING -> RUNNING (10:05 UTC)
 [Glue] my-etl-job (jr_abc12345) | RUNNING -> SUCCEEDED (11:42 UTC)

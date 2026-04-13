@@ -84,7 +84,7 @@
       "description": "This plugin contains skills for AWS Glue ETL jobs: writing, configuring, debugging, and monitoring Glue jobs with update-job gotchas, worker type sizing, CloudWatch and Observability metrics, S3 shuffle, per-worker progress reporting, API call tracking via ApiCallTracker, live job monitoring with long-poll-with-exit, cmux-keystrokes, and tmux-keystrokes modes, resilient credential handling, VPC endpoint validation, Flex job cost savings, Spark UI setup, small files (groupFiles/coalesce), timeout anti-patterns, MaxConcurrentRuns gotchas, and a troubleshooting quick-reference.",
       "source": "./plugins/aws-glue",
       "strict": false,
-      "version": "1.1.1",
+      "version": "1.1.2",
       "category": "developer-tools",
       "keywords": ["aws", "glue", "etl", "cloudwatch", "s3", "pyspark", "data-engineering", "monitoring"],
       "skills": ["./skills/use-aws-glue", "./skills/watch-aws-glue-job"]
