@@ -654,6 +654,7 @@ def _poll_loop(
     state: WatcherState,
     cw_metrics: Optional[CloudWatchMetrics],
     own_surface_id: Optional[str],
+    initial_previous_state: Optional[str] = None,
 ):
     client = GlueJobClient(profile=profile, region=region)
     status_key = f"glue-{watcher_id[:6]}"
@@ -685,7 +686,7 @@ def _poll_loop(
     last_heartbeat = time.monotonic()
     last_version_check = time.monotonic()
     printed_summary = False
-    previous_state = None
+    previous_state = initial_previous_state
     num_workers = 0
 
     try:
@@ -1053,6 +1054,7 @@ def cmd_watch(args):
             state=state,
             cw_metrics=cw_metrics,
             own_surface_id=own_surface_id,
+            initial_previous_state=saved.get('current_state'),
         )
     except SystemExit:
         raise
