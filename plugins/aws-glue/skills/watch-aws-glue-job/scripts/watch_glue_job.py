@@ -816,7 +816,7 @@ def _poll_loop(
                 elapsed_fmt = format_elapsed(exec_time) if exec_time else format_elapsed(elapsed_total)
 
                 if current_state in TERMINAL_STATES:
-                    prefix = f"[Glue Watcher v{_VERSION}/{watcher_id[:8]}]"
+                    prefix = f"[Glue Watcher v{_VERSION}]"
                     if current_state == 'SUCCEEDED':
                         dpu_info = f" DPU-seconds: {int(dpu_seconds)}." if dpu_seconds else ""
                         notification = (
@@ -866,7 +866,7 @@ def _poll_loop(
                 else:
                     prev_label = f"{previous_state} -> " if previous_state else ""
                     notification = (
-                        f"[Glue Watcher v{_VERSION}/{watcher_id[:8]}] {job_name} ({run_id}) | "
+                        f"[Glue Watcher v{_VERSION}] {job_name} ({run_id}) | "
                         f"{prev_label}{current_state} ({ts()})"
                     )
                     print(f"[{ts()}] STATE CHANGE: {prev_label}{current_state}. Elapsed: {elapsed_fmt}", flush=True)
