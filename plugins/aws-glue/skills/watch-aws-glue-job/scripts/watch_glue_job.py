@@ -688,10 +688,14 @@ def _poll_loop(
     printed_summary = False
     previous_state = initial_previous_state
     num_workers = 0
+    first_poll = True
 
     try:
         while running[0]:
-            time.sleep(poll_interval)
+            if first_poll:
+                first_poll = False
+            else:
+                time.sleep(poll_interval)
 
             if not running[0]:
                 break
@@ -1019,7 +1023,7 @@ def cmd_watch(args):
             own_surface_id = _detect_own_surface()
         if own_surface_id:
             print(f"Watcher split: {own_surface_id} (auto-close on exit; use --keep-watcher-running to prevent)", file=sys.stderr, flush=True)
-        if not bridge.send_to_claude(f"[Glue Watcher v{_VERSION}] Started. ID: {watcher_id} | Job: {job_name}"):
+        if not bridge.send_to_claude(f"[Glue Watcher v{_VERSION}] Started. ID: {watcher_id} | Job: {job_name} | Run: {run_id[:12]}"):
             print(
                 f"Surface {surface_ref} unreachable. Get fresh refs via `cmux identify --json` and re-launch:\n"
                 f"  {restart_cmd}",
@@ -1030,7 +1034,7 @@ def cmd_watch(args):
     elif mode == 'tmux-keystrokes':
         assert tmux_pane is not None
         bridge = TmuxBridge(tmux_pane=tmux_pane)
-        if not bridge.send_to_claude(f"[Glue Watcher v{_VERSION}] Started. ID: {watcher_id} | Job: {job_name}"):
+        if not bridge.send_to_claude(f"[Glue Watcher v{_VERSION}] Started. ID: {watcher_id} | Job: {job_name} | Run: {run_id[:12]}"):
             print(
                 f"tmux pane {tmux_pane} unreachable. Check pane ID and re-launch:\n"
                 f"  {restart_cmd}",
