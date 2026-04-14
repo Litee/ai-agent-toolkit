@@ -636,7 +636,8 @@ class QuotaRequestWatcher:
                         if consecutive_credential_errors >= 5 and not self._cred_notified:
                             msg = (
                                 f"[Quota Watcher v{_VERSION}] {consecutive_credential_errors} consecutive "
-                                f"AWS credential errors. Refresh credentials (run: aws sso login or mwinit)."
+                                f"AWS credential errors. Please re-authenticate your AWS credentials. "
+                                f"Watcher will auto-recover when credentials are refreshed."
                             )
                             if self.mode in ('cmux-keystrokes', 'tmux-keystrokes') and self.bridge:
                                 self.bridge.send_to_claude(msg)

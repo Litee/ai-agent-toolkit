@@ -787,7 +787,8 @@ def _run_long_poll_with_exit(args, case_ids: list[str], all_open: bool):
                     if consecutive_cred_errors >= 5:
                         print(
                             f"[{_ts()}] WARN: {consecutive_cred_errors} consecutive credential errors. "
-                            f"Refresh credentials (aws sso login or mwinit). Watcher continuing.",
+                            f"Please re-authenticate your AWS credentials. "
+                            f"Watcher will auto-recover when credentials are refreshed.",
                             file=sys.stderr, flush=True,
                         )
                     time.sleep(min(60 * consecutive_cred_errors, 3600))
@@ -1028,7 +1029,7 @@ def _run_cmux_keystrokes(args, case_ids: list[str], all_open: bool):
                     if consecutive_cred_errors >= 5 and not cred_notified:
                         msg = (
                             f"[Support Watcher v{_VERSION}] {consecutive_cred_errors} consecutive "
-                            f"AWS credential errors. Refresh credentials (aws sso login or mwinit). "
+                            f"AWS credential errors. Please re-authenticate your AWS credentials. "
                             f"Watcher will auto-recover when credentials are refreshed."
                         )
                         bridge.send_to_claude(msg)
@@ -1272,7 +1273,7 @@ def _run_tmux_keystrokes(args, case_ids: list[str], all_open: bool):
                     if consecutive_cred_errors >= 5 and not cred_notified:
                         msg = (
                             f"[Support Watcher v{_VERSION}] {consecutive_cred_errors} consecutive "
-                            f"AWS credential errors. Refresh credentials (aws sso login or mwinit). "
+                            f"AWS credential errors. Please re-authenticate your AWS credentials. "
                             f"Watcher will auto-recover when credentials are refreshed."
                         )
                         bridge.send_to_claude(msg)

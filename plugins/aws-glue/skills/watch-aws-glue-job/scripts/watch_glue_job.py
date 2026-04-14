@@ -734,7 +734,7 @@ def _poll_loop(
                     if consecutive_cred_errors >= 5 and not cred_notified:
                         msg = (
                             f"[Glue Watcher v{_VERSION}] {consecutive_cred_errors} consecutive "
-                            f"AWS credential errors. Refresh credentials (aws sso login or mwinit). "
+                            f"AWS credential errors. Please re-authenticate your AWS credentials. "
                             f"Watcher will auto-recover when credentials are refreshed."
                         )
                         if bridge:
