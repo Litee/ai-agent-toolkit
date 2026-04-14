@@ -148,9 +148,17 @@ This convention does **not** apply to jobs managed via IaC (Terraform, CloudForm
 
 ---
 
-### 5. Monitor running Glue jobs with cron tasks
+### 5. Monitor running Glue jobs
 
-After submitting a job, register a cron with `CronCreate` to poll its status at regular intervals. Tear it down as soon as the job reaches a terminal state.
+After submitting a job, monitor it continuously until it reaches a terminal state.
+
+**Preferred: use the `watch-aws-glue-job` skill (if available)**
+
+Check your loaded plugin list. If `watch-aws-glue-job` is available, invoke it — it launches a continuous background watcher that polls the job, prints status updates, and notifies you on completion. This is more responsive than periodic crons and does not consume cron slots.
+
+**Fallback: cron-based polling (if no watcher skill is available)**
+
+Register a cron with `CronCreate` to poll job status at regular intervals. Tear it down as soon as the job reaches a terminal state.
 
 **Use a two-phase polling strategy:**
 1. **First poll at 5 minutes** — catches launch failures early (bad script path, missing IAM role, wrong arguments) before investing time in longer waits.
