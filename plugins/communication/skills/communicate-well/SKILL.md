@@ -28,7 +28,7 @@ If any of 1–5 is "no" — stay silent, update a field, write to a log, or add 
 
 ## Signing Convention
 
-- **First agentic message in a communication chain:** Start with `🤖 [AI Agent on behalf of Andrey]`
+- **First agentic message in a communication chain:** Start with `🤖 [AI Agent on behalf of John]`
 - **Subsequent messages in the same thread/chain:** `🤖` prefix only
 
 "First in chain" means the first message in a new conversation, thread, or ticket — not the first message ever posted.
@@ -112,10 +112,10 @@ Before asserting any fact in an outbound message, determine which of the followi
 
 ## Status Reporting (thread-first)
 
-1. **Top-level message** — short topic handle only. Example: `🧵 PWDT OG images processing`. No body.
+1. **Top-level message** — short topic handle only. Example: `🧵 Image pipeline batch processing`. No body.
 2. **Thread reply** — calibrate detail to what the reader needs to act or decide. Omit process narration.
 
-**Standalone top-level posts must identify the job.** If a background job posts a new top-level message (not a reply), include the job name: `🤖 SOTW enrichment — Batch 2/5 complete`, not `🤖 Batch 2/5 complete`.
+**Standalone top-level posts must identify the job.** If a background job posts a new top-level message (not a reply), include the job name: `🤖 Data enrichment — Batch 2/5 complete`, not `🤖 Batch 2/5 complete`.
 
 ---
 
@@ -150,7 +150,7 @@ A noisy agent is **worse than no agent at all** — without the agent, humans re
 | **The Ransom Note** | Holding approval hostage until unrelated improvements are made | Separate must-fix from nice-to-have; approve with follow-up items |
 | **Priority Inversion** | Blocking on style nits while missing a logic bug | Review for correctness first, style last; automate style enforcement |
 | **The Swarm** | Multiple agents sending overlapping notifications about the same event | Coordinate across agents; deduplicate before sending |
-| **The Misdirected Request** | Asking someone to take an action (unblock a pipeline, merge a CR, approve a change) without verifying they own or have access to the resource. The recipient wastes time figuring out it's not theirs. | Before requesting action, verify the recipient is the owner, approver, or oncall for the system in question. If uncertain, ask rather than assume. |
+| **The Misdirected Request** | Asking someone to take an action (unblock a pipeline, merge a code review, approve a change) without verifying they own or have access to the resource. The recipient wastes time figuring out it's not theirs. | Before requesting action, verify the recipient is the owner, approver, or oncall for the system in question. If uncertain, ask rather than assume. |
 
 ---
 

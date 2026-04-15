@@ -28,8 +28,8 @@ Session resumed. Cron jobs registered in the previous session are NOT automatica
 ## Required: Verify and restore cron jobs
 
 1. Call CronList to inventory all currently registered cron jobs.
-2. Compare the list against any cron jobs you were responsible for registering in this session context (e.g. Midway expiry warnings from midway-session-guard, or any other recurring tasks you set up).
-3. If expected cron jobs are missing, re-register them now by following the original instructions from the relevant plugin or context (e.g. re-read the midway-session-guard SessionStart output to determine the correct T-60/T-5 cron schedule and register accordingly).
+2. Compare the list against any cron jobs you were responsible for registering in this session context (e.g. session expiry warnings from session-guard, or any other recurring tasks you set up).
+3. If expected cron jobs are missing, re-register them now by following the original instructions from the relevant plugin or context (e.g. re-read the session-guard SessionStart output to determine the correct schedule and register accordingly).
 
 ## Cleanup note
 
