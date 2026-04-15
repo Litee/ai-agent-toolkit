@@ -535,17 +535,6 @@ class TmuxBridge:
 # Helpers
 # ---------------------------------------------------------------------------
 
-def _detect_own_surface() -> Optional[str]:
-    try:
-        result = subprocess.run(['cmux', 'identify', '--json'], capture_output=True, timeout=5)
-        if result.returncode == 0:
-            data = json.loads(result.stdout)
-            return data.get('caller', {}).get('surface_ref')
-    except Exception:
-        pass
-    return os.environ.get('CMUX_SURFACE_ID')
-
-
 def _detect_workspace_ref() -> Optional[str]:
     try:
         result = subprocess.run(['cmux', 'identify', '--json'], capture_output=True, timeout=5)
@@ -570,7 +559,6 @@ def _build_restart_command(
     workspace_ref: Optional[str] = None,
     cmux_notify: bool = False,
     cmux_status: bool = False,
-    keep_watcher_running: bool = False,
     max_runtime_hours: int = 24,
     tmux_pane: Optional[str] = None,
 ) -> str:
@@ -593,8 +581,6 @@ def _build_restart_command(
         parts.append("--cmux-notify")
     if cmux_status:
         parts.append("--cmux-status")
-    if keep_watcher_running:
-        parts.append("--keep-watcher-running")
     if tmux_pane:
         parts.append(f"--tmux-pane {shlex.quote(tmux_pane)}")
     cmd = ' '.join(parts)
@@ -872,7 +858,6 @@ def _run_cmux_keystrokes(args, case_ids: list[str], all_open: bool):
         surface_ref=surface_ref, workspace_ref=workspace_ref,
         cmux_notify=args.cmux_notify,
         cmux_status=args.cmux_status,
-        keep_watcher_running=args.keep_watcher_running,
         max_runtime_hours=max_runtime_hours,
     )
 
@@ -930,13 +915,6 @@ def _run_cmux_keystrokes(args, case_ids: list[str], all_open: bool):
         file=sys.stderr, flush=True,
     )
     print(f"Re-launch:\n  {restart_cmd}", file=sys.stderr, flush=True)
-
-    # Detect own surface for auto-close
-    own_surface_id = None
-    if not args.keep_watcher_running:
-        own_surface_id = _detect_own_surface()
-    if own_surface_id:
-        print(f"Watcher split: {own_surface_id} (auto-close on exit; use --keep-watcher-running to prevent)", file=sys.stderr, flush=True)
 
     # Send startup confirmation
     summary = _case_summary(case_ids)
@@ -1048,7 +1026,6 @@ def _run_cmux_keystrokes(args, case_ids: list[str], all_open: bool):
                         surface_ref=surface_ref, workspace_ref=workspace_ref,
                         cmux_notify=args.cmux_notify,
                         cmux_status=args.cmux_status,
-                        keep_watcher_running=args.keep_watcher_running,
                         max_runtime_hours=max_runtime_hours,
                     )
                     state.update(poll_interval_seconds=poll_interval, launch_command=restart_cmd)
@@ -1108,10 +1085,6 @@ def _run_cmux_keystrokes(args, case_ids: list[str], all_open: bool):
         )
     finally:
         _remove_pid_file(watcher_id)
-        if own_surface_id:
-            time.sleep(3)
-            subprocess.run(['cmux', 'close-surface', '--surface', own_surface_id],
-                           capture_output=True, timeout=5)
 
 
 # ---------------------------------------------------------------------------
@@ -1590,10 +1563,6 @@ Examples:
     cmux_group.add_argument(
         '--cmux-status', action='store_true',
         help='Enable cmux sidebar status badge',
-    )
-    cmux_group.add_argument(
-        '--keep-watcher-running', action='store_true',
-        help='Keep the watcher split open after exit (default: auto-close after 3s)',
     )
 
     # tmux-only flags

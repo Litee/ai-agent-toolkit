@@ -104,7 +104,7 @@
       "description": "This plugin contains a skill for monitoring AWS Support cases for status changes, severity changes, and new communications with long-poll, cmux, and tmux delivery modes. Requires Business or Enterprise AWS support plan.",
       "source": "./plugins/aws-support",
       "strict": false,
-      "version": "1.0.1",
+      "version": "1.0.2",
       "category": "developer-tools",
       "keywords": ["aws", "support", "cases", "monitoring"],
       "skills": ["./skills/watch-aws-support-cases"]
