@@ -862,21 +862,6 @@ class QuotaRequestWatcher:
 # Surface / workspace detection helpers
 # ---------------------------------------------------------------------------
 
-def _detect_own_surface() -> Optional[str]:
-    """Detect the surface this process is running in via cmux identify."""
-    try:
-        result = subprocess.run(
-            ['cmux', 'identify', '--json'],
-            capture_output=True, timeout=5,
-        )
-        if result.returncode == 0:
-            data = json.loads(result.stdout)
-            return data.get('caller', {}).get('surface_ref')
-    except Exception:
-        pass
-    return os.environ.get('CMUX_SURFACE_ID')
-
-
 def _detect_workspace_ref() -> Optional[str]:
     """Auto-detect the workspace this process is running in via cmux identify."""
     try:
@@ -952,7 +937,6 @@ def cmd_watch(args):
 
     # Set up bridge
     bridge = None
-    own_surface_id = None
 
     if mode == 'cmux-keystrokes':
         if not args.cmux_surface:
@@ -969,8 +953,6 @@ def cmd_watch(args):
             enable_notify=args.cmux_notify,
             enable_status=args.cmux_status,
         )
-        if not args.keep_watcher_running:
-            own_surface_id = _detect_own_surface()
 
         state.write(
             watcher_id=watcher_id,
@@ -1027,12 +1009,6 @@ def cmd_watch(args):
     print(f"State file: {state.path}", flush=True)
     if mode == 'cmux-keystrokes':
         print(f"Target surface: {args.cmux_surface}", flush=True)
-        if own_surface_id:
-            print(
-                f"Watcher split: {own_surface_id} "
-                f"(will auto-close on exit; use --keep-watcher-running to prevent)",
-                flush=True,
-            )
     elif mode == 'tmux-keystrokes':
         print(f"Target tmux pane: {args.tmux_pane}", flush=True)
     print(flush=True)
@@ -1047,15 +1023,7 @@ def cmd_watch(args):
         watcher_id=watcher_id,
     )
 
-    try:
-        watcher.run(request_ids)
-    finally:
-        if own_surface_id:
-            time.sleep(3)
-            subprocess.run(
-                ['cmux', 'close-surface', '--surface', own_surface_id],
-                capture_output=True, timeout=5,
-            )
+    watcher.run(request_ids)
 
 
 # ---------------------------------------------------------------------------
@@ -1284,12 +1252,6 @@ Examples:
              'Required for --mode tmux-keystrokes. '
              "Get from: tmux display-message -p '#{pane_id}' or $TMUX_PANE",
     )
-    p_watch.add_argument(
-        '--keep-watcher-running',
-        action='store_true',
-        help='Keep the watcher split open after exit (default: auto-close after 3s)',
-    )
-
     # --- status ---
     p_status = subparsers.add_parser(
         'status',
