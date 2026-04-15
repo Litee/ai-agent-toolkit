@@ -504,17 +504,6 @@ class TmuxBridge:
 # Helpers
 # ---------------------------------------------------------------------------
 
-def _detect_own_surface() -> Optional[str]:
-    try:
-        result = subprocess.run(['cmux', 'identify', '--json'], capture_output=True, timeout=5)
-        if result.returncode == 0:
-            data = json.loads(result.stdout)
-            return data.get('caller', {}).get('surface_ref')
-    except Exception:
-        pass
-    return os.environ.get('CMUX_SURFACE_ID')
-
-
 def _detect_workspace_ref() -> Optional[str]:
     try:
         result = subprocess.run(['cmux', 'identify', '--json'], capture_output=True, timeout=5)
@@ -554,7 +543,6 @@ def _build_restart_command(
     workspace_ref: Optional[str] = None,
     cmux_notify: bool = False,
     cmux_status: bool = False,
-    keep_watcher_running: bool = False,
     max_runtime_hours: int = 24,
     no_cloudwatch_metrics: bool = False,
     tmux_pane: Optional[str] = None,
@@ -579,8 +567,6 @@ def _build_restart_command(
         parts.append("--cmux-notify")
     if cmux_status:
         parts.append("--cmux-status")
-    if keep_watcher_running:
-        parts.append("--keep-watcher-running")
     if tmux_pane:
         parts.append(f"--tmux-pane {shlex.quote(tmux_pane)}")
     cmd = ' '.join(parts)
@@ -653,7 +639,6 @@ def _poll_loop(
     bridge: Optional[CmuxBridge | TmuxBridge],
     state: WatcherState,
     cw_metrics: Optional[CloudWatchMetrics],
-    own_surface_id: Optional[str],
     initial_previous_state: Optional[str] = None,
 ):
     client = GlueJobClient(profile=profile, region=region)
@@ -757,7 +742,6 @@ def _poll_loop(
                         workspace_ref=getattr(args, 'cmux_workspace', None),
                         cmux_notify=getattr(args, 'cmux_notify', False),
                         cmux_status=getattr(args, 'cmux_status', False),
-                        keep_watcher_running=getattr(args, 'keep_watcher_running', False),
                         max_runtime_hours=max_runtime_hours,
                         no_cloudwatch_metrics=getattr(args, 'no_cloudwatch_metrics', False),
                         tmux_pane=getattr(args, 'tmux_pane', None),
@@ -923,10 +907,6 @@ def _poll_loop(
             bridge.clear_status(status_key)
     finally:
         _remove_pid_file(watcher_id)
-        if own_surface_id:
-            time.sleep(3)
-            subprocess.run(['cmux', 'close-surface', '--surface', own_surface_id],
-                           capture_output=True, timeout=5)
 
 
 # ---------------------------------------------------------------------------
@@ -970,7 +950,6 @@ def cmd_watch(args):
         workspace_ref=workspace_ref,
         cmux_notify=getattr(args, 'cmux_notify', False),
         cmux_status=getattr(args, 'cmux_status', False),
-        keep_watcher_running=getattr(args, 'keep_watcher_running', False),
         max_runtime_hours=max_runtime_hours,
         no_cloudwatch_metrics=args.no_cloudwatch_metrics,
         tmux_pane=tmux_pane,
@@ -1010,7 +989,6 @@ def cmd_watch(args):
     print(f"State file: {state.path}", file=sys.stderr, flush=True)
 
     bridge: Optional[CmuxBridge | TmuxBridge] = None
-    own_surface_id = None
 
     if mode == 'cmux-keystrokes':
         assert surface_ref is not None
@@ -1020,10 +998,6 @@ def cmd_watch(args):
             enable_notify=args.cmux_notify,
             enable_status=args.cmux_status,
         )
-        if not args.keep_watcher_running:
-            own_surface_id = _detect_own_surface()
-        if own_surface_id:
-            print(f"Watcher split: {own_surface_id} (auto-close on exit; use --keep-watcher-running to prevent)", file=sys.stderr, flush=True)
         if not bridge.send_to_claude(f"[Glue Watcher v{_VERSION}] Started. ID: {watcher_id} | Job: {job_name} | Run: {run_id[:12]}"):
             print(
                 f"Surface {surface_ref} unreachable. Get fresh refs via `cmux identify --json` and re-launch:\n"
@@ -1058,7 +1032,6 @@ def cmd_watch(args):
             bridge=bridge,
             state=state,
             cw_metrics=cw_metrics,
-            own_surface_id=own_surface_id,
             initial_previous_state=saved.get('current_state'),
         )
     except SystemExit:
@@ -1255,11 +1228,6 @@ Examples:
         '--cmux-status', action='store_true',
         help='Enable cmux sidebar status badge',
     )
-    cmux_group.add_argument(
-        '--keep-watcher-running', action='store_true',
-        help='Keep the watcher split open after exit (default: auto-close after 3s)',
-    )
-
     tmux_group = p_watch.add_argument_group('tmux flags (only valid with --mode tmux-keystrokes)')
     tmux_group.add_argument(
         '--tmux-pane', metavar='PANE_ID',
