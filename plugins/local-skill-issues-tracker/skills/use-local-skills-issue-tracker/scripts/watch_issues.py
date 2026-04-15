@@ -178,17 +178,6 @@ class TmuxBridge:
 # cmux detection helpers
 # ---------------------------------------------------------------------------
 
-def _detect_own_surface() -> Optional[str]:
-    try:
-        result = subprocess.run(['cmux', 'identify', '--json'], capture_output=True, timeout=5)
-        if result.returncode == 0:
-            data = json.loads(result.stdout)
-            return data.get('caller', {}).get('surface_ref')
-    except Exception:
-        pass
-    return os.environ.get('CMUX_SURFACE_ID')
-
-
 def _detect_workspace_ref() -> Optional[str]:
     try:
         result = subprocess.run(['cmux', 'identify', '--json'], capture_output=True, timeout=5)
@@ -478,7 +467,6 @@ def _build_relaunch_cmd(
     cmux_workspace: Optional[str] = None,
     cmux_notify: bool = False,
     cmux_status: bool = False,
-    keep_watcher_running: bool = False,
     tmux_pane: Optional[str] = None,
 ) -> str:
     """Build a shell-safe re-launch command with all non-default args made explicit."""
@@ -503,8 +491,6 @@ def _build_relaunch_cmd(
         cmd += " --cmux-notify"
     if cmux_status:
         cmd += " --cmux-status"
-    if keep_watcher_running:
-        cmd += " --keep-watcher-running"
     if tmux_pane:
         cmd += f" --tmux-pane {shlex.quote(tmux_pane)}"
     socket_path = os.environ.get('CMUX_SOCKET_PATH', '')
@@ -689,12 +675,6 @@ def main() -> None:
         action="store_true",
         help="Enable cmux sidebar status badge",
     )
-    cmux_group.add_argument(
-        "--keep-watcher-running",
-        action="store_true",
-        help="Keep the watcher split open after exit (default: auto-close after 3s)",
-    )
-
     # tmux-only flags
     tmux_group = parser.add_argument_group(
         "tmux flags (only valid with --mode tmux-keystrokes)"
@@ -743,7 +723,6 @@ def main() -> None:
         cmux_workspace=cmux_workspace,
         cmux_notify=args.cmux_notify,
         cmux_status=args.cmux_status,
-        keep_watcher_running=args.keep_watcher_running,
         tmux_pane=args.tmux_pane,
     )
 
@@ -813,7 +792,6 @@ def main() -> None:
 
     # --- Bridge setup ---
     bridge = None
-    own_surface_id = None
     surface_label = ""
 
     if mode == "cmux-keystrokes":
@@ -824,20 +802,6 @@ def main() -> None:
             enable_status=args.cmux_status,
         )
         surface_label = f"Surface {args.cmux_surface}"
-        if not args.keep_watcher_running:
-            detected = _detect_own_surface()
-            # Only treat the detected surface as the watcher's own split when it is
-            # different from --cmux-surface.  When running as a background task the
-            # caller surface is the CC terminal itself (same as --cmux-surface), so
-            # we must not auto-close it on exit.
-            if detected and detected != args.cmux_surface:
-                own_surface_id = detected
-        if own_surface_id:
-            print(
-                f"[{_ts()}] Watcher split: {own_surface_id} "
-                f"(auto-close on exit; use --keep-watcher-running to prevent)",
-                file=sys.stderr, flush=True,
-            )
         # Send startup confirmation
         if not bridge.send_to_claude(
             f"[Issue Watcher v{_VERSION}] Started. ID: {watcher_id} | DB: {db_root}"
@@ -972,12 +936,6 @@ def main() -> None:
         )
     finally:
         _remove_pid_file(state_dir, watcher_id)
-        if own_surface_id:
-            time.sleep(3)
-            subprocess.run(
-                ['cmux', 'close-surface', '--surface', own_surface_id],
-                capture_output=True, timeout=5,
-            )
 
 
 if __name__ == "__main__":
