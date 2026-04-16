@@ -28,7 +28,10 @@ aws glue update-job --job-name my-job --job-update file:///tmp/job.json
 
 Glue jobs default to `Timeout: 2880` minutes (48 hours). A runaway job — infinite loop, stuck waiting on a throttled API, deadlocked executor — will consume DPUs for two full days before Glue kills it. The bill arrives before you notice.
 
-**Fix:** Always set `--timeout` (in minutes) on every `create-job` and `update-job` call. Use 2–3× the expected job runtime as a safety margin. For ad-hoc jobs with unknown runtime, 60–120 minutes is a sane conservative default.
+**Fix:** Always set `--timeout` (in minutes) on every `create-job` and `update-job` call.
+
+- **Short jobs (under ~2 hours expected runtime):** Use 2–3× the expected runtime as a safety margin. For ad-hoc jobs with unknown runtime, 60–120 minutes is a sane conservative default.
+- **Long jobs (several hours or more):** Be conservative — set the timeout to `2880` (the 48-hour maximum). A job that times out at 20 hours because you set the limit to 24 is a catastrophic waste of compute. The cost of extra headroom is negligible compared to losing an entire long run.
 
 ```bash
 # Set timeout at job creation
