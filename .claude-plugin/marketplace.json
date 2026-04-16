@@ -91,13 +91,13 @@
     },
     {
       "name": "aws-cloudwatch",
-      "description": "This plugin contains a skill for querying Amazon CloudWatch Logs using Log Insights queries with real-time progress tracking, flexible time ranges, multiple output formats (JSON, CSV, table), and multi-log-group support.",
+      "description": "This plugin contains skills for Amazon CloudWatch: querying CloudWatch Logs with Log Insights (real-time progress tracking, flexible time ranges, multiple output formats, multi-log-group support); and publishing, querying, and designing monitoring with CloudWatch custom metrics (PutMetricData, EMF, GetMetricData, alarms, composite alarms, metric math, dimension cardinality, cost optimization, high-resolution metrics, metric streams, Contributor Insights).",
       "source": "./plugins/aws-cloudwatch",
       "strict": false,
-      "version": "1.0.0",
+      "version": "1.0.1",
       "category": "developer-tools",
-      "keywords": ["aws", "cloudwatch", "logs", "log-insights", "query", "monitoring"],
-      "skills": ["./skills/query-aws-cloudwatch-logs-insights"]
+      "keywords": ["aws", "cloudwatch", "logs", "log-insights", "query", "monitoring", "metrics", "alarms", "emf", "putmetricdata"],
+      "skills": ["./skills/query-aws-cloudwatch-logs-insights", "./skills/use-aws-cloudwatch-metrics"]
     },
     {
       "name": "aws-support",
