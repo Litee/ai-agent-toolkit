@@ -206,10 +206,35 @@ End: 2025-12-05T09:00:00Z (1733396400000)
 - `--end-time`: Query end time (default: `now`)
 - `--output-file`: Output file path (auto-generated if not specified)
 - `--format`: Output format - `table`, `csv`, or `json` (default: `table`)
-- `--limit`: Maximum results to return (default: 10000)
+- `--limit`: Maximum results to return (default: 10000). CloudWatch Logs Insights returns at most 10,000 results per query regardless of this value.
 - `--region`: AWS region (uses default if not specified)
 - `--update-interval`: Status update interval in seconds (default: 30)
 - `--exclude-metadata`: Exclude CloudWatch metadata fields
+
+## Gotchas
+
+### `yesterday` vs `last-24h` / `last-day` — different time windows
+
+- `yesterday` resolves to the **previous calendar day** (midnight UTC to midnight UTC). Running it at 3pm gives the full prior day's logs.
+- `last-24h` and `last-day` are **rolling 24-hour windows** — they resolve to exactly 24 hours before the current moment. Running at 3pm gives logs from 3pm yesterday to 3pm today.
+
+Use `yesterday` when you need a clean, repeatable 24-hour window aligned to calendar boundaries. Use `last-24h` when you want the most recent 24 hours regardless of time of day. Mixing them in comparisons or dashboards will produce subtly different result sets.
+
+Note: `last-day` is undocumented but accepted by the script; it behaves identically to `last-24h`.
+
+### Wildcard log group patterns — only prefix wildcards work
+
+The script expands wildcard log group patterns by calling `describe_log_groups` with a `logGroupNamePrefix`. This means **only trailing wildcards work correctly**:
+
+- `/aws/lambda/*` — works (prefix is `/aws/lambda/`)
+- `/aws/lambda/prod-*` — works (prefix is `/aws/lambda/prod-`)
+- `/aws/lambda/*-prod-*` — **silently broken** (the prefix passed to the API is `/aws/lambda/-prod-` which will match nothing or wrong groups)
+
+If you need to match log groups with a wildcard in the middle of the name, either enumerate them explicitly as a comma-separated list, or use a prefix that narrows the match and then filter the returned names manually.
+
+### `--limit` cap at 10,000
+
+CloudWatch Logs Insights has a hard API cap of 10,000 results per query. Specifying `--limit` above 10,000 has no effect — the API silently returns at most 10,000 rows. The script prints a warning when the supplied `--limit` exceeds this cap.
 
 ## Advanced Usage
 
@@ -222,7 +247,7 @@ ${SKILL_DIR}/scripts/query_cloudwatch_logs.py \
   --end-time '2025-12-02T00:00:00Z' \
   --output-file 'reports/december_errors.csv' \
   --format csv \
-  --limit 50000 \
+  --limit 10000 \
   --update-interval 60 \
   --region us-east-1 \
   --profile production

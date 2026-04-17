@@ -572,6 +572,10 @@ class CloudWatchLogsQueryExecutor:
             update_interval: Status update interval in seconds
             exclude_metadata: Exclude CloudWatch metadata fields
         """
+        if limit > 10000:
+            print(f"Warning: CloudWatch Logs Insights caps results at 10,000. "
+                  f"--limit {limit} will be silently capped.", file=sys.stderr)
+
         try:
             query_id = self.execute_query(query, log_groups, start_time, end_time, limit)
             response = self.wait_for_results(query_id, update_interval)
