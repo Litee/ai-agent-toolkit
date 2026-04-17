@@ -5,3 +5,4 @@ __pycache__
 .claude/scheduled_tasks.lock
 CLAUDE.local.md
 .claude/worktrees/
+.remember/
