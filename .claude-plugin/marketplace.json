@@ -6,7 +6,7 @@
   "metadata": {
     "description": "Collection of AI agent skills for AWS CDK development, AWS documentation search, AWS Athena SQL querying, CloudWatch Logs Insights querying, Anki flashcard management, Obsidian vault management, audio conversion, podcast generation, safe terminal command registration, image generation, and ML system design interviews",
 
-    "version": "1.1.25",
+    "version": "1.1.26",
     "homepage": "https://github.com/Litee/ai-agent-toolkit"
   },
   "plugins": [
@@ -78,6 +78,16 @@
       "category": "developer-tools",
       "keywords": ["aws", "athena", "sql", "query", "s3"],
       "skills": ["./skills/query-aws-athena"]
+    },
+    {
+      "name": "aws-dynamodb",
+      "description": "This plugin contains a skill for managing the full DynamoDB export lifecycle: exporting tables to S3 via ExportTableToPointInTime, converting DynamoDB JSON to Parquet with AWS Glue or PySpark, filtering exported data with Athena or Glue predicates, and sharing datasets cross-account with scoped S3 bucket policies.",
+      "source": "./plugins/aws-dynamodb",
+      "strict": false,
+      "version": "1.0.0",
+      "category": "developer-tools",
+      "keywords": ["aws", "dynamodb", "ddb", "export", "parquet", "s3", "glue", "athena"],
+      "skills": ["./skills/manage-ddb-exports"]
     },
     {
       "name": "aws-glue",

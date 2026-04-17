@@ -26,6 +26,7 @@ These skills can be installed as plugins in Claude Code.
 /plugin install aws-athena@litee-claude-code-plugins
 /plugin install aws-cloudwatch@litee-claude-code-plugins
 /plugin install aws-documentation@litee-claude-code-plugins
+/plugin install aws-dynamodb@litee-claude-code-plugins
 /plugin install aws-glue@litee-claude-code-plugins
 /plugin install aws-quota-service@litee-claude-code-plugins
 /plugin install aws-support@litee-claude-code-plugins
@@ -58,6 +59,7 @@ Each plugin installs a skill that extends Claude's capabilities:
 | `aws-athena` (`query-aws-athena`) | developer-tools | AWS Athena SQL queries with S3 result download, parallel execution, and CTE optimization |
 | `aws-cloudwatch` (`query-aws-cloudwatch-logs-insights`, `use-aws-cloudwatch-metrics`) | developer-tools | CloudWatch Log Insights queries with real-time progress tracking, flexible time ranges, multiple output formats (JSON, CSV, table), and multi-log-group support; CloudWatch custom metrics best practices: PutMetricData batching, EMF, GetMetricData, alarms with M-of-N evaluation and missing-data treatment, composite alarms, metric math, dimension cardinality design, high-resolution metrics, metric streams, Contributor Insights, cost optimization |
 | `aws-documentation` | developer-tools | AWS CDK expert guidance and official AWS documentation search via MCP servers |
+| `aws-dynamodb` (`manage-ddb-exports`) | developer-tools | Full DynamoDB export lifecycle: export tables to S3 via ExportTableToPointInTime, convert DynamoDB JSON to Parquet (Glue or PySpark), filter with Athena or Glue predicates, share cross-account with scoped S3 bucket policies |
 | `aws-glue` (`use-aws-glue`, `watch-aws-glue-job`) | developer-tools | AWS Glue ETL job writing, configuration, debugging, monitoring with CloudWatch and Observability metrics, S3 shuffle, worker sizing, per-worker progress reporting, API call tracking, live job monitoring (long-poll, cmux, and tmux modes), VPC endpoint validation, Flex job cost savings, Spark UI setup, small files handling (groupFiles/coalesce), timeout/MaxConcurrentRuns anti-patterns, and troubleshooting quick-reference |
 | `aws-quota-service` (`watch-aws-quota-requests`) | developer-tools | AWS Service Quotas increase request monitoring with approval/denial notifications (long-poll, cmux, and tmux modes) |
 | `aws-support` (`watch-aws-support-cases`) | developer-tools | AWS Support case monitoring with status/severity/communication change detection (long-poll, cmux, and tmux modes). Requires Business or Enterprise AWS support plan |
