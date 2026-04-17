@@ -877,7 +877,8 @@ def _poll_loop(
                         sys.exit(0)
                     else:
                         if bridge:
-                            bridge.send_to_claude(notification)
+                            if previous_state is not None:
+                                bridge.send_to_claude(notification)
                             bridge.set_status(status_key, current_state)
                             bridge.notify(f"Glue: {job_name}", notification)
 
