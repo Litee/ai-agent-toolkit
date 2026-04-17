@@ -239,13 +239,13 @@
     },
     {
       "name": "skill-management",
-      "description": "This plugin contains skills for skill development and quality assurance: portability best practices, file naming conventions, the ${SKILL_DIR} placeholder, context management, self-containment rules (skill-creator-extra-tips); customer-perspective skill evaluation using synthetic tasks to find bugs by executing skills as a real user would (evaluate-skills-with-synthetic-tasks); systematic bulk quality audits of all skills in a plugin workspace with parallel sub-agents and auto-filed issues (audit-skills-against-best-practices); and enriching existing skills with new knowledge from external sources such as official docs, post-mortems, and code examples (enrich-skill-via-research).",
+      "description": "This plugin contains skills for skill development and quality assurance: portability best practices, file naming conventions, the ${SKILL_DIR} placeholder, context management, self-containment rules (skill-creator-extra-tips); customer-perspective skill evaluation using synthetic tasks to find bugs by executing skills as a real user would (evaluate-skills-with-synthetic-tasks); single-skill and bulk plugin quality reviews with parallel sub-agents and auto-filed issues (review-skill); and enriching existing skills with new knowledge from external sources such as official docs, post-mortems, and code examples (enrich-skill-via-research).",
       "source": "./plugins/skill-management",
       "strict": false,
-      "version": "1.0.2",
+      "version": "1.0.4",
       "category": "developer-tools",
-      "keywords": ["skill", "skill-creator", "portability", "best-practices", "naming-conventions", "skill-dir", "evaluation", "synthetic-tasks", "quality-assurance", "audit", "research", "enrich"],
-      "skills": ["./skills/audit-skills-against-best-practices", "./skills/enrich-skill-via-research", "./skills/evaluate-skills-with-synthetic-tasks", "./skills/skill-creator-extra-tips"]
+      "keywords": ["skill", "skill-creator", "portability", "best-practices", "naming-conventions", "skill-dir", "evaluation", "synthetic-tasks", "quality-assurance", "audit", "review", "research", "enrich"],
+      "skills": ["./skills/enrich-skill-via-research", "./skills/evaluate-skills-with-synthetic-tasks", "./skills/review-skill", "./skills/skill-creator-extra-tips"]
     },
     {
       "name": "update-versioned-permissions",

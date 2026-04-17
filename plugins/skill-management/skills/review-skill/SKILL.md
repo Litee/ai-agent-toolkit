@@ -1,21 +1,24 @@
 ---
-name: audit-skills-against-best-practices
-description: "Use when asked to 'audit all skills', 'check skills for best practices', 'review skills for quality', 'find issues across all skills', 'sweep skills for compliance', or any bulk quality sweep of a plugin workspace. Dispatches parallel sub-agents to evaluate every skill in a plugin against a canonical 10-criterion checklist, then aggregates findings by severity and auto-files actionable items. Do NOT use when the goal is to review a single skill in isolation (just read that skill's SKILL.md and apply the checklist manually), or when the user wants to fix a specific known issue (use use-local-skills-issue-tracker directly)."
+name: review-skill
+description: "Use when asked to 'review a skill', 'check a skill for best practices', 'audit all skills', 'review skills for quality', 'find issues across skills', or any quality sweep of one or more skills. Supports both single-skill review and bulk plugin audit. Do NOT use when the user wants to fix a specific known issue (use use-local-skills-issue-tracker directly)."
 ---
 
 > Found major gaps or factual errors in this skill? Report it via the `use-local-skills-issue-tracker` skill, if the skill exists.
 
-# audit-skills-against-best-practices
+# review-skill
 
 ## Overview
 
-This skill guides a systematic, parallel quality audit of all skills in a plugin workspace. It dispatches sub-agents in batches to evaluate each skill against a canonical checklist, aggregates findings by severity, and auto-files actionable items via `use-local-skills-issue-tracker`.
+This skill guides quality reviews of skills against a canonical checklist. It supports two modes:
+
+- **Single-skill review** — apply the checklist manually to one skill
+- **Bulk plugin audit** — dispatch parallel sub-agents per batch across all skills in a plugin, aggregate findings by severity, and auto-file actionable items
 
 ---
 
 ## Checklist
 
-**Before auditing, invoke `skill-creator` and `skill-creator-extra-tips`** to load the full best practices. Use their criteria as the authoritative checklist for each sub-agent — do not summarise or paraphrase them.
+**Before reviewing, invoke `skill-creator`, `skill-creator-extra-tips`, and `superpowers:writing-skills`** to load the full best practices. Use their criteria as the authoritative checklist — do not summarise or paraphrase them.
 
 In addition, each skill must be checked for these criteria not covered by those skills:
 
@@ -26,7 +29,7 @@ In addition, each skill must be checked for these criteria not covered by those 
 | 3 | **Knowledge skills: no stale claims** | Knowledge skills note that facts need verification against source; no unconditional present-tense assertions about dynamic systems |
 | 4 | **Action skills: error handling documented** | What to do when the tool/API fails is documented (retry, fallback, escalation path) |
 
-Always include the full criteria (from `skill-creator` + `skill-creator-extra-tips` + the table above) verbatim in every sub-agent prompt — agents without the full list will invent their own criteria.
+Always include the full criteria (from `skill-creator` + `skill-creator-extra-tips` + `superpowers:writing-skills` + the table above) verbatim in every sub-agent prompt — agents without the full list will invent their own criteria.
 
 ---
 
@@ -50,7 +53,19 @@ Apply type-specific emphasis when evaluating each criterion:
 
 ---
 
-## Audit Procedure
+## Single-Skill Review
+
+For one skill, apply the checklist manually without spawning sub-agents:
+
+1. Invoke `skill-creator`, `skill-creator-extra-tips`, and `superpowers:writing-skills` to load the full criteria
+2. Read the skill's `SKILL.md`
+3. Evaluate each criterion from the checklist above plus all criteria from the three invoked skills
+4. Classify each finding by severity (CRITICAL / SHOULD_FIX / NICE_TO_HAVE)
+5. Report findings using the output format below; file CRITICAL and SHOULD_FIX items via `use-local-skills-issue-tracker`
+
+---
+
+## Bulk Plugin Audit
 
 ### Step 1 — Discover skills
 
@@ -70,7 +85,7 @@ Partition skills into batches of 3–5 per sub-agent. Prioritise grouping skills
 
 For each batch, dispatch a sub-agent with:
 
-1. The full criteria from `skill-creator`, `skill-creator-extra-tips`, plus the 4 additional criteria above (copy verbatim — do not summarise)
+1. The full criteria from `skill-creator`, `skill-creator-extra-tips`, `superpowers:writing-skills`, plus the 4 additional criteria above (copy verbatim — do not summarise)
 2. The skill type classification rules above
 3. The list of SKILL.md paths to evaluate
 4. This output format requirement:
@@ -98,7 +113,7 @@ For each CRITICAL and SHOULD_FIX finding, call `use-local-skills-issue-tracker` 
 Produce a structured summary:
 
 ```
-## Audit Results — <plugin-name>
+## Review Results — <plugin-name>
 
 ### CRITICAL (<count>)
 - <skill-name>: <criterion> — <evidence>
@@ -128,6 +143,7 @@ Issues filed: <count> (CRITICAL + SHOULD_FIX)
 
 ## Related Skills
 
-- `use-local-skills-issue-tracker` — file and track the issues discovered during the audit
+- `use-local-skills-issue-tracker` — file and track the issues discovered during the review
 - `skill-creator` — consult when unsure whether a specific pattern violates best practices
 - `skill-creator-extra-tips` — additional best-practice tips complementing skill-creator
+- `superpowers:writing-skills` — additional skill writing best practices and quality standards
