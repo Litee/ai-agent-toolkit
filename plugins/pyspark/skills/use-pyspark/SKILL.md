@@ -114,9 +114,9 @@ df_salted = df.withColumn("salted_key",
 df_agg = (df_salted
     .groupBy("salted_key")
     .agg(F.sum("value").alias("partial_sum")))
-# Strip salt and re-aggregate
+# strip trailing salt suffix (split would break keys that contain underscores)
 df_result = (df_agg
-    .withColumn("key", F.split("salted_key", "_")[0])
+    .withColumn("key", F.regexp_replace(F.col("salted_key"), r"_\d+$", ""))
     .groupBy("key")
     .agg(F.sum("partial_sum").alias("total")))
 ```
@@ -217,6 +217,16 @@ F.last("val",  ignorenulls=True).over(w_partition)
 ```
 
 Also: **never use `W.partitionBy()` with no arguments** — it forces all data into a single partition. Use `df.agg()` instead.
+
+**`rowsBetween` vs `rangeBetween`**: `rowsBetween` counts physical rows (position-based); `rangeBetween` uses the numeric value of the `ORDER BY` column (value-based). For date/time rolling windows, cast your timestamp to a Unix epoch long and use `rangeBetween` with the appropriate interval in seconds — `rowsBetween` on sparse data gives a wrong window (7 preceding _rows_, not 7 preceding _days_).
+
+```python
+# rowsBetween — 7 preceding physical rows regardless of time gap
+w_rows = W.partitionBy("key").orderBy("ts").rowsBetween(-6, 0)
+
+# rangeBetween — all rows within the last 7 days (86400s × 7)
+w_range = W.partitionBy("key").orderBy(F.col("ts").cast("long")).rangeBetween(-6 * 86400, 0)
+```
 
 ---
 

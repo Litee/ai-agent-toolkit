@@ -133,7 +133,7 @@
       "description": "This plugin contains a skill for writing, debugging, and reviewing PySpark scripts and Spark DataFrame transformations. Covers anti-patterns (JSON inference OOM, data skew, shuffle spill, Python UDFs), coding style (import aliases, type hints, method chains, join hygiene, null handling), and Spark tuning (AQE, broadcast joins, shuffle partitions).",
       "source": "./plugins/pyspark",
       "strict": false,
-      "version": "1.0.0",
+      "version": "1.0.1",
       "category": "developer-tools",
       "keywords": ["pyspark", "spark", "dataframe", "etl", "data-engineering", "python"],
       "skills": ["./skills/use-pyspark"]
