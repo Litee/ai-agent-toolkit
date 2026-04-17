@@ -228,14 +228,14 @@
       "skills": ["./skills/ml-system-design-interviewer"]
     },
     {
-      "name": "skill-creator-extra-tips",
-      "description": "This plugin contains a skill with supplementary guidance for the skill-creator skill: portability best practices, file naming conventions, the ${SKILL_DIR} placeholder, context management (three-level loading), self-containment rules, and automated tooling references. Use when creating distributable skills, avoiding hardcoded paths, or learning skill quality best practices.",
-      "source": "./plugins/skill-creator-extra-tips",
+      "name": "skill-management",
+      "description": "This plugin contains skills for skill development and quality assurance: portability best practices, file naming conventions, the ${SKILL_DIR} placeholder, context management, self-containment rules (skill-creator-extra-tips); and customer-perspective skill evaluation using synthetic tasks to find bugs by executing skills as a real user would (evaluate-skills-with-synthetic-tasks).",
+      "source": "./plugins/skill-management",
       "strict": false,
-      "version": "1.0.0",
+      "version": "1.0.1",
       "category": "developer-tools",
-      "keywords": ["skill", "skill-creator", "portability", "best-practices", "naming-conventions", "skill-dir"],
-      "skills": ["./skills/skill-creator-extra-tips"]
+      "keywords": ["skill", "skill-creator", "portability", "best-practices", "naming-conventions", "skill-dir", "evaluation", "synthetic-tasks", "quality-assurance"],
+      "skills": ["./skills/evaluate-skills-with-synthetic-tasks", "./skills/skill-creator-extra-tips"]
     },
     {
       "name": "update-versioned-permissions",

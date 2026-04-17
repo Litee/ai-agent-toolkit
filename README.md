@@ -43,7 +43,7 @@ These skills can be installed as plugins in Claude Code.
 /plugin install protect-file-system-access@litee-claude-code-plugins
 /plugin install pyspark@litee-claude-code-plugins
 /plugin install register-safe-terminal-commands@litee-claude-code-plugins
-/plugin install skill-creator-extra-tips@litee-claude-code-plugins
+/plugin install skill-management@litee-claude-code-plugins
 /plugin install update-versioned-permissions@litee-claude-code-plugins
 /plugin install writing@litee-claude-code-plugins
 ```
@@ -75,7 +75,8 @@ Each plugin installs a skill that extends Claude's capabilities:
 | `protect-file-system-access` | developer-tools | PreToolUse hook blocking direct edits to AWS credentials, SSH keys, shell profiles, and lockfiles |
 | `pyspark` (`use-pyspark`) | developer-tools | PySpark anti-patterns (JSON inference OOM, data skew, shuffle spill, Python UDFs), coding style guide (import aliases, type hints, method chains, join hygiene, null handling), and Spark tuning (AQE, broadcast joins, shuffle partitions) |
 | `register-safe-terminal-commands` | developer-tools | SessionStart hook that auto-syncs safe terminal commands to Claude Code settings; skill available for manual dry-run/verbose sync |
-| `skill-creator-extra-tips` | developer-tools | Supplementary skill-authoring guidance: portability best practices, file naming conventions, `${SKILL_DIR}` placeholder, three-level context management, self-containment rules, and automated tooling references |
+| `skill-management` (`evaluate-skills-with-synthetic-tasks`) | developer-tools | Customer-perspective skill evaluation using synthetic tasks: test skills by executing them as a real user would, score results (PASS/PARTIAL/FAIL/BLOCKED), dispatch evaluation sub-agents per skill, and file issues for failures |
+| `skill-management` (`skill-creator-extra-tips`) | developer-tools | Supplementary skill-authoring guidance: portability best practices, file naming conventions, `${SKILL_DIR}` placeholder, three-level context management, self-containment rules, and automated tooling references |
 | `update-versioned-permissions` | developer-tools | SessionStart hook that auto-clones stale versioned plugin path entries in permissions when plugins are upgraded; additive-only, also updates statusLine.command to latest installed version |
 | `writing` (`write-technical-design`, `write-well`) | productivity | Two skills: technical design document drafting (HLD/LLD templates, section standards, architecture diagrams, assembly checklists, red-flag detection); universal writing quality (clarity, structure, conciseness, AI writing hygiene, editing checklists, format-aware guidance for design docs, RFCs, emails, postmortems, and status updates) |
 
