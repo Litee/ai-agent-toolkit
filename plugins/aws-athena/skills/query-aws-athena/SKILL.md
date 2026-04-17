@@ -168,7 +168,7 @@ For comprehensive CTE patterns, examples, and best practices, read the `referenc
 
 ### Optional Parameters
 - `--output-file`: Local file path to save downloaded results (auto-generated if not specified)
-- `--format`: Output format — `csv`, `json`, or `parquet` (default: `csv`)
+- `--format`: Output format (default: `csv`; only `csv` is supported — Athena writes CSV to S3)
 - `--region`: AWS region (uses profile default if not specified)
 - `--no-download`: Execute query but skip downloading results from S3
 
@@ -195,7 +195,7 @@ For complex queries:
 
 Use the `query_athena.py` script:
 - Execute with automatic S3 download (recommended)
-- Specify output format (csv, json, parquet)
+- Specify output format (only csv is supported)
 - Set appropriate AWS region if needed
 
 ### 4. Handling Results
@@ -215,7 +215,7 @@ The script provides a complete workflow for querying Athena:
 - Executes queries with proper error handling
 - Waits for query completion
 - Downloads results directly from S3 (avoiding pagination)
-- Supports multiple output formats (csv, json, parquet)
+- Downloads results as CSV (Athena writes CSV to S3)
 
 ### references/
 

@@ -74,7 +74,7 @@
       "description": "This plugin contains a skill for executing AWS Athena SQL queries, downloading results from S3, running queries in parallel, and optimizing query performance with Common Table Expressions (CTEs).",
       "source": "./plugins/aws-athena",
       "strict": false,
-      "version": "1.0.0",
+      "version": "1.0.1",
       "category": "developer-tools",
       "keywords": ["aws", "athena", "sql", "query", "s3"],
       "skills": ["./skills/query-aws-athena"]
