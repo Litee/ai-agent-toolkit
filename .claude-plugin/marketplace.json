@@ -74,7 +74,7 @@
       "description": "This plugin contains a skill for executing AWS Athena SQL queries, downloading results from S3, running queries in parallel, and optimizing query performance with Common Table Expressions (CTEs).",
       "source": "./plugins/aws-athena",
       "strict": false,
-      "version": "1.0.1",
+      "version": "1.0.2",
       "category": "developer-tools",
       "keywords": ["aws", "athena", "sql", "query", "s3"],
       "skills": ["./skills/query-aws-athena"]
@@ -104,7 +104,7 @@
       "description": "This plugin contains skills for Amazon CloudWatch: querying CloudWatch Logs with Log Insights (real-time progress tracking, flexible time ranges, multiple output formats, multi-log-group support); and publishing, querying, and designing monitoring with CloudWatch custom metrics (PutMetricData, EMF, GetMetricData, alarms, composite alarms, metric math, dimension cardinality, cost optimization, high-resolution metrics, metric streams, Contributor Insights).",
       "source": "./plugins/aws-cloudwatch",
       "strict": false,
-      "version": "1.0.2",
+      "version": "1.0.3",
       "category": "developer-tools",
       "keywords": ["aws", "cloudwatch", "logs", "log-insights", "query", "monitoring", "metrics", "alarms", "emf", "putmetricdata"],
       "skills": ["./skills/query-aws-cloudwatch-logs-insights", "./skills/use-aws-cloudwatch-metrics"]

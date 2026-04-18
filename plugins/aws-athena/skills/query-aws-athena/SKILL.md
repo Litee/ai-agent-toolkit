@@ -1,6 +1,6 @@
 ---
 name: query-aws-athena
-description: Execute AWS Athena SQL queries, download results from S3, and optimize query performance. Use when querying data in Athena, handling large result sets, running parallel queries, or using CTEs for complex query optimization. Triggers on "run Athena query", "query S3 data", "Athena SQL", "query data in AWS", "Athena results", "download Athena output", "Athena timeout", "large Athena result", or any request to execute or optimize AWS Athena queries.
+description: Use when running SQL queries against AWS Athena, querying data stored in S3, downloading large Athena result sets, running parallel Athena queries, or optimizing complex queries with CTEs. Triggers on "run Athena query", "query S3 data", "Athena SQL", "query data in AWS", "Athena results", "download Athena output", "Athena timeout", "large Athena result", or any request to execute or optimize AWS Athena queries.
 ---
 
 # Query AWS Athena
@@ -90,7 +90,7 @@ ${SKILL_DIR}/scripts/query_athena.py \
 - No risk of accidentally using wrong credentials from shell environment
 - Easier to audit and reproduce queries
 
-The `--profile` parameter is required to ensure explicit AWS credential selection.
+The `--profile` parameter is optional. Omit it when running on EC2 instances, Lambda functions, ECS tasks, or any environment that provides credentials via an IAM instance/task role — boto3 will automatically pick up the ambient credentials.
 
 ## Running Queries in Parallel
 
@@ -164,9 +164,9 @@ For comprehensive CTE patterns, examples, and best practices, read the `referenc
 - `--query` or `--query-file`: SQL query string or path to a `.sql` file
 - `--database`: Athena database name
 - `--output-location`: S3 URI for query results (e.g., `s3://my-bucket/athena-results/`)
-- `--profile`: AWS credentials profile name (required)
 
 ### Optional Parameters
+- `--profile`: AWS credentials profile name. Omit when running with instance/task role credentials (EC2, Lambda, ECS).
 - `--output-file`: Local file path to save downloaded results (auto-generated if not specified)
 - `--format`: Output format (default: `csv`; only `csv` is supported — Athena writes CSV to S3)
 - `--region`: AWS region (uses profile default if not specified)
@@ -240,6 +240,41 @@ Load reference files based on the task at hand:
 **For query optimization**: Read `references/cte-examples.md` to find relevant CTE patterns and examples
 
 **For script usage**: The script includes comprehensive help text accessible via `--help` flag
+
+## Error Handling
+
+### Common Query Failures
+
+**InvalidRequestException**
+Athena rejects the query before execution. Causes include syntax errors, referencing non-existent databases or tables, and unsupported SQL constructs. Fix the SQL and re-run.
+
+**AccessDeniedException / insufficient permissions**
+The caller lacks `athena:StartQueryExecution`, `s3:PutObject` on the output bucket, or `glue:GetTable` for the data catalog. Check IAM policies and ensure the output S3 bucket allows writes from the executing principal.
+
+**S3 output location missing or inaccessible**
+Athena cannot write results if the `--output-location` bucket does not exist or the principal has no write access. Verify the bucket exists and the IAM policy grants `s3:PutObject` and `s3:GetBucketLocation` on that prefix.
+
+**Query timeout**
+Long-running queries can exceed Athena's default 30-minute timeout. Partition-prune with `WHERE` clauses, use CTEs to avoid repeated scans, or split into smaller parallel queries.
+
+### Checking Query Status
+
+If `query_athena.py` exits before results are downloaded (e.g. a timeout or SIGINT), retrieve the `QueryExecutionId` printed at script start and check status manually:
+
+```bash
+aws athena get-query-execution \
+    --query-execution-id <QueryExecutionId> \
+    --region us-east-1 \
+    --profile my-aws-profile
+```
+
+The `Status.State` field will be `SUCCEEDED`, `FAILED`, or `CANCELLED`. For `FAILED`, `Status.AthenaError.ErrorMessage` contains the root cause.
+
+### Retry Guidance
+
+- **Transient API errors** (ThrottlingException, InternalServerException): retry with exponential backoff; Athena has per-account concurrency limits.
+- **FAILED queries**: do not retry blindly — read the error message first. Syntax and permission errors will not resolve on their own.
+- **Succeeded but no local file**: the query output is still in S3 at `--output-location/<QueryExecutionId>.csv`; download it with `aws s3 cp`.
 
 ## Summary
 

@@ -81,7 +81,7 @@ ${SKILL_DIR}/scripts/query_cloudwatch_logs.py \
 - No risk of accidentally using wrong credentials from shell environment
 - Easier to audit and reproduce queries
 
-The `--profile` parameter is required to ensure explicit AWS credential selection.
+The `--profile` parameter is optional. Omit it when running on EC2 instances, Lambda functions, ECS tasks, or any environment that provides credentials via an IAM instance/task role — boto3 will automatically pick up the ambient credentials.
 
 ## Workflow
 
@@ -200,9 +200,9 @@ End: 2025-12-05T09:00:00Z (1733396400000)
 - `--query` or `--query-file`: The Log Insights query (inline or from file)
 - `--log-groups`: Comma-separated log groups or patterns
 - `--start-time`: Query start time (various formats supported)
-- `--profile`: AWS profile name (required)
 
 ### Optional Parameters
+- `--profile`: AWS profile name. Omit when running with instance/task role credentials (EC2, Lambda, ECS).
 - `--end-time`: Query end time (default: `now`)
 - `--output-file`: Output file path (auto-generated if not specified)
 - `--format`: Output format - `table`, `csv`, or `json` (default: `table`)
@@ -316,3 +316,8 @@ Load reference files based on the current task:
 - Working with multi-log group queries
 
 Both reference files provide detailed guidance without cluttering this main skill document.
+
+## Related Skills
+
+- **`query-aws-athena`** — Query structured data in S3 via SQL; complements CloudWatch Logs Insights when the data has been exported to S3 or lives in Glue tables rather than log groups.
+- **`use-aws-cloudwatch-metrics`** — Publish and query CloudWatch custom metrics; use alongside this skill when you need both metric time-series data and the raw log events behind them.
