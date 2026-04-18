@@ -69,6 +69,7 @@ def _version_from_path(path: str) -> str:
 
 
 _VERSION = _version_from_path(__file__)
+_ver = lambda: f"v{_VERSION}" if _VERSION != 'unknown' else "(unknown version)"
 
 _INSTALLED_PLUGINS_PATH = Path.home() / '.claude' / 'plugins' / 'installed_plugins.json'
 
@@ -112,7 +113,7 @@ def _check_version_drift() -> None:
             best_tuple = vt
     if best_tuple > _parse_semver(_VERSION):
         print(
-            f"[{ts()}] [Quota Watcher v{_VERSION}] WARNING: Running version {_VERSION} but "
+            f"[{ts()}] [Quota Watcher {_ver()}] WARNING: Running version {_VERSION} but "
             f"version {best_version} is installed. Restart the watcher by invoking the "
             f"'watch-aws-quota-requests' skill.",
             file=sys.stderr, flush=True,
@@ -588,7 +589,7 @@ class QuotaRequestWatcher:
         ]
 
         print(
-            f"[{ts()}] Quota Request Watcher v{_VERSION} | ID: {self.watcher_id} | "
+            f"[{ts()}] Quota Request Watcher {_ver()} | ID: {self.watcher_id} | "
             f"Watching {len(active_ids)} active request(s) | poll={self.poll_interval}s",
             file=sys.stderr, flush=True,
         )
@@ -616,7 +617,7 @@ class QuotaRequestWatcher:
                     if consecutive_credential_errors > 0:
                         if self._cred_notified and self.mode in ('cmux-keystrokes', 'tmux-keystrokes') and self.bridge:
                             self.bridge.send_to_claude(
-                                f"[Quota Watcher v{_VERSION}] Credentials recovered — resuming normal polling."
+                                f"[Quota Watcher {_ver()}] Credentials recovered — resuming normal polling."
                             )
                         self._cred_notified = False
                     consecutive_credential_errors = 0
@@ -635,7 +636,7 @@ class QuotaRequestWatcher:
                         )
                         if consecutive_credential_errors >= 5 and not self._cred_notified:
                             msg = (
-                                f"[Quota Watcher v{_VERSION}] {consecutive_credential_errors} consecutive "
+                                f"[Quota Watcher {_ver()}] {consecutive_credential_errors} consecutive "
                                 f"AWS credential errors. Please re-authenticate your AWS credentials. "
                                 f"Watcher will auto-recover when credentials are refreshed."
                             )
@@ -759,7 +760,7 @@ class QuotaRequestWatcher:
             sig = self._received_signal or 'signal'
             restart_cmd = self._build_restart_cmd(active_ids)
             print(
-                f"[Quota Watcher v{_VERSION}] Exiting ({sig}).\n"
+                f"[Quota Watcher {_ver()}] Exiting ({sig}).\n"
                 f"Re-launch:\n  {restart_cmd}",
                 file=sys.stderr, flush=True,
             )
@@ -998,7 +999,7 @@ def cmd_watch(args):
         )
 
     # Startup banner
-    print(f"Quota Request Watcher v{_VERSION} | ID: {watcher_id}", flush=True)
+    print(f"Quota Request Watcher {_ver()} | ID: {watcher_id}", flush=True)
     print(
         f"Mode: {mode} | Poll: {poll_interval}s | "
         f"Max runtime: {args.max_runtime_hours}h | "

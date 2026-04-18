@@ -41,6 +41,7 @@ def _version_from_path(path: str) -> str:
 
 
 _VERSION = _version_from_path(__file__)
+_ver = lambda: f"v{_VERSION}" if _VERSION != "unknown" else "(unknown version)"
 
 _ISSUE_FNAME_RE = re.compile(r"^(\d{4})-[a-z0-9-]+\.json$")
 
@@ -377,7 +378,7 @@ def _remove_pid_file(state_dir: str, watcher_id: str) -> None:
 
 def _it_prefix() -> str:
     """Return '[Local Issue Tracker vX.Y.Z]' using the watcher's own version."""
-    return f"[Local Issue Tracker v{_VERSION}]" if _VERSION and _VERSION != "unknown" else "[Local Issue Tracker]"
+    return f"[Local Issue Tracker {_ver()}]"
 
 
 def _diff_snapshots(old: dict, new: dict) -> list:
@@ -738,7 +739,7 @@ def main() -> None:
             print(f"[{_ts()}] WARN: failed to write state: {e}", flush=True)
         baseline = current
         print(
-            f"[{_ts()}] Issue watcher v{_VERSION} — initialised state ({len(current)} issues). "
+            f"[{_ts()}] Issue watcher {_ver()} — initialised state ({len(current)} issues). "
             f"Polling every {args.poll_interval}s.",
             flush=True,
         )
@@ -759,7 +760,7 @@ def main() -> None:
             # keystrokes modes: fall through to bridge setup, then deliver startup_pending
         else:
             print(
-                f"[{_ts()}] Issue watcher v{_VERSION} — resuming from saved state "
+                f"[{_ts()}] Issue watcher {_ver()} — resuming from saved state "
                 f"({len(current)} issues). Polling every {args.poll_interval}s.",
                 flush=True,
             )
@@ -804,7 +805,7 @@ def main() -> None:
         surface_label = f"Surface {args.cmux_surface}"
         # Send startup confirmation
         if not bridge.send_to_claude(
-            f"[Issue Watcher v{_VERSION}] Started. ID: {watcher_id} | DB: {db_root}"
+            f"[Issue Watcher {_ver()}] Started. ID: {watcher_id} | DB: {db_root}"
         ):
             print(
                 f"Surface {args.cmux_surface} unreachable. "
@@ -826,7 +827,7 @@ def main() -> None:
         surface_label = f"tmux pane {args.tmux_pane}"
         # Send startup confirmation
         if not bridge.send_to_claude(
-            f"[Issue Watcher v{_VERSION}] Started. ID: {watcher_id} | DB: {db_root}"
+            f"[Issue Watcher {_ver()}] Started. ID: {watcher_id} | DB: {db_root}"
         ):
             print(
                 f"tmux pane {args.tmux_pane} unreachable. "
@@ -863,7 +864,7 @@ def main() -> None:
                     _print_timeout_instructions(args.max_runtime_hours, relaunch_cmd)
                 else:
                     msg = (
-                        f"[Issue Watcher v{_VERSION}] Max runtime ({args.max_runtime_hours}h) "
+                        f"[Issue Watcher {_ver()}] Max runtime ({args.max_runtime_hours}h) "
                         f"reached. Re-launch: {relaunch_cmd}"
                     )
                     if bridge:
@@ -905,7 +906,7 @@ def main() -> None:
             else:
                 if mode == "long-poll-with-exit":
                     print(
-                        f"[{_ts()}] Issue watcher v{_VERSION} | poll #{poll_count} | "
+                        f"[{_ts()}] Issue watcher {_ver()} | poll #{poll_count} | "
                         f"{status_summary} | no changes",
                         flush=True,
                     )
@@ -914,7 +915,7 @@ def main() -> None:
                     now_mono = time.monotonic()
                     if now_mono - last_heartbeat >= _HEARTBEAT_INTERVAL:
                         print(
-                            f"[{_ts()}] Issue watcher v{_VERSION} | poll #{poll_count} | "
+                            f"[{_ts()}] Issue watcher {_ver()} | poll #{poll_count} | "
                             f"{status_summary} | no changes",
                             flush=True,
                         )
@@ -926,10 +927,10 @@ def main() -> None:
         _remove_pid_file(state_dir, watcher_id)
         if mode in ("cmux-keystrokes", "tmux-keystrokes") and bridge:
             bridge.send_to_claude(
-                f"[Issue Watcher v{_VERSION}] Exiting ({sig}). Re-launch: {relaunch_cmd}"
+                f"[Issue Watcher {_ver()}] Exiting ({sig}). Re-launch: {relaunch_cmd}"
             )
         print(
-            f"[{_ts()}] Issue watcher v{_VERSION} — exiting ({sig}).\n"
+            f"[{_ts()}] Issue watcher {_ver()} — exiting ({sig}).\n"
             f"Re-launch via Bash tool with run_in_background=true:\n"
             f"   {relaunch_cmd}",
             flush=True,

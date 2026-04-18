@@ -44,7 +44,7 @@
       "description": "This plugin contains a skill for a local JSON-based issue tracker where disconnected agents report skill bugs and feature requests. Includes a filesystem watcher with cmux integration for live notifications on new issues, status changes, and comments.",
       "source": "./plugins/local-skill-issues-tracker",
       "strict": false,
-      "version": "1.1.6",
+      "version": "1.1.7",
       "category": "developer-tools",
       "keywords": ["issues", "tracker", "bugs", "feature-requests", "skills", "watcher"],
       "skills": ["./skills/use-local-skills-issue-tracker"]
@@ -94,7 +94,7 @@
       "description": "This plugin contains skills for AWS Glue ETL jobs: writing, configuring, debugging, and monitoring Glue jobs with update-job gotchas, worker type sizing, CloudWatch and Observability metrics, S3 shuffle, per-worker progress reporting, API call tracking via ApiCallTracker, live job monitoring with long-poll-with-exit, cmux-keystrokes, and tmux-keystrokes modes, resilient credential handling, VPC endpoint validation, Flex job cost savings, Spark UI setup, small files (groupFiles/coalesce), timeout anti-patterns, MaxConcurrentRuns gotchas, and a troubleshooting quick-reference.",
       "source": "./plugins/aws-glue",
       "strict": false,
-      "version": "1.1.11",
+      "version": "1.1.12",
       "category": "developer-tools",
       "keywords": ["aws", "glue", "etl", "cloudwatch", "s3", "pyspark", "data-engineering", "monitoring"],
       "skills": ["./skills/use-aws-glue", "./skills/watch-aws-glue-job"]
@@ -114,7 +114,7 @@
       "description": "This plugin contains a skill for monitoring AWS Support cases for status changes, severity changes, and new communications with long-poll, cmux, and tmux delivery modes. Requires Business or Enterprise AWS support plan.",
       "source": "./plugins/aws-support",
       "strict": false,
-      "version": "1.0.2",
+      "version": "1.0.3",
       "category": "developer-tools",
       "keywords": ["aws", "support", "cases", "monitoring"],
       "skills": ["./skills/watch-aws-support-cases"]
@@ -124,7 +124,7 @@
       "description": "This plugin contains a skill for monitoring AWS Service Quotas increase requests for status changes, with approval/denial notifications across regions.",
       "source": "./plugins/aws-quota-service",
       "strict": false,
-      "version": "1.0.2",
+      "version": "1.0.3",
       "category": "developer-tools",
       "keywords": ["aws", "monitoring", "service-quotas", "quotas"],
       "skills": ["./skills/watch-aws-quota-requests"]
