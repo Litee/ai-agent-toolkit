@@ -30,6 +30,7 @@ These skills can be installed as plugins in Claude Code.
 /plugin install aws-glue@litee-claude-code-plugins
 /plugin install aws-quota-service@litee-claude-code-plugins
 /plugin install aws-support@litee-claude-code-plugins
+/plugin install claude-code-session-history@litee-claude-code-plugins
 /plugin install claude-code-status-line@litee-claude-code-plugins
 /plugin install cmux-terminal@litee-claude-code-plugins
 /plugin install communication@litee-claude-code-plugins
@@ -63,6 +64,7 @@ Each plugin installs a skill that extends Claude's capabilities:
 | `aws-glue` (`use-aws-glue`, `watch-aws-glue-job`) | developer-tools | AWS Glue ETL job writing, configuration, debugging, monitoring with CloudWatch and Observability metrics, S3 shuffle, worker sizing, per-worker progress reporting, API call tracking, live job monitoring (long-poll, cmux, and tmux modes), VPC endpoint validation, Flex job cost savings, Spark UI setup, small files handling (groupFiles/coalesce), timeout/MaxConcurrentRuns anti-patterns, and troubleshooting quick-reference |
 | `aws-quota-service` (`watch-aws-quota-requests`) | developer-tools | AWS Service Quotas increase request monitoring with approval/denial notifications (long-poll, cmux, and tmux modes) |
 | `aws-support` (`watch-aws-support-cases`) | developer-tools | AWS Support case monitoring with status/severity/communication change detection (long-poll, cmux, and tmux modes). Requires Business or Enterprise AWS support plan |
+| `claude-code-session-history` (`analyze-claude-code-session-transcripts`) | developer-tools | Analyze Claude Code session JSONL transcripts to identify recurring patterns, skill gaps, agent failure modes, and improvement opportunities |
 | `claude-code-status-line` | developer-tools | SessionStart hook that configures Claude Code statusline to display context usage, token counts, cost, model ID, git branch, and working directory |
 | `cmux-terminal` (`use-cmux-terminal`) | developer-tools | Terminal multiplexer integration: orchestrate sessions, browser automation, progress reporting; SessionStart hook prints cmux context and LLM behavioural instructions when running inside cmux |
 | `communication` (`communicate-well`, `write-good-emails`) | productivity | Async communication guidelines for AI agents: value test, message style, frequency, anti-patterns, and channel-type rules; professional email writing: subject lines, tone calibration, difficult scenarios, follow-up strategy, and AI prompting for emails |

@@ -6,7 +6,7 @@
   "metadata": {
     "description": "Collection of AI agent skills for AWS CDK development, AWS documentation search, AWS Athena SQL querying, CloudWatch Logs Insights querying, Anki flashcard management, Obsidian vault management, audio conversion, podcast generation, safe terminal command registration, image generation, and ML system design interviews",
 
-    "version": "1.1.26",
+    "version": "1.1.27",
     "homepage": "https://github.com/Litee/ai-agent-toolkit"
   },
   "plugins": [
@@ -255,6 +255,16 @@
       "version": "1.0.1",
       "category": "developer-tools",
       "keywords": ["permissions", "plugins", "upgrade", "hooks", "settings", "versioning"]
+    },
+    {
+      "name": "claude-code-session-history",
+      "description": "This plugin contains a skill for analyzing Claude Code session JSONL transcripts to identify recurring patterns, skill gaps, agent failure modes, and improvement opportunities. Covers transcript storage layout, JSONL entry types, user message extraction recipe, sub-agent dispatch for large volumes, and output format for pattern reporting.",
+      "source": "./plugins/claude-code-session-history",
+      "strict": false,
+      "version": "1.0.0",
+      "category": "developer-tools",
+      "keywords": ["claude-code", "session", "transcript", "analysis", "patterns", "skill-gaps"],
+      "skills": ["./skills/analyze-claude-code-session-transcripts"]
     }
   ]
 }
