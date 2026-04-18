@@ -344,3 +344,10 @@ Replace every instance before sending for review.
 ## After Drafting
 
 Once the draft is complete, run the `write-well` editing checklist (three passes: structure, clarity, conciseness) before sending for review.
+
+---
+
+## Related Skills
+
+- **`write-well`** — Apply alongside this skill for sentence-level clarity, conciseness, active voice, and the full editing checklist. Every design doc should pass the `write-well` three-pass review before sharing.
+- **`communicate-well`** — Use when distributing the finished doc: choosing the right channel, crafting the announcement message, and managing async review threads in Slack or tickets.

@@ -22,8 +22,6 @@ Before finalizing any document, every section must pass:
 
 ## Core Principles
 
-Seven rules that every source -- from Strunk's 1918 pamphlet to Google's 2025 style guide -- converges on:
-
 ### 1. Clarity Above All
 
 Clear writing reflects clear thinking. If the reader is confused, the writer has failed -- not the reader.
@@ -329,3 +327,11 @@ When writing specific document types, apply the core principles above plus these
 | **The Zombie Nominalization** | "Implementation of" / "Utilization of" / "Facilitation of" | Use the verb: implement, use, help |
 | **Copy-Paste AI** | Uniform sentence length, banned vocabulary, relentless positivity | Apply the AI Writing Hygiene section |
 | **The Circular Conclusion** | Conclusion restates the introduction verbatim | End with the implication, next step, or open question |
+
+---
+
+## Related Skills
+
+- **`write-technical-design`** — Applies the principles here to technical design documents (HLD/LLD). Use alongside this skill when drafting architecture proposals, API specs, or system design docs.
+- **`communicate-well`** — Covers async channel etiquette: when to post, where to post, how to structure messages in Slack, tickets, and code reviews. Complements this skill for any written communication that goes through an async channel.
+- **`write-good-emails`** — Dedicated guidance for professional email: subject lines, tone calibration, follow-up strategy, and prompting AI for email drafts.

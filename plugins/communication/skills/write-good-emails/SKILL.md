@@ -40,7 +40,7 @@ The most important line. If it fails, nothing else matters.
 - 6-10 words. Longer subjects get truncated on mobile and get fewer opens.
 - Front-load the action verb. "Decision needed" beats "I wanted to get your thoughts on."
 - Never: "Following up," "Quick question," "Hey," "Important," "Checking in." These are invisible.
-- Personalized subjects boost open rates 50% and reply rates 30% — reference something specific to the recipient.
+- Studies suggest personalized subjects boost open rates and reply rates — reference something specific to the recipient.
 
 ### Opening Line
 
@@ -51,7 +51,7 @@ Never: "I hope this email finds you well." "Per my last email." "As discussed." 
 ### Body
 
 - BLUF first: conclusion or request before reasoning. (See **write-well** for the full pyramid principle.)
-- Under 200 words. Emails over 200 words get 30% fewer replies.
+- Under 200 words. Research indicates longer emails receive fewer replies.
 - If longer than 5 sentences, switch to bullet points.
 - One screen on mobile = the entire email.
 - One idea per paragraph. Two or three sentences max.
@@ -174,7 +174,7 @@ Treat AI like a capable intern — review everything before sending:
 | Follow-up 3 | 5-7 days after second | Change angle or channel (try Slack, phone) |
 | Stop | After 3 attempts | Take the hint; move to a different path |
 
-**The first follow-up alone boosts reply rates 49%.** Most people do not follow up at all — one follow-up is the highest-leverage email you can send.
+**The first follow-up is the highest-leverage email you can send.** Most people do not follow up at all — research consistently shows that a single follow-up can significantly boost reply rates.
 
 **Rules:**
 - Always reply to the original thread. Do not start fresh.
