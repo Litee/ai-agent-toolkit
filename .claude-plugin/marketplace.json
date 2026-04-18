@@ -209,10 +209,10 @@
     },
     {
       "name": "generate-image",
-      "description": "This plugin contains a skill for generating images using Amazon Nova Canvas on AWS Bedrock. Use when creating images, illustrations, AI art, text-to-image generation, or visual content.",
+      "description": "This plugin contains a skill for generating images using Amazon Nova Canvas on AWS Bedrock. Use when creating images, illustrations, AI art, text-to-image generation, or visual content. Not for editing existing images.",
       "source": "./plugins/generate-image",
       "strict": false,
-      "version": "1.0.3",
+      "version": "1.0.4",
       "category": "user",
       "keywords": ["aws", "bedrock", "nova-canvas", "image-generation", "text-to-image", "ai-art"],
       "skills": ["./skills/generate-image"]

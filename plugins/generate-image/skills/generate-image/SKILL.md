@@ -1,6 +1,6 @@
 ---
 name: generate-image
-description: Generate images using Amazon Nova Canvas on AWS Bedrock. Use when creating images, illustrations, pictures, artwork, AI art, text-to-image generation, or any visual content.
+description: Generate images using Amazon Nova Canvas on AWS Bedrock. Use when creating images, illustrations, pictures, artwork, AI art, text-to-image generation, or any visual content. Do NOT use for editing existing images.
 ---
 
 # Generate Image
@@ -13,8 +13,11 @@ Generate images using Amazon Nova Canvas model hosted on AWS Bedrock. This skill
    - The script uses the default AWS credential chain (environment variables, `~/.aws/credentials`, instance profile, etc.)
    - To use a specific profile, pass `--aws-profile your-profile-name`
 2. Access to AWS Bedrock in your AWS account
-3. Python 3.6+ installed
-4. Activate the project virtual environment: `source .venv/bin/activate`
+3. Python 3.9+ installed
+4. Create and activate a virtual environment in `/tmp`:
+   ```bash
+   python3 -m venv /tmp/generate-image-venv && source /tmp/generate-image-venv/bin/activate
+   ```
 5. boto3 library installed: `pip install boto3`
 
 ## Script Usage
@@ -155,41 +158,6 @@ python3 ${SKILL_DIR}/scripts/generate_image.py \
   --height 1080
 ```
 
-## Using in Python Code
-
-You can also import and use the generator in your Python code:
-
-```python
-from scripts.generate_image import NovaCanvasGenerator
-
-# Initialize generator with default credential chain
-generator = NovaCanvasGenerator(region="us-east-1")
-
-# Or use a specific profile
-generator = NovaCanvasGenerator(region="us-east-1", profile_name="my-custom-profile")
-
-# Generate a basic image
-images = generator.generate_image(
-    prompt="a beautiful sunset over the ocean",
-    output_dir="./my_images",
-    negative_prompt="people, anatomy, hands, low quality",
-    width=1024,
-    height=1024,
-    quality="standard"
-)
-
-# Generate with color guidance
-images = generator.generate_image(
-    prompt="abstract art with geometric shapes",
-    output_dir="./my_images",
-    colors=["#FF5733", "#33FF57", "#3357FF"],
-    width=1024,
-    height=1024
-)
-
-print(f"Generated images: {images}")
-```
-
 ## Troubleshooting
 
 ### AWS Credentials Error
@@ -210,4 +178,4 @@ Width and height must be between 320 and 4096 pixels and divisible by 16.
 - High contrast: `["#000000", "#FFFFFF"]`
 - Gold and bronze: `["#FFD700", "#B87333"]`
 - Sunset: `["#FF6B35", "#F7931E", "#FDC830", "#F37335"]`
-- Ocean: `["#006994", "#1E90FF", "#87CEEB", "#B0E0E6"]` 
+- Ocean: `["#006994", "#1E90FF", "#87CEEB", "#B0E0E6"]`
