@@ -1,6 +1,6 @@
 ---
 name: evaluate-skills-with-synthetic-tasks
-description: "Use when asked to 'test skills', 'evaluate skill quality', 'customer-perspective test', 'end-to-end test skills', 'run synthetic scenarios against skills', or 'find bugs in skills by using them'. Distinct from `audit-skills-against-best-practices` (checks compliance without executing) — this skill EXECUTES the skill and observes what happens."
+description: "Use when asked to 'test skills', 'evaluate skill quality', 'customer-perspective test', 'end-to-end test skills', 'run synthetic scenarios against skills', or 'find bugs in skills by using them'. Distinct from `review-skill` (checks compliance without executing) — this skill EXECUTES the skill and observes what happens."
 ---
 
 # evaluate-skills-with-synthetic-tasks — Customer-Perspective Skill Evaluation
@@ -80,6 +80,6 @@ For each FAIL or BLOCKED result, file a skill issue with:
 
 ## Related Skills
 
-- `audit-skills-against-best-practices` — checks compliance without executing; use for structural/format audits
+- `review-skill` — checks compliance without executing; use for structural/format audits
 - `skill-creator` — canonical guidance for writing new skills
 - `use-local-skills-issue-tracker` — file issues for FAIL/BLOCKED results found during evaluation

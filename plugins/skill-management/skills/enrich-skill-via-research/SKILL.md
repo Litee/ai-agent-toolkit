@@ -1,6 +1,6 @@
 ---
 name: enrich-skill-via-research
-description: "Use when asked to 'improve a skill', 'enrich a skill with best practices', 'add anti-patterns to a skill', 'research and update a skill', or 'find what's missing in a skill'. Distinct from skill-creator (creates skills from scratch) and audit-skills-against-best-practices (checks compliance against existing standards). This skill specifically adds NEW knowledge sourced from external references — internet, documentation, code examples, post-mortems — into an existing SKILL.md."
+description: "Use when asked to 'improve a skill', 'enrich a skill with best practices', 'add anti-patterns to a skill', 'research and update a skill', or 'find what's missing in a skill'. Distinct from skill-creator (creates skills from scratch) and review-skill (checks compliance against existing standards). This skill specifically adds NEW knowledge sourced from external references — internet, documentation, code examples, post-mortems — into an existing SKILL.md."
 ---
 
 # enrich-skill-via-research
@@ -13,7 +13,7 @@ This skill guides the process of improving an existing skill by researching exte
 
 **Distinct from:**
 - `skill-creator` — creates a skill from scratch
-- `audit-skills-against-best-practices` — checks an existing skill against structural/quality standards
+- `review-skill` — checks an existing skill against structural/quality standards
 
 ---
 
@@ -100,4 +100,4 @@ Apply these rules to every candidate finding before writing anything.
 
 - `skill-creator` — creates a skill from scratch; this skill enriches existing ones
 - `skill-creator-extra-tips` — structural and quality tips for writing skills
-- `audit-skills-against-best-practices` — checks an existing skill against standards (does not add new content)
+- `review-skill` — checks an existing skill against standards (does not add new content)
