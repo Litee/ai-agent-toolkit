@@ -84,7 +84,7 @@
       "description": "This plugin contains a skill for managing the full DynamoDB export lifecycle: exporting tables to S3 via ExportTableToPointInTime, converting DynamoDB JSON to Parquet with AWS Glue or PySpark, filtering exported data with Athena or Glue predicates, and sharing datasets cross-account with scoped S3 bucket policies.",
       "source": "./plugins/aws-dynamodb",
       "strict": false,
-      "version": "1.0.0",
+      "version": "1.0.1",
       "category": "developer-tools",
       "keywords": ["aws", "dynamodb", "ddb", "export", "parquet", "s3", "glue", "athena"],
       "skills": ["./skills/manage-ddb-exports"]
