@@ -202,7 +202,7 @@
       "description": "This plugin contains skills for freeing disk space on developer machines, scanning for bloat directories, and safely analyzing large files without exceeding the context window. Cleans package manager caches, IDE build artefacts, and Docker resources. Scans for node_modules, virtual environments, and build caches. Covers size-checking strategies, targeted extraction with Bash/Python/Node.js one-liners, structured data analysis (JSON, CSV, XML, logs), and token estimation. Use when disk is full, cleaning caches, reclaiming storage, finding bloat, or working with large files.",
       "source": "./plugins/file-system-tools",
       "strict": false,
-      "version": "1.1.0",
+      "version": "1.1.1",
       "category": "developer-tools",
       "keywords": ["disk", "cache", "cleanup", "storage", "free-space", "large-files", "context-window", "extraction", "analysis"],
       "skills": ["./skills/free-disk-space", "./skills/handle-large-files"]

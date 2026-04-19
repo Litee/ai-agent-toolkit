@@ -2,11 +2,13 @@
 """
 clean_caches.py — Report disk usage and optionally clean development caches.
 
-Covers two types of targets:
+Covers three types of targets:
   cli     — package manager CLIs with built-in clean commands (npm, pip, yarn,
             pnpm, go, brew, rustup, docker)
   dir     — cache directories with no CLI support, cleaned via directory removal
             (claude-code-debug, maven, gradle, jetbrains, xcode, vscode)
+  scan    — directories discovered by recursive scan under --scan-root
+            (node_modules)
 
 Normal workflow:
     python3 clean_caches.py          # Step 1: report all sizes (safe, no deletion)
@@ -15,9 +17,14 @@ Normal workflow:
 Special cases (restrict to specific targets):
     python3 clean_caches.py --target npm gradle          # report only
     python3 clean_caches.py --apply --target npm gradle  # clean only those targets
+
+Scan targets (require --scan-root):
+    python3 clean_caches.py --target node_modules --scan-root ~/projects
+    python3 clean_caches.py --apply --target node_modules --scan-root ~/projects
 """
 
 import argparse
+import os
 import platform
 import shutil
 import subprocess
@@ -284,12 +291,33 @@ def build_dir_targets() -> list[dict]:
     return targets
 
 
+def build_scan_targets() -> list[dict]:
+    """
+    Scan-based targets: directories discovered by recursive scan under --scan-root.
+    Each entry: name, description, pattern (the directory name to match).
+    """
+    return [
+        {
+            "name": "node_modules",
+            "description": "npm/yarn/pnpm dependency directories (recursive scan under --scan-root)",
+            "pattern": "node_modules",
+        },
+    ]
+
+
 # ---------------------------------------------------------------------------
 # Report
 # ---------------------------------------------------------------------------
 
-def print_report(cli_rows: list[tuple], dir_rows: list[tuple], free_before: int) -> None:
-    all_rows = cli_rows + dir_rows
+def print_report(
+    cli_rows: list[tuple],
+    dir_rows: list[tuple],
+    scan_rows: list[tuple],
+    free_before: int,
+) -> None:
+    # scan_rows tuples: (name, description, total_size, found_dirs_list)
+    scan_summary_rows = [(name, desc, size, None) for name, desc, size, _ in scan_rows]
+    all_rows = cli_rows + dir_rows + scan_summary_rows
     if not all_rows:
         print("No targets found.")
         return
@@ -319,6 +347,16 @@ def print_report(cli_rows: list[tuple], dir_rows: list[tuple], free_before: int)
             marker = " (not found)" if size == 0 else ""
             print(f"{name:<{name_col}} {format_size(size):>{size_col}}  {desc}{marker}")
 
+    if scan_rows:
+        print("  [Scan targets]")
+        for name, desc, size, found_dirs in scan_rows:
+            count = len(found_dirs)
+            suffix = f" ({count} found)" if count else " (none found)"
+            print(f"{name:<{name_col}} {format_size(size):>{size_col}}  {desc}{suffix}")
+            for d in found_dirs:
+                indent = "    "
+                print(f"{indent}{format_size(d['size_bytes']):>{size_col - len(indent)}}  {d['path']}")
+
     print(sep)
     print(f"{'TOTAL':<{name_col}} {format_size(total):>{size_col}}")
     print(f"\nCurrent free disk space: {format_size(free_before)}")
@@ -346,6 +384,44 @@ def measure_dir_rows(targets: list[dict]) -> list[tuple]:
     for t in targets:
         size = sum(get_dir_size(p) for p in t["paths"])
         rows.append((t["name"], t["description"], size, t["paths"]))
+    return rows
+
+
+def _import_scanner():
+    """Import scan functions from sibling scan_bloat.py script."""
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    if script_dir not in sys.path:
+        sys.path.insert(0, script_dir)
+    from scan_bloat import dir_size, scan_tree, ProgressPrinter as ScanProgress
+    return dir_size, scan_tree, ScanProgress
+
+
+def measure_scan_rows(targets: list[dict], scan_root: str) -> list[tuple]:
+    """
+    Scan for directories matching scan targets under scan_root.
+    Returns list of tuples: (name, description, total_size, found_dirs)
+    where found_dirs is a list of {"path": str, "size_bytes": int, ...}.
+    """
+    _, scan_tree_fn, ScanProgress = _import_scanner()
+
+    errors: list = []
+    progress = ScanProgress()
+    progress.start()
+    try:
+        results = scan_tree_fn(scan_root, False, progress, errors)
+    finally:
+        progress.stop()
+
+    if errors:
+        for e in errors:
+            print(f"  WARNING: scan error at {e['path']}: {e['error']}", file=sys.stderr)
+
+    rows = []
+    for t in targets:
+        matched = [r for r in results if r["type"] == t["pattern"]]
+        matched.sort(key=lambda r: r["size_bytes"], reverse=True)
+        total_size = sum(r["size_bytes"] for r in matched)
+        rows.append((t["name"], t["description"], total_size, matched))
     return rows
 
 
@@ -386,6 +462,21 @@ def clean_dir_target(t: dict) -> int:
     return freed
 
 
+def clean_scan_target(found_dirs: list[dict]) -> int:
+    """Remove scanned directories. Returns bytes freed."""
+    freed = 0
+    for entry in found_dirs:
+        path = entry["path"]
+        size = entry["size_bytes"]
+        try:
+            shutil.rmtree(path)
+            freed += size
+            print(f"  Deleted: {path} ({format_size(size)})")
+        except (OSError, PermissionError) as exc:
+            print(f"  ERROR deleting {path}: {exc}", file=sys.stderr)
+    return freed
+
+
 # ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
@@ -408,11 +499,18 @@ def main() -> None:
         help="Restrict to specific targets (e.g. --target npm gradle). "
              "Omit to report or clean everything.",
     )
+    parser.add_argument(
+        "--scan-root",
+        metavar="PATH",
+        help="Root directory for scan-based targets (e.g. node_modules). "
+             "Required when --target includes scan targets like 'node_modules'.",
+    )
     args = parser.parse_args()
 
     all_cli = build_cli_targets()
     all_dir = build_dir_targets()
-    all_names = [t["name"] for t in all_cli + all_dir]
+    all_scan = build_scan_targets()
+    all_names = [t["name"] for t in all_cli + all_dir + all_scan]
 
     if args.target:
         unknown = set(args.target) - set(all_names)
@@ -422,9 +520,20 @@ def main() -> None:
             sys.exit(1)
         cli_targets = [t for t in all_cli if t["name"] in args.target]
         dir_targets = [t for t in all_dir if t["name"] in args.target]
+        scan_targets = [t for t in all_scan if t["name"] in args.target]
     else:
         cli_targets = all_cli
         dir_targets = all_dir
+        scan_targets = []  # opt-in only: require explicit --target
+
+    if scan_targets and not args.scan_root:
+        scan_names = [t["name"] for t in scan_targets]
+        print(
+            f"Error: --scan-root is required when targeting: {', '.join(scan_names)}",
+            file=sys.stderr,
+        )
+        print("Example: --scan-root ~/projects", file=sys.stderr)
+        sys.exit(1)
 
     print()
     if args.apply:
@@ -443,7 +552,17 @@ def main() -> None:
     progress.stop()
     print()
 
-    print_report(cli_rows, dir_rows, free_before)
+    scan_rows: list[tuple] = []
+    if scan_targets:
+        scan_root = os.path.realpath(args.scan_root)
+        if not os.path.isdir(scan_root):
+            print(f"Error: --scan-root {args.scan_root!r} is not a directory", file=sys.stderr)
+            sys.exit(1)
+        print(f"Scanning {scan_root} for scan targets...")
+        scan_rows = measure_scan_rows(scan_targets, scan_root)
+        print()
+
+    print_report(cli_rows, dir_rows, scan_rows, free_before)
 
     if not args.apply:
         print("Run with --apply to clean everything above.")
@@ -477,11 +596,26 @@ def main() -> None:
         freed_dirs += clean_dir_target(t)
         progress.stop()
 
+    # --- Scan cleanups ---
+    freed_scan = 0
+    for name, _, size, found_dirs in scan_rows:
+        if not found_dirs:
+            print(f"\nSkipping {name}: none found")
+            continue
+        print(f"\nCleaning {name} ({format_size(size)}, {len(found_dirs)} directories)...")
+        progress = ProgressPrinter(name)
+        progress.start()
+        freed_scan += clean_scan_target(found_dirs)
+        progress.stop()
+
     free_after = disk_free()
     print(f"\nDone.")
     print(f"  Free disk space before: {format_size(free_before)}")
     print(f"  Free disk space after:  {format_size(free_after)}")
-    print(f"  Freed (directories):    {format_size(freed_dirs)}")
+    if freed_dirs:
+        print(f"  Freed (directories):    {format_size(freed_dirs)}")
+    if freed_scan:
+        print(f"  Freed (scan targets):   {format_size(freed_scan)}")
 
 
 if __name__ == "__main__":

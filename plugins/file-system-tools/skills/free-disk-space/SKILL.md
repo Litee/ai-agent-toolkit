@@ -35,7 +35,7 @@ du -sh ~/* | sort -rh | head -20
 
 ## The Cleanup Script
 
-`scripts/clean_caches.py` is the primary cleanup tool. It covers all cache types — both CLI-managed (npm, pip, yarn, pnpm, go, brew, docker, etc.) and directory-based (Maven, Gradle, JetBrains, etc.).
+`scripts/clean_caches.py` is the primary cleanup tool. It covers all cache types — CLI-managed (npm, pip, yarn, pnpm, go, brew, docker, etc.), directory-based (Maven, Gradle, JetBrains, etc.), and scan-based (node_modules under a given root).
 
 ```bash
 # Step 1: Report all cache sizes without deleting anything
@@ -49,6 +49,22 @@ python3 ${SKILL_DIR}/scripts/clean_caches.py --apply --target maven gradle
 ```
 
 The script reports sizes and then confirms before deleting. The `--target` flag is for special cases where only specific caches need cleaning.
+
+### Scan-based targets (require `--scan-root`)
+
+Scan targets recursively find directories by name under a given root and delete them. They are **opt-in only** — not included in the default run.
+
+| Target | Scans for | Notes |
+|--------|-----------|-------|
+| `node_modules` | All `node_modules` directories | Does not descend into matched dirs (no double-counting) |
+
+```bash
+# Report node_modules under ~/projects (no deletion)
+python3 ${SKILL_DIR}/scripts/clean_caches.py --target node_modules --scan-root ~/projects
+
+# Delete all found node_modules directories
+python3 ${SKILL_DIR}/scripts/clean_caches.py --apply --target node_modules --scan-root ~/projects
+```
 
 ## The Bloat Scanner
 
