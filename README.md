@@ -44,6 +44,7 @@ These skills can be installed as plugins in Claude Code.
 /plugin install podcast-generation@litee-claude-code-plugins
 /plugin install protect-file-system-access@litee-claude-code-plugins
 /plugin install pyspark@litee-claude-code-plugins
+/plugin install qmd@litee-claude-code-plugins
 /plugin install register-safe-terminal-commands@litee-claude-code-plugins
 /plugin install skill-management@litee-claude-code-plugins
 /plugin install update-versioned-permissions@litee-claude-code-plugins
@@ -78,6 +79,7 @@ Each plugin installs a skill that extends Claude's capabilities:
 | `podcast-generation` | user | AI-powered podcast script generation and audio synthesis using AWS TTS |
 | `protect-file-system-access` | developer-tools | PreToolUse hook blocking direct edits to AWS credentials, SSH keys, shell profiles, and lockfiles |
 | `pyspark` (`use-pyspark`) | developer-tools | PySpark anti-patterns (JSON inference OOM, data skew, shuffle spill, Python UDFs), coding style guide (import aliases, type hints, method chains, join hygiene, null handling), and Spark tuning (AQE, broadcast joins, shuffle partitions) |
+| `qmd` (`use-qmd-cli`) | productivity | On-device markdown note search using QMD CLI: hybrid BM25 + vector + LLM re-ranking retrieval, structured query syntax (lex:/vec:/hyde:), document retrieval by path or docid, collection management, and agent-friendly output formats (JSON, CSV, XML) |
 | `register-safe-terminal-commands` | developer-tools | SessionStart hook that auto-syncs safe terminal commands to Claude Code settings; skill available for manual dry-run/verbose sync |
 | `skill-management` (`enrich-skill-via-research`) | developer-tools | Research external sources (official docs, team wikis, post-mortems, code search) to fill gaps in an existing skill's SKILL.md: failure modes, anti-patterns, troubleshooting steps, and operational gotchas. Distinct from skill-creator (creates from scratch) and review-skill (checks compliance) |
 | `skill-management` (`evaluate-skills-with-synthetic-tasks`) | developer-tools | Customer-perspective skill evaluation using synthetic tasks: test skills by executing them as a real user would, score results (PASS/PARTIAL/FAIL/BLOCKED), dispatch evaluation sub-agents per skill, and file issues for failures |
