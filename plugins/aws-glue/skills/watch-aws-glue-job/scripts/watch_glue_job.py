@@ -47,6 +47,7 @@ def _version_from_path(path: str) -> str:
 
 _VERSION = _version_from_path(__file__)
 _ver = lambda: f"v{_VERSION}" if _VERSION != 'unknown' else "(unknown version)"
+_WATCHER_NAME = "Glue Job Watcher"
 
 _INSTALLED_PLUGINS_PATH = Path.home() / '.claude' / 'plugins' / 'installed_plugins.json'
 
@@ -89,7 +90,7 @@ def _check_version_drift() -> None:
             best_tuple = vt
     if best_tuple > _parse_semver(_VERSION):
         print(
-            f"[{ts()}] [Glue Watcher {_ver()}] WARNING: Running version {_VERSION} but "
+            f"[{ts()}] [{_WATCHER_NAME} {_ver()}] WARNING: Running version {_VERSION} but "
             f"version {best_version} is installed. Restart to pick up the newer version.",
             file=sys.stderr, flush=True,
         )
@@ -146,7 +147,7 @@ def _check_instance_guard(watcher_id: str) -> None:
     try:
         os.kill(pid, 0)
         print(
-            f"[Glue Watcher] ERROR: watcher {watcher_id} is already running (PID {pid}).\n"
+            f"[{_WATCHER_NAME}] ERROR: watcher {watcher_id} is already running (PID {pid}).\n"
             f"  PID file: {pid_path}\n"
             f"  To force a restart: kill {pid} && rm {pid_path}",
             file=sys.stderr, flush=True,
@@ -156,7 +157,7 @@ def _check_instance_guard(watcher_id: str) -> None:
         return
     except PermissionError:
         print(
-            f"[Glue Watcher] ERROR: watcher {watcher_id} is already running (PID {pid}).\n"
+            f"[{_WATCHER_NAME}] ERROR: watcher {watcher_id} is already running (PID {pid}).\n"
             f"  PID file: {pid_path}\n"
             f"  To force a restart: kill {pid} && rm {pid_path}",
             file=sys.stderr, flush=True,
@@ -169,7 +170,7 @@ def _write_pid_file(watcher_id: str) -> None:
     try:
         _pid_file_path(watcher_id).write_text(str(os.getpid()))
     except OSError as e:
-        print(f"[Glue Watcher] FATAL: failed to write PID file: {e}", file=sys.stderr, flush=True)
+        print(f"[{_WATCHER_NAME}] FATAL: failed to write PID file: {e}", file=sys.stderr, flush=True)
         sys.exit(1)
 
 
@@ -689,7 +690,7 @@ def _poll_loop(
             elapsed_total = time.monotonic() - started_at
             if elapsed_total > max_runtime_seconds:
                 msg = (
-                    f"[Glue Watcher {_ver()}] Max runtime ({max_runtime_hours}h) reached. "
+                    f"[{_WATCHER_NAME} {_ver()}] Max runtime ({max_runtime_hours}h) reached. "
                     f"Last known state: {previous_state}. Re-launch: {restart_cmd}"
                 )
                 if bridge:
@@ -702,7 +703,7 @@ def _poll_loop(
             try:
                 run = client.get_job_run(job_name, run_id)
                 if consecutive_cred_errors > 0 and cred_notified:
-                    recovery_msg = f"[Glue Watcher {_ver()}] AWS credentials recovered — resuming."
+                    recovery_msg = f"[{_WATCHER_NAME} {_ver()}] AWS credentials recovered — resuming."
                     if bridge:
                         bridge.send_to_claude(recovery_msg)
                     else:
@@ -719,13 +720,13 @@ def _poll_loop(
                     )
                     if consecutive_cred_errors >= 5 and not cred_notified:
                         msg = (
-                            f"[Glue Watcher {_ver()}] {consecutive_cred_errors} consecutive "
+                            f"[{_WATCHER_NAME} {_ver()}] {consecutive_cred_errors} consecutive "
                             f"AWS credential errors. Please re-authenticate your AWS credentials. "
                             f"Watcher will auto-recover when credentials are refreshed."
                         )
                         if bridge:
                             bridge.send_to_claude(msg)
-                            bridge.notify("Glue Watcher", "Credentials expired")
+                            bridge.notify(_WATCHER_NAME, "Credentials expired")
                             bridge.clear_status(status_key)
                         else:
                             print(f"[{ts()}] WARN: {msg}", file=sys.stderr, flush=True)
@@ -754,7 +755,7 @@ def _poll_loop(
                 print(f"[{ts()}] WARN: Poll error #{consecutive_poll_errors}: {e}", file=sys.stderr, flush=True)
                 if bridge and consecutive_poll_errors >= 3:
                     bridge.send_to_claude(
-                        f"[Glue Watcher {_ver()}] {consecutive_poll_errors} consecutive poll errors. "
+                        f"[{_WATCHER_NAME} {_ver()}] {consecutive_poll_errors} consecutive poll errors. "
                         f"Last: {str(e)[:80]}. Still watching."
                     )
                     consecutive_poll_errors = 0
@@ -801,7 +802,7 @@ def _poll_loop(
                 elapsed_fmt = format_elapsed(exec_time) if exec_time else format_elapsed(elapsed_total)
 
                 if current_state in TERMINAL_STATES:
-                    prefix = f"[Glue Watcher {_ver()}]"
+                    prefix = f"[{_WATCHER_NAME} {_ver()}]"
                     if current_state == 'SUCCEEDED':
                         dpu_info = f" DPU-seconds: {int(dpu_seconds)}." if dpu_seconds else ""
                         notification = (
@@ -851,7 +852,7 @@ def _poll_loop(
                 else:
                     prev_label = f"{previous_state} -> " if previous_state else ""
                     notification = (
-                        f"[Glue Watcher {_ver()}] {job_name} ({run_id}) | "
+                        f"[{_WATCHER_NAME} {_ver()}] {job_name} ({run_id}) | "
                         f"{prev_label}{current_state} ({ts()})"
                     )
                     print(f"[{ts()}] STATE CHANGE: {prev_label}{current_state}. Elapsed: {elapsed_fmt}", flush=True)
@@ -901,7 +902,7 @@ def _poll_loop(
 
         sig = received_signal[0] or 'timeout'
         print(
-            f"[Glue Watcher {_ver()}] Exiting ({sig}).\n"
+            f"[{_WATCHER_NAME} {_ver()}] Exiting ({sig}).\n"
             f"Re-launch:\n  {restart_cmd}",
             file=sys.stderr, flush=True,
         )
@@ -983,7 +984,7 @@ def cmd_watch(args):
     cw_metrics = None if args.no_cloudwatch_metrics else CloudWatchMetrics(profile=profile, region=region)
 
     print(
-        f"[Glue Watcher {_ver()}] ID: {watcher_id} | Mode: {mode} | "
+        f"[{_WATCHER_NAME} {_ver()}] ID: {watcher_id} | Mode: {mode} | "
         f"Job: {job_name} | Run: {run_id} | Poll: {poll_interval}s",
         file=sys.stderr, flush=True,
     )
@@ -1000,7 +1001,7 @@ def cmd_watch(args):
             enable_notify=args.cmux_notify,
             enable_status=args.cmux_status,
         )
-        if not bridge.send_to_claude(f"[Glue Watcher {_ver()}] Started. ID: {watcher_id} | Job: {job_name} | Run: {run_id[:12]}"):
+        if not bridge.send_to_claude(f"[{_WATCHER_NAME} {_ver()}] Started. ID: {watcher_id} | Job: {job_name} | Run: {run_id[:12]}"):
             print(
                 f"Surface {surface_ref} unreachable. Get fresh refs via `cmux identify --json` and re-launch:\n"
                 f"  {restart_cmd}",
@@ -1011,7 +1012,7 @@ def cmd_watch(args):
     elif mode == 'tmux-keystrokes':
         assert tmux_pane is not None
         bridge = TmuxBridge(tmux_pane=tmux_pane)
-        if not bridge.send_to_claude(f"[Glue Watcher {_ver()}] Started. ID: {watcher_id} | Job: {job_name} | Run: {run_id[:12]}"):
+        if not bridge.send_to_claude(f"[{_WATCHER_NAME} {_ver()}] Started. ID: {watcher_id} | Job: {job_name} | Run: {run_id[:12]}"):
             print(
                 f"tmux pane {tmux_pane} unreachable. Check pane ID and re-launch:\n"
                 f"  {restart_cmd}",
@@ -1259,7 +1260,7 @@ def main():
 
     if _VERSION == 'unknown':
         print(
-            "[Glue Watcher] WARNING: Running from source (version unknown). "
+            f"[{_WATCHER_NAME}] WARNING: Running from source (version unknown). "
             "Version drift checks disabled.",
             file=sys.stderr, flush=True,
         )
