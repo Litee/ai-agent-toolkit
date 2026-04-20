@@ -6,7 +6,7 @@
   "metadata": {
     "description": "Collection of AI agent skills for AWS CDK development, AWS documentation search, AWS Athena SQL querying, CloudWatch Logs Insights querying, Anki flashcard management, Obsidian vault management, audio conversion, podcast generation, safe terminal command registration, image generation, ML system design interviews, and markdown note search",
 
-    "version": "1.1.28",
+    "version": "1.1.29",
     "homepage": "https://github.com/Litee/ai-agent-toolkit"
   },
   "plugins": [
@@ -256,6 +256,16 @@
       "category": "developer-tools",
       "keywords": ["skill", "skill-creator", "portability", "best-practices", "naming-conventions", "skill-dir", "evaluation", "synthetic-tasks", "quality-assurance", "audit", "review", "research", "enrich"],
       "skills": ["./skills/enrich-skill-via-research", "./skills/evaluate-skills-with-synthetic-tasks", "./skills/review-skill", "./skills/skill-creator-extra-tips"]
+    },
+    {
+      "name": "toon",
+      "description": "This plugin contains a skill for converting between JSON and TOON (Token-Oriented Object Notation) formats using the toon CLI. TOON is a compact, human-readable format that encodes the JSON data model with minimal tokens, designed as a translation layer for LLM input. Use for encoding JSON to TOON, decoding TOON to JSON, measuring token savings with --stats, or reducing token usage when feeding data to language models.",
+      "source": "./plugins/toon",
+      "strict": false,
+      "version": "1.0.0",
+      "category": "developer-tools",
+      "keywords": ["toon", "json", "token", "format", "encode", "decode", "llm", "compact"],
+      "skills": ["./skills/use-toon-cli"]
     },
     {
       "name": "update-versioned-permissions",
