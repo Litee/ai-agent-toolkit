@@ -1,0 +1,6 @@
+{
+  "name": "cli-design",
+  "description": "This plugin contains a skill for designing and reviewing command-line interfaces (CLIs). Covers language-agnostic best practices, POSIX/GNU conventions, anti-patterns, output formatting, error messages, exit codes, configuration, testing, versioning, performance, distribution, and AI-agent-friendly CLI design.",
+  "version": "1.0.0",
+  "skills": ["./skills/build-cli"]
+}

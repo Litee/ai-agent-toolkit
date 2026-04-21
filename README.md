@@ -32,6 +32,7 @@ These skills can be installed as plugins in Claude Code.
 /plugin install aws-support@litee-claude-code-plugins
 /plugin install claude-code-session-history@litee-claude-code-plugins
 /plugin install claude-code-status-line@litee-claude-code-plugins
+/plugin install cli-design@litee-claude-code-plugins
 /plugin install cmux-terminal@litee-claude-code-plugins
 /plugin install communication@litee-claude-code-plugins
 /plugin install convert-audio@litee-claude-code-plugins
@@ -70,6 +71,7 @@ Each plugin installs a skill that extends Claude's capabilities:
 | `claude-code-status-line` | developer-tools | SessionStart hook that configures Claude Code statusline to display context usage, token counts, cost, model ID, git branch, and working directory |
 | `cmux-terminal` (`use-cmux-terminal`) | developer-tools | Terminal multiplexer integration: orchestrate sessions, browser automation, progress reporting; SessionStart hook prints cmux context and LLM behavioural instructions when running inside cmux |
 | `communication` (`communicate-well`, `write-good-emails`) | productivity | Async communication guidelines for AI agents: value test, message style, frequency, anti-patterns, and channel-type rules; professional email writing: subject lines, tone calibration, difficult scenarios, follow-up strategy, and AI prompting for emails |
+| `cli-design` (`build-cli`) | developer-tools | Language-agnostic CLI design: naming conventions, flags, help text, stdout/stderr routing, error messages, exit codes, interactivity, configuration precedence (XDG), authentication patterns, signal handling, idempotency, testing (black-box binary testing, snapshot tests), SemVer breaking-change rules, performance budgets (< 100ms startup), distribution (binary packaging, signing), plugin architectures, and AI-agent-friendly design (structured output, schema introspection, terse output) |
 | `convert-audio` | user | Audio format conversion using ffmpeg (MP3, WAV, AAC, FLAC, Opus, OGG), bitrate/speed adjustment, and metadata tagging (ID3 tags) |
 | `cron-restoration-guard` | developer-tools | SessionStart hook (resume only) that instructs the agent to verify and re-register any cron jobs from the previous session that are no longer active |
 | `file-system-tools` (`free-disk-space`, `handle-large-files`) | developer-tools | Free disk space by cleaning development caches, IDE artefacts, and Docker resources. Scan for bloat directories (node_modules, virtual environments, build caches). Safely analyze large files without exceeding the context window: size-checking strategies, targeted extraction one-liners (Bash/Python/Node.js), structured data probing (JSON, CSV, XML, logs), and token estimation |

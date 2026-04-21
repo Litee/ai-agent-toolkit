@@ -6,7 +6,7 @@
   "metadata": {
     "description": "Collection of AI agent skills for AWS CDK development, AWS documentation search, AWS Athena SQL querying, CloudWatch Logs Insights querying, Anki flashcard management, Obsidian vault management, audio conversion, podcast generation, safe terminal command registration, image generation, ML system design interviews, and markdown note search",
 
-    "version": "1.1.30",
+    "version": "1.1.31",
     "homepage": "https://github.com/Litee/ai-agent-toolkit"
   },
   "plugins": [
@@ -196,6 +196,16 @@
       "category": "productivity",
       "keywords": ["communication", "async", "messaging", "slack", "tickets", "code-review", "anti-patterns", "email"],
       "skills": ["./skills/communicate-well", "./skills/write-good-emails"]
+    },
+    {
+      "name": "cli-design",
+      "description": "This plugin contains a skill for designing and reviewing command-line interfaces (CLIs). Covers language-agnostic best practices, POSIX/GNU conventions, anti-patterns, output formatting, error messages, exit codes, configuration, testing, versioning, performance, distribution, and AI-agent-friendly CLI design.",
+      "source": "./plugins/cli-design",
+      "strict": false,
+      "version": "1.0.0",
+      "category": "developer-tools",
+      "keywords": ["cli", "command-line", "design", "best-practices", "posix", "ux", "exit-codes", "flags"],
+      "skills": ["./skills/build-cli"]
     },
     {
       "name": "cmux-terminal",
