@@ -52,6 +52,7 @@ def _version_from_path(path: str) -> str:
 
 _VERSION = _version_from_path(__file__)
 _ver = lambda: f"v{_VERSION}" if _VERSION != 'unknown' else "(unknown version)"
+_WATCHER_NAME = "Glue Workflow Watcher"
 
 _INSTALLED_PLUGINS_PATH = Path.home() / '.claude' / 'plugins' / 'installed_plugins.json'
 
@@ -102,6 +103,10 @@ def _check_version_drift() -> None:
 
 def ts() -> str:
     return datetime.now(timezone.utc).strftime('%H:%M UTC')
+
+
+def _pfx() -> str:
+    return f"[{_WATCHER_NAME} {_ver()}] ({ts()})"
 
 
 def now_iso() -> str:
@@ -614,7 +619,7 @@ def _poll_loop(
             elapsed_total = time.monotonic() - started_at
             if elapsed_total > max_runtime_seconds:
                 msg = (
-                    f"[Glue Workflow Watcher {_ver()}] Max runtime ({max_runtime_hours}h) reached. "
+                    f"{_pfx()} Max runtime ({max_runtime_hours}h) reached. "
                     f"Last known state: {previous_state}. Re-launch: {restart_cmd}"
                 )
                 if bridge:
@@ -627,7 +632,7 @@ def _poll_loop(
             try:
                 run = client.get_workflow_run(workflow_name, run_id)
                 if consecutive_cred_errors > 0 and cred_notified:
-                    recovery_msg = f"[Glue Workflow Watcher {_ver()}] AWS credentials recovered — resuming."
+                    recovery_msg = f"{_pfx()} AWS credentials recovered — resuming."
                     if bridge:
                         bridge.send_to_claude(recovery_msg)
                     else:
@@ -644,7 +649,7 @@ def _poll_loop(
                     )
                     if consecutive_cred_errors >= 5 and not cred_notified:
                         msg = (
-                            f"[Glue Workflow Watcher {_ver()}] {consecutive_cred_errors} consecutive "
+                            f"{_pfx()} {consecutive_cred_errors} consecutive "
                             f"AWS credential errors. Please re-authenticate. "
                             f"Watcher will auto-recover when credentials are refreshed."
                         )
@@ -678,7 +683,7 @@ def _poll_loop(
                 print(f"[{ts()}] WARN: Poll error #{consecutive_poll_errors}: {e}", file=sys.stderr, flush=True)
                 if bridge and consecutive_poll_errors >= 3:
                     bridge.send_to_claude(
-                        f"[Glue Workflow Watcher {_ver()}] {consecutive_poll_errors} consecutive poll errors. "
+                        f"{_pfx()} {consecutive_poll_errors} consecutive poll errors. "
                         f"Last: {str(e)[:80]}. Still watching."
                     )
                     consecutive_poll_errors = 0
@@ -955,8 +960,7 @@ def cmd_watch(args):
             enable_status=args.cmux_status,
         )
         if not bridge.send_to_claude(
-            f"[Glue Workflow Watcher {_ver()}] Started. ID: {watcher_id} | "
-            f"Workflow: {workflow_name} | Run: {run_id[:12]}"
+            f"{_pfx()} Started. ID: {watcher_id} | Workflow: {workflow_name} | Run: {run_id[:12]}"
         ):
             print(
                 f"Surface {surface_ref} unreachable. Get fresh refs via `cmux identify --json` and re-launch:\n"
@@ -969,8 +973,7 @@ def cmd_watch(args):
         assert tmux_pane is not None
         bridge = TmuxBridge(tmux_pane=tmux_pane)
         if not bridge.send_to_claude(
-            f"[Glue Workflow Watcher {_ver()}] Started. ID: {watcher_id} | "
-            f"Workflow: {workflow_name} | Run: {run_id[:12]}"
+            f"{_pfx()} Started. ID: {watcher_id} | Workflow: {workflow_name} | Run: {run_id[:12]}"
         ):
             print(
                 f"tmux pane {tmux_pane} unreachable. Check pane ID and re-launch:\n"

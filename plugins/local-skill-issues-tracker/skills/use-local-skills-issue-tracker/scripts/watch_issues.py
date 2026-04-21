@@ -42,6 +42,7 @@ def _version_from_path(path: str) -> str:
 
 _VERSION = _version_from_path(__file__)
 _ver = lambda: f"v{_VERSION}" if _VERSION != "unknown" else "(unknown version)"
+_WATCHER_NAME = "Issue Watcher"
 
 _ISSUE_FNAME_RE = re.compile(r"^(\d{4})-[a-z0-9-]+\.json$")
 
@@ -55,8 +56,11 @@ POLL_INTERVAL_MAX = 3600
 # ---------------------------------------------------------------------------
 
 def _ts() -> str:
-    """Short UTC timestamp for log lines."""
-    return datetime.now(timezone.utc).strftime("%H:%M:%SZ")
+    return datetime.now(timezone.utc).strftime("%H:%M UTC")
+
+
+def _pfx() -> str:
+    return f"[{_WATCHER_NAME} {_ver()}] ({_ts()})"
 
 
 def _now_iso() -> str:
@@ -573,7 +577,8 @@ def _deliver_via_bridge(
 ) -> bool:
     """Send each notification line via bridge. Returns False if bridge becomes unreachable."""
     for note in notifications:
-        if not bridge.send_to_claude(note):
+        stamped = note.replace("] ", f"] ({_ts()}) ", 1)
+        if not bridge.send_to_claude(stamped):
             print(
                 f"{surface_label} unreachable. Re-launch:\n  {relaunch_cmd}",
                 file=sys.stderr, flush=True,
@@ -805,7 +810,7 @@ def main() -> None:
         surface_label = f"Surface {args.cmux_surface}"
         # Send startup confirmation
         if not bridge.send_to_claude(
-            f"[Issue Watcher {_ver()}] Started. ID: {watcher_id} | DB: {db_root}"
+            f"{_pfx()} Started. ID: {watcher_id} | DB: {db_root}"
         ):
             print(
                 f"Surface {args.cmux_surface} unreachable. "
@@ -827,7 +832,7 @@ def main() -> None:
         surface_label = f"tmux pane {args.tmux_pane}"
         # Send startup confirmation
         if not bridge.send_to_claude(
-            f"[Issue Watcher {_ver()}] Started. ID: {watcher_id} | DB: {db_root}"
+            f"{_pfx()} Started. ID: {watcher_id} | DB: {db_root}"
         ):
             print(
                 f"tmux pane {args.tmux_pane} unreachable. "
@@ -864,7 +869,7 @@ def main() -> None:
                     _print_timeout_instructions(args.max_runtime_hours, relaunch_cmd)
                 else:
                     msg = (
-                        f"[Issue Watcher {_ver()}] Max runtime ({args.max_runtime_hours}h) "
+                        f"{_pfx()} Max runtime ({args.max_runtime_hours}h) "
                         f"reached. Re-launch: {relaunch_cmd}"
                     )
                     if bridge:
@@ -927,7 +932,7 @@ def main() -> None:
         _remove_pid_file(state_dir, watcher_id)
         if mode in ("cmux-keystrokes", "tmux-keystrokes") and bridge:
             bridge.send_to_claude(
-                f"[Issue Watcher {_ver()}] Exiting ({sig}). Re-launch: {relaunch_cmd}"
+                f"{_pfx()} Exiting ({sig}). Re-launch: {relaunch_cmd}"
             )
         print(
             f"[{_ts()}] Issue watcher {_ver()} — exiting ({sig}).\n"

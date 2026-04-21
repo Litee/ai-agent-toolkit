@@ -6,7 +6,7 @@
   "metadata": {
     "description": "Collection of AI agent skills for AWS CDK development, AWS documentation search, AWS Athena SQL querying, CloudWatch Logs Insights querying, Anki flashcard management, Obsidian vault management, audio conversion, podcast generation, safe terminal command registration, image generation, ML system design interviews, and markdown note search",
 
-    "version": "1.1.29",
+    "version": "1.1.30",
     "homepage": "https://github.com/Litee/ai-agent-toolkit"
   },
   "plugins": [

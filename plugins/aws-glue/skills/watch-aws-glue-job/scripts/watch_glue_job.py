@@ -100,6 +100,10 @@ def ts() -> str:
     return datetime.now(timezone.utc).strftime('%H:%M UTC')
 
 
+def _pfx() -> str:
+    return f"[{_WATCHER_NAME} {_ver()}] ({ts()})"
+
+
 def now_iso() -> str:
     return datetime.now(timezone.utc).isoformat(timespec='seconds')
 
@@ -690,7 +694,7 @@ def _poll_loop(
             elapsed_total = time.monotonic() - started_at
             if elapsed_total > max_runtime_seconds:
                 msg = (
-                    f"[{_WATCHER_NAME} {_ver()}] Max runtime ({max_runtime_hours}h) reached. "
+                    f"{_pfx()} Max runtime ({max_runtime_hours}h) reached. "
                     f"Last known state: {previous_state}. Re-launch: {restart_cmd}"
                 )
                 if bridge:
@@ -703,7 +707,7 @@ def _poll_loop(
             try:
                 run = client.get_job_run(job_name, run_id)
                 if consecutive_cred_errors > 0 and cred_notified:
-                    recovery_msg = f"[{_WATCHER_NAME} {_ver()}] AWS credentials recovered — resuming."
+                    recovery_msg = f"{_pfx()} AWS credentials recovered — resuming."
                     if bridge:
                         bridge.send_to_claude(recovery_msg)
                     else:
@@ -720,7 +724,7 @@ def _poll_loop(
                     )
                     if consecutive_cred_errors >= 5 and not cred_notified:
                         msg = (
-                            f"[{_WATCHER_NAME} {_ver()}] {consecutive_cred_errors} consecutive "
+                            f"{_pfx()} {consecutive_cred_errors} consecutive "
                             f"AWS credential errors. Please re-authenticate your AWS credentials. "
                             f"Watcher will auto-recover when credentials are refreshed."
                         )
@@ -755,7 +759,7 @@ def _poll_loop(
                 print(f"[{ts()}] WARN: Poll error #{consecutive_poll_errors}: {e}", file=sys.stderr, flush=True)
                 if bridge and consecutive_poll_errors >= 3:
                     bridge.send_to_claude(
-                        f"[{_WATCHER_NAME} {_ver()}] {consecutive_poll_errors} consecutive poll errors. "
+                        f"{_pfx()} {consecutive_poll_errors} consecutive poll errors. "
                         f"Last: {str(e)[:80]}. Still watching."
                     )
                     consecutive_poll_errors = 0
@@ -1001,7 +1005,7 @@ def cmd_watch(args):
             enable_notify=args.cmux_notify,
             enable_status=args.cmux_status,
         )
-        if not bridge.send_to_claude(f"[{_WATCHER_NAME} {_ver()}] Started. ID: {watcher_id} | Job: {job_name} | Run: {run_id[:12]}"):
+        if not bridge.send_to_claude(f"{_pfx()} Started. ID: {watcher_id} | Job: {job_name} | Run: {run_id[:12]}"):
             print(
                 f"Surface {surface_ref} unreachable. Get fresh refs via `cmux identify --json` and re-launch:\n"
                 f"  {restart_cmd}",
@@ -1012,7 +1016,7 @@ def cmd_watch(args):
     elif mode == 'tmux-keystrokes':
         assert tmux_pane is not None
         bridge = TmuxBridge(tmux_pane=tmux_pane)
-        if not bridge.send_to_claude(f"[{_WATCHER_NAME} {_ver()}] Started. ID: {watcher_id} | Job: {job_name} | Run: {run_id[:12]}"):
+        if not bridge.send_to_claude(f"{_pfx()} Started. ID: {watcher_id} | Job: {job_name} | Run: {run_id[:12]}"):
             print(
                 f"tmux pane {tmux_pane} unreachable. Check pane ID and re-launch:\n"
                 f"  {restart_cmd}",

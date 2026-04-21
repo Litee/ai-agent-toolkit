@@ -70,6 +70,7 @@ def _version_from_path(path: str) -> str:
 
 _VERSION = _version_from_path(__file__)
 _ver = lambda: f"v{_VERSION}" if _VERSION != 'unknown' else "(unknown version)"
+_WATCHER_NAME = "Quota Watcher"
 
 _INSTALLED_PLUGINS_PATH = Path.home() / '.claude' / 'plugins' / 'installed_plugins.json'
 
@@ -125,8 +126,11 @@ def now_iso() -> str:
 
 
 def ts() -> str:
-    """Short UTC timestamp for log lines."""
     return datetime.now(timezone.utc).strftime('%H:%M UTC')
+
+
+def _pfx() -> str:
+    return f"[{_WATCHER_NAME} {_ver()}] ({ts()})"
 
 
 # ---------------------------------------------------------------------------
@@ -617,7 +621,7 @@ class QuotaRequestWatcher:
                     if consecutive_credential_errors > 0:
                         if self._cred_notified and self.mode in ('cmux-keystrokes', 'tmux-keystrokes') and self.bridge:
                             self.bridge.send_to_claude(
-                                f"[Quota Watcher {_ver()}] Credentials recovered — resuming normal polling."
+                                f"{_pfx()} Credentials recovered — resuming normal polling."
                             )
                         self._cred_notified = False
                     consecutive_credential_errors = 0
@@ -636,7 +640,7 @@ class QuotaRequestWatcher:
                         )
                         if consecutive_credential_errors >= 5 and not self._cred_notified:
                             msg = (
-                                f"[Quota Watcher {_ver()}] {consecutive_credential_errors} consecutive "
+                                f"{_pfx()} {consecutive_credential_errors} consecutive "
                                 f"AWS credential errors. Please re-authenticate your AWS credentials. "
                                 f"Watcher will auto-recover when credentials are refreshed."
                             )
@@ -672,7 +676,7 @@ class QuotaRequestWatcher:
                     )
                     if consecutive_poll_errors >= 3:
                         warn_msg = (
-                            f"[Quota Watcher] {req_id} — {consecutive_poll_errors} consecutive "
+                            f"{_pfx()} {req_id} — {consecutive_poll_errors} consecutive "
                             f"poll errors. Last: {str(e)[:100]}. Monitor retrying."
                         )
                         if self.mode == 'cmux-keystrokes' and self.bridge:
@@ -750,7 +754,7 @@ class QuotaRequestWatcher:
         # All requests reached terminal state or signal received
         if not active_ids:
             done_msg = (
-                f"[Quota Watcher] All watched requests reached terminal status. "
+                f"{_pfx()} All watched requests reached terminal status. "
                 f"Watcher {self.watcher_id} exiting."
             )
             print(done_msg, file=sys.stderr, flush=True)
@@ -838,7 +842,7 @@ class QuotaRequestWatcher:
         """Handle max-runtime expiry."""
         restart_cmd = self._build_restart_cmd(active_ids)
         timeout_msg = (
-            f"Quota Request Watcher {self.watcher_id} timed out after "
+            f"{_pfx()} Timed out after "
             f"{self.max_runtime_seconds // 3600}h. "
             f"Still watching: {', '.join(active_ids)}. Re-launch: {restart_cmd}"
         )

@@ -51,6 +51,7 @@ def _version_from_path(path: str) -> str:
 
 _VERSION = _version_from_path(__file__)
 _ver = lambda: f"v{_VERSION}" if _VERSION != 'unknown' else "(unknown version)"
+_WATCHER_NAME = "Support Watcher"
 
 _INSTALLED_PLUGINS_PATH = Path.home() / '.claude' / 'plugins' / 'installed_plugins.json'
 
@@ -101,6 +102,10 @@ def _check_version_drift() -> None:
 
 def _ts() -> str:
     return datetime.now(timezone.utc).strftime('%H:%M UTC')
+
+
+def _pfx() -> str:
+    return f"[{_WATCHER_NAME} {_ver()}] ({_ts()})"
 
 
 def _now_iso() -> str:
@@ -919,7 +924,7 @@ def _run_cmux_keystrokes(args, case_ids: list[str], all_open: bool):
 
     # Send startup confirmation
     summary = _case_summary(case_ids)
-    if not bridge.send_to_claude(f"[Support Watcher {_ver()}] Started. ID: {watcher_id} | Watching: {summary}"):
+    if not bridge.send_to_claude(f"{_pfx()} Started. ID: {watcher_id} | Watching: {summary}"):
         print(
             f"Surface {surface_ref} unreachable. Get fresh refs via `cmux identify --json` and re-launch:\n"
             f"  {restart_cmd}",
@@ -964,7 +969,7 @@ def _run_cmux_keystrokes(args, case_ids: list[str], all_open: bool):
 
             if time.monotonic() - started_at > max_runtime_seconds:
                 msg = (
-                    f"[Support Watcher {_ver()}] Max runtime ({max_runtime_hours}h) reached. "
+                    f"{_pfx()} Max runtime ({max_runtime_hours}h) reached. "
                     f"Re-launch: {restart_cmd}"
                 )
                 bridge.send_to_claude(msg)
@@ -990,11 +995,11 @@ def _run_cmux_keystrokes(args, case_ids: list[str], all_open: bool):
                 consecutive_cred_errors = 0
                 consecutive_poll_errors = 0
                 if cred_notified:
-                    bridge.send_to_claude(f"[Support Watcher {_ver()}] Credentials recovered — resuming.")
+                    bridge.send_to_claude(f"{_pfx()} Credentials recovered — resuming.")
                     cred_notified = False
             except Exception as e:
                 if _is_subscription_error(e):
-                    msg = "[Support Watcher] SubscriptionRequiredException — Business/Enterprise support plan required."
+                    msg = f"{_pfx()} SubscriptionRequiredException — Business/Enterprise support plan required."
                     bridge.send_to_claude(msg)
                     bridge.clear_status(status_key)
                     break
@@ -1007,7 +1012,7 @@ def _run_cmux_keystrokes(args, case_ids: list[str], all_open: bool):
                     )
                     if consecutive_cred_errors >= 5 and not cred_notified:
                         msg = (
-                            f"[Support Watcher {_ver()}] {consecutive_cred_errors} consecutive "
+                            f"{_pfx()} {consecutive_cred_errors} consecutive "
                             f"AWS credential errors. Please re-authenticate your AWS credentials. "
                             f"Watcher will auto-recover when credentials are refreshed."
                         )
@@ -1036,7 +1041,7 @@ def _run_cmux_keystrokes(args, case_ids: list[str], all_open: bool):
                 print(f"[{_ts()}] WARN: Poll error #{consecutive_poll_errors}: {e}", file=sys.stderr, flush=True)
                 if consecutive_poll_errors >= 3:
                     msg = (
-                        f"[Support Watcher {_ver()}] {consecutive_poll_errors} consecutive poll errors. "
+                        f"{_pfx()} {consecutive_poll_errors} consecutive poll errors. "
                         f"Last: {str(e)[:80]}. Still watching."
                     )
                     bridge.send_to_claude(msg)
@@ -1161,7 +1166,7 @@ def _run_tmux_keystrokes(args, case_ids: list[str], all_open: bool):
 
     # Send startup confirmation
     summary = _case_summary(case_ids)
-    if not bridge.send_to_claude(f"[Support Watcher {_ver()}] Started. ID: {watcher_id} | Watching: {summary}"):
+    if not bridge.send_to_claude(f"{_pfx()} Started. ID: {watcher_id} | Watching: {summary}"):
         print(
             f"tmux pane {tmux_pane} unreachable. Check pane ID and re-launch:\n"
             f"  {restart_cmd}",
@@ -1205,7 +1210,7 @@ def _run_tmux_keystrokes(args, case_ids: list[str], all_open: bool):
 
             if time.monotonic() - started_at > max_runtime_seconds:
                 msg = (
-                    f"[Support Watcher {_ver()}] Max runtime ({max_runtime_hours}h) reached. "
+                    f"{_pfx()} Max runtime ({max_runtime_hours}h) reached. "
                     f"Re-launch: {restart_cmd}"
                 )
                 bridge.send_to_claude(msg)
@@ -1228,13 +1233,13 @@ def _run_tmux_keystrokes(args, case_ids: list[str], all_open: bool):
             try:
                 new_evts, new_baselines = poller.fetch_all_changes(case_ids, baselines)
                 if consecutive_cred_errors > 0 and cred_notified:
-                    bridge.send_to_claude(f"[Support Watcher {_ver()}] Credentials recovered — resuming.")
+                    bridge.send_to_claude(f"{_pfx()} Credentials recovered — resuming.")
                     cred_notified = False
                 consecutive_cred_errors = 0
                 consecutive_poll_errors = 0
             except Exception as e:
                 if _is_subscription_error(e):
-                    msg = "[Support Watcher] SubscriptionRequiredException — Business/Enterprise support plan required."
+                    msg = f"{_pfx()} SubscriptionRequiredException — Business/Enterprise support plan required."
                     bridge.send_to_claude(msg)
                     break
 
@@ -1246,7 +1251,7 @@ def _run_tmux_keystrokes(args, case_ids: list[str], all_open: bool):
                     )
                     if consecutive_cred_errors >= 5 and not cred_notified:
                         msg = (
-                            f"[Support Watcher {_ver()}] {consecutive_cred_errors} consecutive "
+                            f"{_pfx()} {consecutive_cred_errors} consecutive "
                             f"AWS credential errors. Please re-authenticate your AWS credentials. "
                             f"Watcher will auto-recover when credentials are refreshed."
                         )
@@ -1272,7 +1277,7 @@ def _run_tmux_keystrokes(args, case_ids: list[str], all_open: bool):
                 print(f"[{_ts()}] WARN: Poll error #{consecutive_poll_errors}: {e}", file=sys.stderr, flush=True)
                 if consecutive_poll_errors >= 3:
                     msg = (
-                        f"[Support Watcher {_ver()}] {consecutive_poll_errors} consecutive poll errors. "
+                        f"{_pfx()} {consecutive_poll_errors} consecutive poll errors. "
                         f"Last: {str(e)[:80]}. Still watching."
                     )
                     bridge.send_to_claude(msg)
