@@ -6,7 +6,7 @@
   "metadata": {
     "description": "Collection of AI agent skills for AWS CDK development, AWS documentation search, AWS Athena SQL querying, CloudWatch Logs Insights querying, Anki flashcard management, Obsidian vault management, audio conversion, podcast generation, safe terminal command registration, image generation, ML system design interviews, and markdown note search",
 
-    "version": "1.1.33",
+    "version": "1.1.34",
     "homepage": "https://github.com/Litee/ai-agent-toolkit"
   },
   "plugins": [
@@ -124,7 +124,7 @@
       "description": "This plugin contains a skill for monitoring AWS Service Quotas increase requests for status changes, with approval/denial notifications across regions.",
       "source": "./plugins/aws-quota-service",
       "strict": false,
-      "version": "1.0.4",
+      "version": "1.0.5",
       "category": "developer-tools",
       "keywords": ["aws", "monitoring", "service-quotas", "quotas"],
       "skills": ["./skills/watch-aws-quota-requests"]

@@ -367,9 +367,15 @@ class CmuxBridge:
         with open(_WATCHER_SEND_LOCK, 'w') as _lock_fh:
             fcntl.flock(_lock_fh, fcntl.LOCK_EX)
             try:
-                for cmd in attempts:
-                    if self._run(cmd):
-                        return True
+                for attempt in range(3):
+                    for cmd in attempts:
+                        if self._run(cmd):
+                            return True
+                    if attempt < 2:
+                        print(f"[{ts()}] WARN: cmux send failed (attempt {attempt + 1}/3), retrying in 3s ...",
+                              file=sys.stderr, flush=True)
+                        time.sleep(3)
+                print(f"[{ts()}] ERROR: cmux send failed after 3 attempts.", file=sys.stderr, flush=True)
             finally:
                 fcntl.flock(_lock_fh, fcntl.LOCK_UN)
         return False
@@ -413,24 +419,24 @@ class TmuxBridge:
             return False
 
     def send_to_claude(self, message: str) -> bool:
-        """Send text as a keystroke line to the tmux pane. Retries up to 10 times."""
+        """Send text as a keystroke line to the tmux pane. Retries up to 2 times."""
         message = message.replace('\r', ' ').replace('\n', ' ')
         cmd = ['tmux', 'send-keys', '-t', self.tmux_pane, message + '\n', 'Enter']
         with open(_WATCHER_SEND_LOCK, 'w') as _lock_fh:
             fcntl.flock(_lock_fh, fcntl.LOCK_EX)
             try:
-                for attempt in range(11):
+                for attempt in range(3):
                     if self._run(cmd):
                         return True
-                    if attempt < 10:
+                    if attempt < 2:
                         print(
-                            f"[{ts()}] WARN: tmux send-keys failed (attempt {attempt + 1}/11), "
+                            f"[{ts()}] WARN: tmux send-keys failed (attempt {attempt + 1}/3), "
                             f"retrying in 3s ...",
                             file=sys.stderr, flush=True,
                         )
                         time.sleep(3)
                 print(
-                    f"[{ts()}] ERROR: tmux send-keys failed after 11 attempts. Pane: {self.tmux_pane!r}.",
+                    f"[{ts()}] ERROR: tmux send-keys failed after 3 attempts. Pane: {self.tmux_pane!r}.",
                     file=sys.stderr, flush=True,
                 )
             finally:
