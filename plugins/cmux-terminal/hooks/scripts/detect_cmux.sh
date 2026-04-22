@@ -19,7 +19,5 @@ if command -v cmux &>/dev/null; then
   fi
 
   echo ""
-  echo "- You MUST NOT update cmux workspace title unless explicitly asked so."
-  echo "- You MUST use \`cmux\` skill to update surface tab title when you start working on a new task. Maximum surface title length is 30 characters."
   echo "- You MUST use \`cmux\` skill to publish status updates and progress, if you are running a job that may take longer than 10 minutes. If user starts a new task after that, you MUST reset status update and progress."
 fi
