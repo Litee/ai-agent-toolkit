@@ -41,6 +41,14 @@ TERMINAL_STATES = {'SUCCEEDED', 'FAILED', 'STOPPED', 'ERROR', 'TIMEOUT'}
 STATE_DIR = Path.home() / '.claude' / 'plugin-data' / 'aws-glue' / 'watch-aws-glue-job'
 _HEARTBEAT_INTERVAL = 300
 _VERSION_CHECK_INTERVAL = 3600
+_GC_MAX_AGE_DAYS = 90
+
+
+def _gc_old_state_files(state_dir: Path) -> None:
+    cutoff = time.time() - _GC_MAX_AGE_DAYS * 86400
+    for f in state_dir.glob('*.json'):
+        if f.stat().st_mtime < cutoff:
+            f.unlink(missing_ok=True)
 
 
 def _version_from_path(path: str) -> str:
@@ -446,9 +454,15 @@ class CmuxBridge:
         with open(_WATCHER_SEND_LOCK, 'w') as _lock_fh:
             fcntl.flock(_lock_fh, fcntl.LOCK_EX)
             try:
-                for cmd in attempts:
-                    if self._run(cmd):
-                        return True
+                for attempt in range(3):
+                    for cmd in attempts:
+                        if self._run(cmd):
+                            return True
+                    if attempt < 2:
+                        print(f"[{ts()}] WARN: cmux send failed (attempt {attempt + 1}/3), retrying in 3s ...",
+                              file=sys.stderr, flush=True)
+                        time.sleep(3)
+                print(f"[{ts()}] ERROR: cmux send failed after 3 attempts.", file=sys.stderr, flush=True)
             finally:
                 fcntl.flock(_lock_fh, fcntl.LOCK_UN)
         return False
@@ -495,18 +509,18 @@ class TmuxBridge:
         with open(_WATCHER_SEND_LOCK, 'w') as _lock_fh:
             fcntl.flock(_lock_fh, fcntl.LOCK_EX)
             try:
-                for attempt in range(11):
+                for attempt in range(3):
                     if self._run(cmd):
                         return True
-                    if attempt < 10:
+                    if attempt < 2:
                         print(
-                            f"[{ts()}] WARN: tmux send-keys failed (attempt {attempt + 1}/11), "
+                            f"[{ts()}] WARN: tmux send-keys failed (attempt {attempt + 1}/3), "
                             f"retrying in 3s ...",
                             file=sys.stderr, flush=True,
                         )
                         time.sleep(3)
                 print(
-                    f"[{ts()}] ERROR: tmux send-keys failed after 11 attempts. Pane: {self.tmux_pane!r}.",
+                    f"[{ts()}] ERROR: tmux send-keys failed after 3 attempts. Pane: {self.tmux_pane!r}.",
                     file=sys.stderr, flush=True,
                 )
             finally:
@@ -677,12 +691,11 @@ def _poll_loop(
     signal.signal(signal.SIGTERM, _handle_signal)
     signal.signal(signal.SIGINT, _handle_signal)
 
-    if mode in ('cmux-keystrokes', 'tmux-keystrokes'):
-        def _handle_sigusr1(_signum, _frame):
-            print(f"[{ts()}] Received SIGUSR1 — exiting cleanly.", file=sys.stderr, flush=True)
-            _remove_pid_file(watcher_id)
-            sys.exit(0)
-        signal.signal(signal.SIGUSR1, _handle_sigusr1)
+    def _handle_sigusr1(_signum, _frame):
+        print(f"[{ts()}] Received SIGUSR1 — exiting cleanly.", file=sys.stderr, flush=True)
+        _remove_pid_file(watcher_id)
+        sys.exit(0)
+    signal.signal(signal.SIGUSR1, _handle_sigusr1)
 
     _write_pid_file(watcher_id)
 
@@ -983,6 +996,7 @@ def cmd_watch(args):
 
     state = WatcherState(watcher_id)
     saved = state.read()
+    _gc_old_state_files(STATE_DIR)
 
     state.write({
         'watcher_id': watcher_id,
