@@ -28,6 +28,9 @@ import traceback
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 from typing import Optional
+import fcntl
+
+_WATCHER_SEND_LOCK = '/tmp/watcher_send.lock'
 
 
 # ---------------------------------------------------------------------------
@@ -434,12 +437,20 @@ class CmuxBridge:
             return False
 
     def send_to_claude(self, message: str) -> bool:
-        if self._run(['cmux', 'send', '--surface', self.surface_id, message + '\n']):
-            return True
+        message = message.replace('\r', ' ').replace('\n', ' ')
+        payload = message + '\n'
+        attempts = [['cmux', 'send', '--surface', self.surface_id, payload]]
         if self.workspace_ref:
-            if self._run(['cmux', 'send', '--surface', self.surface_id,
-                         '--workspace', self.workspace_ref, message + '\n']):
-                return True
+            attempts.append(['cmux', 'send', '--surface', self.surface_id,
+                             '--workspace', self.workspace_ref, payload])
+        with open(_WATCHER_SEND_LOCK, 'w') as _lock_fh:
+            fcntl.flock(_lock_fh, fcntl.LOCK_EX)
+            try:
+                for cmd in attempts:
+                    if self._run(cmd):
+                        return True
+            finally:
+                fcntl.flock(_lock_fh, fcntl.LOCK_UN)
         return False
 
     def notify(self, title: str, body: str):
@@ -479,21 +490,27 @@ class TmuxBridge:
             return False
 
     def send_to_claude(self, message: str) -> bool:
+        message = message.replace('\r', ' ').replace('\n', ' ')
         cmd = ['tmux', 'send-keys', '-t', self.tmux_pane, message + '\n', 'Enter']
-        for attempt in range(11):
-            if self._run(cmd):
-                return True
-            if attempt < 10:
+        with open(_WATCHER_SEND_LOCK, 'w') as _lock_fh:
+            fcntl.flock(_lock_fh, fcntl.LOCK_EX)
+            try:
+                for attempt in range(11):
+                    if self._run(cmd):
+                        return True
+                    if attempt < 10:
+                        print(
+                            f"[{ts()}] WARN: tmux send-keys failed (attempt {attempt + 1}/11), "
+                            f"retrying in 3s ...",
+                            file=sys.stderr, flush=True,
+                        )
+                        time.sleep(3)
                 print(
-                    f"[{ts()}] WARN: tmux send-keys failed (attempt {attempt + 1}/11), "
-                    f"retrying in 3s ...",
+                    f"[{ts()}] ERROR: tmux send-keys failed after 11 attempts. Pane: {self.tmux_pane!r}.",
                     file=sys.stderr, flush=True,
                 )
-                time.sleep(3)
-        print(
-            f"[{ts()}] ERROR: tmux send-keys failed after 11 attempts. Pane: {self.tmux_pane!r}.",
-            file=sys.stderr, flush=True,
-        )
+            finally:
+                fcntl.flock(_lock_fh, fcntl.LOCK_UN)
         return False
 
     def notify(self, title: str, body: str):
