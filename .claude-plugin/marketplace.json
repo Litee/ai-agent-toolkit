@@ -15,7 +15,7 @@
       "description": "This plugin contains skills for AWS CDK infrastructure development and searching official AWS documentation. Use for CDK guidance, architecture patterns, GenAI constructs, Bedrock agent schemas, CDK Nag rules, documentation search, and AWS architecture recommendations.",
       "source": "./plugins/aws-documentation",
       "strict": false,
-      "version": "1.0.3",
+      "version": "1.0.4",
       "category": "developer-tools",
       "keywords": ["aws", "cdk", "documentation", "architecture", "mcp", "bedrock", "infrastructure"],
       "skills": ["./skills/aws-cdk-expert", "./skills/search-aws-documentation"]
@@ -182,7 +182,7 @@
       "description": "This plugin contains skills for AI-powered podcast production: generating podcast scripts with natural conversation flow and converting scripts into high-quality audio using text-to-speech synthesis on AWS. Use when creating podcast scripts, multi-speaker dialogue, or generating podcast audio from scripts.",
       "source": "./plugins/podcast-generation",
       "strict": false,
-      "version": "1.1.4",
+      "version": "1.1.5",
       "category": "user",
       "keywords": ["podcast", "script", "tts", "audio", "conversation", "text-to-speech", "audio-generation", "voice", "aws", "ec2"],
       "skills": ["./skills/generate-podcast-script", "./skills/generate-podcast-audio"]

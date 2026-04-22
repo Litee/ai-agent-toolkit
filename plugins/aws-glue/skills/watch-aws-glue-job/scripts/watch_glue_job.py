@@ -329,13 +329,14 @@ class CloudWatchMetrics:
                 print(
                     f"[{ts()}] INFO: No CloudWatch metrics yet "
                     f"(may appear after ~2 min; use --no-cloudwatch-metrics to suppress)",
+                    file=sys.stderr,
                     flush=True,
                 )
             return results
         except Exception as e:
             if not self._no_data_warned:
                 self._no_data_warned = True
-                print(f"[{ts()}] WARN: CloudWatch metrics unavailable: {e}", flush=True)
+                print(f"[{ts()}] WARN: CloudWatch metrics unavailable: {e}", file=sys.stderr, flush=True)
             return {}
 
     @staticmethod

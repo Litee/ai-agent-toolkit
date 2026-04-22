@@ -1026,20 +1026,21 @@ def cmd_watch(args):
         )
 
     # Startup banner
-    print(f"Quota Request Watcher {_ver()} | ID: {watcher_id}", flush=True)
+    print(f"Quota Request Watcher {_ver()} | ID: {watcher_id}", file=sys.stderr, flush=True)
     print(
         f"Mode: {mode} | Poll: {poll_interval}s | "
         f"Max runtime: {args.max_runtime_hours}h | "
         f"Region: {args.region or 'profile default'}",
+        file=sys.stderr,
         flush=True,
     )
-    print(f"Watching {len(request_ids)} request(s): {', '.join(request_ids)}", flush=True)
-    print(f"State file: {state.path}", flush=True)
+    print(f"Watching {len(request_ids)} request(s): {', '.join(request_ids)}", file=sys.stderr, flush=True)
+    print(f"State file: {state.path}", file=sys.stderr, flush=True)
     if mode == 'cmux-keystrokes':
-        print(f"Target surface: {args.cmux_surface}", flush=True)
+        print(f"Target surface: {args.cmux_surface}", file=sys.stderr, flush=True)
     elif mode == 'tmux-keystrokes':
-        print(f"Target tmux pane: {args.tmux_pane}", flush=True)
-    print(flush=True)
+        print(f"Target tmux pane: {args.tmux_pane}", file=sys.stderr, flush=True)
+    print(file=sys.stderr, flush=True)
 
     watcher = QuotaRequestWatcher(
         client=client,

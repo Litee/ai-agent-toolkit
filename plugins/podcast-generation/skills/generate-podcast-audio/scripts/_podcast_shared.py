@@ -8,6 +8,7 @@ so no config file handoff is required between the two scripts.
 """
 
 import subprocess
+import sys
 from datetime import datetime
 from pathlib import Path
 
@@ -80,7 +81,7 @@ def get_default_voices_dir() -> str:
 def log_progress(message: str, level: str = "INFO") -> None:
     """Print timestamped progress message."""
     ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    print(f"[{ts}] [{level}] {message}", flush=True)
+    print(f"[{ts}] [{level}] {message}", file=sys.stderr, flush=True)
 
 
 def get_aws_region(*, profile: str) -> str:

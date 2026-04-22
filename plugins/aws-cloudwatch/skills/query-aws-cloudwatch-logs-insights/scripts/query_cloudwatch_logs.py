@@ -273,11 +273,11 @@ class CloudWatchLogsQueryExecutor:
             print(f"✗ Error: {e}", file=sys.stderr)
             sys.exit(1)
 
-        print(f"Executing query across {len(validated_groups)} log group(s)...")
-        print(f"Time range: {start_time} to {end_time}")
+        print(f"Executing query across {len(validated_groups)} log group(s)...", file=sys.stderr)
+        print(f"Time range: {start_time} to {end_time}", file=sys.stderr)
         if len(validated_groups) <= 5:
             for group in validated_groups:
-                print(f"  - {group}")
+                print(f"  - {group}", file=sys.stderr)
 
         try:
             response = self.logs_client.start_query(
@@ -289,7 +289,7 @@ class CloudWatchLogsQueryExecutor:
             )
 
             query_id = response['queryId']
-            print(f"Query ID: {query_id}")
+            print(f"Query ID: {query_id}", file=sys.stderr)
 
             return query_id
         except Exception as e:
@@ -321,7 +321,7 @@ class CloudWatchLogsQueryExecutor:
         self.start_time = time.time()
         self.last_update_time = self.start_time
 
-        print("Waiting for query to complete...")
+        print("Waiting for query to complete...", file=sys.stderr)
 
         while True:
             current_time = time.time()
@@ -380,7 +380,7 @@ class CloudWatchLogsQueryExecutor:
         else:
             elapsed_str = f"{int(elapsed)}s"
 
-        print(f"[{elapsed_str}] Status: {status}")
+        print(f"[{elapsed_str}] Status: {status}", file=sys.stderr)
 
         if stats:
             records_scanned = stats.get('recordsScanned', 0)
@@ -390,15 +390,15 @@ class CloudWatchLogsQueryExecutor:
             # Format bytes
             if bytes_scanned > 0:
                 mb_scanned = bytes_scanned / (1024 * 1024)
-                print(f"  → Scanned: {records_scanned:,} records ({mb_scanned:.2f} MB)")
+                print(f"  → Scanned: {records_scanned:,} records ({mb_scanned:.2f} MB)", file=sys.stderr)
             else:
-                print(f"  → Scanned: {records_scanned:,} records")
+                print(f"  → Scanned: {records_scanned:,} records", file=sys.stderr)
 
-            print(f"  → Matched: {records_matched:,} records")
+            print(f"  → Matched: {records_matched:,} records", file=sys.stderr)
 
         # Print completion message
         if status == 'Complete':
-            print(f"✓ Query completed successfully in {elapsed_str}")
+            print(f"✓ Query completed successfully in {elapsed_str}", file=sys.stderr)
 
     def format_results(
         self,
@@ -466,7 +466,7 @@ class CloudWatchLogsQueryExecutor:
         if output_file:
             with open(output_file, 'w') as f:
                 f.write(json_output)
-            print(f"✓ Results saved to: {output_file}")
+            print(f"✓ Results saved to: {output_file}", file=sys.stderr)
             return output_file
         else:
             print(json_output)
@@ -484,7 +484,7 @@ class CloudWatchLogsQueryExecutor:
                 writer = csv.DictWriter(f, fieldnames=fields)
                 writer.writeheader()
                 writer.writerows(rows)
-            print(f"✓ Results saved to: {output_file}")
+            print(f"✓ Results saved to: {output_file}", file=sys.stderr)
             return output_file
         else:
             import io
@@ -540,7 +540,7 @@ class CloudWatchLogsQueryExecutor:
         if output_file:
             with open(output_file, 'w') as f:
                 f.write(table_output)
-            print(f"✓ Results saved to: {output_file}")
+            print(f"✓ Results saved to: {output_file}", file=sys.stderr)
             return output_file
         else:
             print(table_output)
