@@ -463,6 +463,7 @@ class CmuxBridge:
         """Send text as keystrokes to the Claude Code surface.
 
         Tries direct send first, then with --workspace flag.
+        Retries 3 times with 3s sleep between attempts.
         Returns True on success, False on failure (caller should exit).
         """
         message = message.replace('\r', ' ').replace('\n', ' ')
@@ -474,9 +475,21 @@ class CmuxBridge:
         with open(_WATCHER_SEND_LOCK, 'w') as _lock_fh:
             fcntl.flock(_lock_fh, fcntl.LOCK_EX)
             try:
-                for cmd in attempts:
-                    if self._run(cmd):
-                        return True
+                for attempt in range(3):
+                    for cmd in attempts:
+                        if self._run(cmd):
+                            return True
+                    if attempt < 2:
+                        print(
+                            f"[{_ts()}] WARN: cmux send failed (attempt {attempt + 1}/3), "
+                            f"retrying in 3s ...",
+                            file=sys.stderr, flush=True,
+                        )
+                        time.sleep(3)
+                print(
+                    f"[{_ts()}] ERROR: cmux send failed after 3 attempts. Surface: {self.surface_id!r}.",
+                    file=sys.stderr, flush=True,
+                )
             finally:
                 fcntl.flock(_lock_fh, fcntl.LOCK_UN)
         return False
@@ -520,24 +533,24 @@ class TmuxBridge:
             return False
 
     def send_to_claude(self, message: str) -> bool:
-        """Send text as a keystroke line to the tmux pane. Retries up to 10 times."""
+        """Send text as a keystroke line to the tmux pane. Retries up to 3 times."""
         message = message.replace('\r', ' ').replace('\n', ' ')
         cmd = ['tmux', 'send-keys', '-t', self.tmux_pane, message + '\n', 'Enter']
         with open(_WATCHER_SEND_LOCK, 'w') as _lock_fh:
             fcntl.flock(_lock_fh, fcntl.LOCK_EX)
             try:
-                for attempt in range(11):
+                for attempt in range(3):
                     if self._run(cmd):
                         return True
-                    if attempt < 10:
+                    if attempt < 2:
                         print(
-                            f"[{_ts()}] WARN: tmux send-keys failed (attempt {attempt + 1}/11), "
+                            f"[{_ts()}] WARN: tmux send-keys failed (attempt {attempt + 1}/3), "
                             f"retrying in 3s ...",
                             file=sys.stderr, flush=True,
                         )
                         time.sleep(3)
                 print(
-                    f"[{_ts()}] ERROR: tmux send-keys failed after 11 attempts. Pane: {self.tmux_pane!r}.",
+                    f"[{_ts()}] ERROR: tmux send-keys failed after 3 attempts. Pane: {self.tmux_pane!r}.",
                     file=sys.stderr, flush=True,
                 )
             finally:
@@ -549,6 +562,44 @@ class TmuxBridge:
 
     def set_status(self, *_a, **_kw) -> None:
         pass  # no-op: tmux has no sidebar status
+
+    def clear_status(self, *_a, **_kw) -> None:
+        pass  # no-op
+
+
+# ---------------------------------------------------------------------------
+# ExitBridge (long-poll-with-exit mode)
+# ---------------------------------------------------------------------------
+
+class ExitBridge:
+    """Bridge for long-poll-with-exit mode: stores a message and exits 0 via JSON output."""
+
+    def __init__(self, watcher_id: str, restart_cmd: str):
+        self.watcher_id = watcher_id
+        self.restart_cmd = restart_cmd
+        self.enable_notify = False
+        self.enable_status = False
+
+    def send_to_claude(self, message: str) -> bool:
+        """Print a one-shot JSON notification and exit 0."""
+        output = {
+            'events': [],
+            'notification': message,
+            'watcher_id': self.watcher_id,
+            'instruction': (
+                f"Re-launch the watcher FIRST, then process events.\n"
+                f"{self.restart_cmd}"
+            ),
+        }
+        _remove_pid_file(self.watcher_id)
+        print(json.dumps(output, indent=2))
+        sys.exit(0)
+
+    def notify(self, _title: str, _body: str) -> None:
+        pass  # no-op
+
+    def set_status(self, *_a, **_kw) -> None:
+        pass  # no-op
 
     def clear_status(self, *_a, **_kw) -> None:
         pass  # no-op
@@ -653,31 +704,48 @@ def _throttle_sleep(poll_interval: int) -> int:
 
 
 # ---------------------------------------------------------------------------
-# Subcommand: watch (long-poll-with-exit)
+# Core polling loop (shared by all modes)
 # ---------------------------------------------------------------------------
 
-def _run_long_poll_with_exit(args, case_ids: list[str], all_open: bool):
-    poll_interval = args.poll_interval_seconds
-    watcher_id = args.watcher_id or _make_watcher_id()
-    script_path = os.path.abspath(__file__)
-    profile = args.profile
-    region = args.region
-    max_runtime_hours = args.max_runtime_hours
-
-    restart_cmd = _build_restart_command(
-        script_path, 'long-poll-with-exit', case_ids, all_open,
-        watcher_id, profile, region, poll_interval,
-        max_runtime_hours=max_runtime_hours,
-    )
-
-    _check_instance_guard(watcher_id)
-
-    state = WatcherState(watcher_id)
-    saved = state.read()
-    baselines = saved.get('baselines', {})
-
+def _poll_loop(
+    args,
+    mode: str,
+    watcher_id: str,
+    case_ids: list[str],
+    all_open: bool,
+    profile: str,
+    region: str,
+    poll_interval: int,
+    max_runtime_hours: int,
+    restart_cmd: str,
+    bridge,
+    state: WatcherState,
+):
     client = SupportClient(profile=profile, region=region)
     poller = SupportPoller(client)
+    status_key = f"support-{watcher_id[:6]}"
+
+    running = [True]
+    received_signal = ['']
+
+    def _handle_signal(signum, _):
+        running[0] = False
+        received_signal[0] = signal.Signals(signum).name
+
+    signal.signal(signal.SIGTERM, _handle_signal)
+    signal.signal(signal.SIGINT, _handle_signal)
+
+    def _handle_sigusr1(_signum, _frame):
+        """Handle SIGUSR1 from Claude Code background task manager (exit code 0, not 144)."""
+        print(f"[{_ts()}] Received SIGUSR1 — exiting cleanly.", file=sys.stderr, flush=True)
+        _remove_pid_file(watcher_id)
+        sys.exit(0)
+    signal.signal(signal.SIGUSR1, _handle_sigusr1)
+
+    _write_pid_file(watcher_id)
+
+    saved = state.read()
+    baselines = saved.get('baselines', {})
 
     # Seed baselines on first run
     needs_seed = any(cid not in baselines for cid in case_ids)
@@ -695,47 +763,12 @@ def _run_long_poll_with_exit(args, case_ids: list[str], all_open: bool):
                 sys.exit(1)
             print(f"[{_ts()}] WARN: seed failed: {e}. Continuing with empty baselines.", file=sys.stderr, flush=True)
 
-    state.write({
-        'watcher_id': watcher_id,
-        'mode': 'long-poll-with-exit',
-        'started_at': saved.get('started_at', _now_iso()),
-        'last_poll_at': _now_iso(),
-        'monitor_pid': os.getpid(),
-        'profile': profile,
-        'region': region,
-        'case_ids': case_ids,
-        'all_open': all_open,
-        'poll_interval_seconds': poll_interval,
-        'surface_id': None,
-        'workspace_ref': None,
-        'baselines': baselines,
-        'launch_command': restart_cmd,
-        'max_runtime_hours': max_runtime_hours,
-    })
-
-    print(
-        f"[Support Watcher {_ver()}] ID: {watcher_id} | Mode: long-poll-with-exit | "
-        f"Cases: {_case_summary(case_ids)} | Poll: {poll_interval}s",
-        file=sys.stderr, flush=True,
-    )
-    print(f"Re-launch command:\n  {restart_cmd}", file=sys.stderr, flush=True)
-    print("Watching for AWS Support case changes...", file=sys.stderr, flush=True)
-
-    running = [True]
-    received_signal = ['']
-
-    def _handle_signal(signum, _):
-        running[0] = False
-        received_signal[0] = signal.Signals(signum).name
-
-    signal.signal(signal.SIGTERM, _handle_signal)
-    signal.signal(signal.SIGINT, _handle_signal)
-
-    _write_pid_file(watcher_id)
+    state.update(baselines=baselines)
 
     started_at = time.monotonic()
     consecutive_cred_errors = 0
     consecutive_poll_errors = 0
+    cred_notified = False
     last_heartbeat = time.monotonic()
     last_version_check = time.monotonic()
     max_runtime_seconds = max_runtime_hours * 3600
@@ -749,11 +782,18 @@ def _run_long_poll_with_exit(args, case_ids: list[str], all_open: bool):
 
             # Hard timeout
             if time.monotonic() - started_at > max_runtime_seconds:
-                print(
-                    f"[{_ts()}] Max runtime ({max_runtime_hours}h) reached. Exiting.\n"
-                    f"Re-launch: {restart_cmd}",
-                    file=sys.stderr, flush=True,
-                )
+                if mode in ('cmux-keystrokes', 'tmux-keystrokes'):
+                    bridge.send_to_claude(
+                        f"{_pfx()} Max runtime ({max_runtime_hours}h) reached. "
+                        f"Re-launch: {restart_cmd}"
+                    )
+                    bridge.clear_status(status_key)
+                else:
+                    print(
+                        f"[{_ts()}] Max runtime ({max_runtime_hours}h) reached. Exiting.\n"
+                        f"Re-launch: {restart_cmd}",
+                        file=sys.stderr, flush=True,
+                    )
                 break
 
             # Refresh case list if --all-open
@@ -761,8 +801,7 @@ def _run_long_poll_with_exit(args, case_ids: list[str], all_open: bool):
                 try:
                     open_cases = client.list_open_cases()
                     case_ids = [c['caseId'] for c in open_cases if c.get('caseId')]
-                    new_baselines = poller.seed_baselines(case_ids, baselines)
-                    baselines = new_baselines
+                    baselines = poller.seed_baselines(case_ids, baselines)
                     state.update(case_ids=case_ids, baselines=baselines)
                 except Exception as e:
                     print(f"[{_ts()}] WARN: could not refresh open cases: {e}", file=sys.stderr, flush=True)
@@ -773,19 +812,34 @@ def _run_long_poll_with_exit(args, case_ids: list[str], all_open: bool):
 
             try:
                 new_evts, new_baselines = poller.fetch_all_changes(case_ids, baselines)
-                consecutive_cred_errors = 0
                 consecutive_poll_errors = 0
+                if consecutive_cred_errors > 0 and cred_notified:
+                    recovery_msg = f"{_pfx()} AWS credentials recovered — resuming."
+                    if mode in ('cmux-keystrokes', 'tmux-keystrokes'):
+                        bridge.send_to_claude(recovery_msg)
+                    else:
+                        print(f"[{_ts()}] {recovery_msg}", file=sys.stderr, flush=True)
+                    cred_notified = False
+                consecutive_cred_errors = 0
             except Exception as e:
                 if _is_subscription_error(e):
-                    output = {
-                        'error': 'SUBSCRIPTION_REQUIRED',
-                        'message': 'AWS Support API requires Business or Enterprise support plan.',
-                        'watcher_id': watcher_id,
-                        'instruction': f"Upgrade support plan, then re-launch:\n{restart_cmd}",
-                    }
-                    _remove_pid_file(watcher_id)
-                    print(json.dumps(output, indent=2))
-                    sys.exit(1)
+                    if mode in ('cmux-keystrokes', 'tmux-keystrokes'):
+                        bridge.send_to_claude(
+                            f"{_pfx()} SubscriptionRequiredException — "
+                            f"Business/Enterprise support plan required."
+                        )
+                        bridge.clear_status(status_key)
+                    else:
+                        output = {
+                            'error': 'SUBSCRIPTION_REQUIRED',
+                            'message': 'AWS Support API requires Business or Enterprise support plan.',
+                            'watcher_id': watcher_id,
+                            'instruction': f"Upgrade support plan, then re-launch:\n{restart_cmd}",
+                        }
+                        _remove_pid_file(watcher_id)
+                        print(json.dumps(output, indent=2))
+                        sys.exit(1)
+                    break
 
                 if _is_credential_error(e):
                     consecutive_cred_errors += 1
@@ -793,13 +847,19 @@ def _run_long_poll_with_exit(args, case_ids: list[str], all_open: bool):
                         f"[{_ts()}] Credential error #{consecutive_cred_errors}: {e}",
                         file=sys.stderr, flush=True,
                     )
-                    if consecutive_cred_errors >= 5:
-                        print(
-                            f"[{_ts()}] WARN: {consecutive_cred_errors} consecutive credential errors. "
-                            f"Please re-authenticate your AWS credentials. "
-                            f"Watcher will auto-recover when credentials are refreshed.",
-                            file=sys.stderr, flush=True,
+                    if consecutive_cred_errors >= 5 and not cred_notified:
+                        msg = (
+                            f"{_pfx()} {consecutive_cred_errors} consecutive "
+                            f"AWS credential errors. Please re-authenticate your AWS credentials. "
+                            f"Watcher will auto-recover when credentials are refreshed."
                         )
+                        if mode in ('cmux-keystrokes', 'tmux-keystrokes'):
+                            bridge.send_to_claude(msg)
+                            bridge.notify("Support Watcher", "Credentials expired")
+                            bridge.clear_status(status_key)
+                        else:
+                            bridge.send_to_claude(msg)
+                        cred_notified = True
                     time.sleep(min(60 * consecutive_cred_errors, 3600))
                     continue
 
@@ -807,15 +867,28 @@ def _run_long_poll_with_exit(args, case_ids: list[str], all_open: bool):
                     print(f"[{_ts()}] Throttled. Applying jittered backoff.", file=sys.stderr, flush=True)
                     poll_interval = _throttle_sleep(poll_interval)
                     restart_cmd = _build_restart_command(
-                        script_path, 'long-poll-with-exit', case_ids, all_open,
+                        os.path.abspath(__file__), mode, case_ids, all_open,
                         watcher_id, profile, region, poll_interval,
+                        surface_ref=getattr(args, 'cmux_surface', None),
+                        workspace_ref=getattr(args, 'cmux_workspace', None),
+                        cmux_notify=getattr(args, 'cmux_notify', False),
+                        cmux_status=getattr(args, 'cmux_status', False),
                         max_runtime_hours=max_runtime_hours,
+                        tmux_pane=getattr(args, 'tmux_pane', None),
                     )
                     state.update(poll_interval_seconds=poll_interval, launch_command=restart_cmd)
+                    if isinstance(bridge, ExitBridge):
+                        bridge.restart_cmd = restart_cmd
                     continue
 
                 consecutive_poll_errors += 1
                 print(f"[{_ts()}] WARN: Poll error #{consecutive_poll_errors}: {e}", file=sys.stderr, flush=True)
+                if mode in ('cmux-keystrokes', 'tmux-keystrokes') and consecutive_poll_errors >= 3:
+                    bridge.send_to_claude(
+                        f"{_pfx()} {consecutive_poll_errors} consecutive poll errors. "
+                        f"Last: {str(e)[:80]}. Still watching."
+                    )
+                    consecutive_poll_errors = 0
                 continue
 
             baselines = new_baselines
@@ -826,265 +899,41 @@ def _run_long_poll_with_exit(args, case_ids: list[str], all_open: bool):
             )
 
             if new_evts:
-                output = {
-                    'events': new_evts,
-                    'watcher_id': watcher_id,
-                    'instruction': (
-                        f"Re-launch the watcher FIRST, then process events.\n"
-                        f"{restart_cmd}"
-                    ),
-                }
-                _remove_pid_file(watcher_id)
-                print(json.dumps(output, indent=2))
-                sys.exit(0)
-
-            # Heartbeat
-            now = time.monotonic()
-            if now - last_heartbeat >= _HEARTBEAT_INTERVAL:
-                print(
-                    f"[{_ts()}] Watching {len(case_ids)} case(s) -- no changes (poll_interval={poll_interval}s)",
-                    file=sys.stderr, flush=True,
-                )
-                last_heartbeat = now
-
-            if now - last_version_check >= _VERSION_CHECK_INTERVAL:
-                _check_version_drift()
-                last_version_check = now
-
-        sig = received_signal[0] or 'timeout'
-        print(
-            f"[Support Watcher {_ver()}] Exiting ({sig}).\n"
-            f"Re-launch:\n  {restart_cmd}",
-            file=sys.stderr, flush=True,
-        )
-    finally:
-        _remove_pid_file(watcher_id)
-
-
-# ---------------------------------------------------------------------------
-# Subcommand: watch (cmux-keystrokes)
-# ---------------------------------------------------------------------------
-
-def _run_cmux_keystrokes(args, case_ids: list[str], all_open: bool):
-    poll_interval = args.poll_interval_seconds
-    watcher_id = args.watcher_id or _make_watcher_id()
-    script_path = os.path.abspath(__file__)
-    profile = args.profile
-    region = args.region
-    max_runtime_hours = args.max_runtime_hours
-    surface_ref = args.cmux_surface
-    workspace_ref = args.cmux_workspace or _detect_workspace_ref()
-
-    restart_cmd = _build_restart_command(
-        script_path, 'cmux-keystrokes', case_ids, all_open,
-        watcher_id, profile, region, poll_interval,
-        surface_ref=surface_ref, workspace_ref=workspace_ref,
-        cmux_notify=args.cmux_notify,
-        cmux_status=args.cmux_status,
-        max_runtime_hours=max_runtime_hours,
-    )
-
-    _check_instance_guard(watcher_id)
-
-    state = WatcherState(watcher_id)
-    saved = state.read()
-    baselines = saved.get('baselines', {})
-
-    client = SupportClient(profile=profile, region=region)
-    poller = SupportPoller(client)
-    bridge = CmuxBridge(
-        surface_id=surface_ref,
-        workspace_ref=workspace_ref,
-        enable_notify=args.cmux_notify,
-        enable_status=args.cmux_status,
-    )
-
-    # Seed baselines
-    needs_seed = any(cid not in baselines for cid in case_ids)
-    if needs_seed:
-        print(f"[{_ts()}] Seeding baseline state...", file=sys.stderr, flush=True)
-        try:
-            baselines = poller.seed_baselines(case_ids, baselines)
-        except Exception as e:
-            if _is_subscription_error(e):
-                print(
-                    f"[{_ts()}] ERROR: SubscriptionRequiredException — Business/Enterprise support plan required.",
-                    file=sys.stderr, flush=True,
-                )
-                sys.exit(1)
-            print(f"[{_ts()}] WARN: seed failed: {e}. Continuing with empty baselines.", file=sys.stderr, flush=True)
-
-    state.write({
-        'watcher_id': watcher_id,
-        'mode': 'cmux-keystrokes',
-        'started_at': saved.get('started_at', _now_iso()),
-        'last_poll_at': _now_iso(),
-        'monitor_pid': os.getpid(),
-        'profile': profile,
-        'region': region,
-        'case_ids': case_ids,
-        'all_open': all_open,
-        'poll_interval_seconds': poll_interval,
-        'surface_id': surface_ref,
-        'workspace_ref': workspace_ref,
-        'baselines': baselines,
-        'launch_command': restart_cmd,
-        'max_runtime_hours': max_runtime_hours,
-    })
-
-    print(
-        f"[Support Watcher {_ver()}] ID: {watcher_id} | Mode: cmux-keystrokes | "
-        f"Cases: {_case_summary(case_ids)} | Poll: {poll_interval}s | Surface: {surface_ref}",
-        file=sys.stderr, flush=True,
-    )
-    print(f"Re-launch:\n  {restart_cmd}", file=sys.stderr, flush=True)
-
-    # Send startup confirmation
-    summary = _case_summary(case_ids)
-    if not bridge.send_to_claude(f"{_pfx()} Started. ID: {watcher_id} | Watching: {summary}"):
-        print(
-            f"Surface {surface_ref} unreachable. Get fresh refs via `cmux identify --json` and re-launch:\n"
-            f"  {restart_cmd}",
-            file=sys.stderr, flush=True,
-        )
-        sys.exit(1)
-
-    running = [True]
-    received_signal = ['']
-
-    def _handle_signal(signum, _):
-        running[0] = False
-        received_signal[0] = signal.Signals(signum).name
-
-    signal.signal(signal.SIGTERM, _handle_signal)
-    signal.signal(signal.SIGINT, _handle_signal)
-
-    def _handle_sigusr1(_signum, _frame):
-        """Handle SIGUSR1 from Claude Code background task manager (exit code 0, not 144)."""
-        print(f"[{_ts()}] Received SIGUSR1 — exiting cleanly.", file=sys.stderr, flush=True)
-        _remove_pid_file(watcher_id)
-        sys.exit(0)
-    signal.signal(signal.SIGUSR1, _handle_sigusr1)
-
-    _write_pid_file(watcher_id)
-
-    started_at = time.monotonic()
-    consecutive_cred_errors = 0
-    consecutive_poll_errors = 0
-    cred_notified = False
-    last_heartbeat = time.monotonic()
-    last_version_check = time.monotonic()
-    max_runtime_seconds = max_runtime_hours * 3600
-    status_key = f"support-{watcher_id[:6]}"
-
-    try:
-        while running[0]:
-            time.sleep(poll_interval)
-
-            if not running[0]:
-                break
-
-            if time.monotonic() - started_at > max_runtime_seconds:
-                msg = (
-                    f"{_pfx()} Max runtime ({max_runtime_hours}h) reached. "
-                    f"Re-launch: {restart_cmd}"
-                )
-                bridge.send_to_claude(msg)
-                bridge.clear_status(status_key)
-                break
-
-            # Refresh case list if --all-open
-            if all_open:
-                try:
-                    open_cases = client.list_open_cases()
-                    case_ids = [c['caseId'] for c in open_cases if c.get('caseId')]
-                    baselines = poller.seed_baselines(case_ids, baselines)
-                    state.update(case_ids=case_ids, baselines=baselines)
-                except Exception as e:
-                    print(f"[{_ts()}] WARN: could not refresh open cases: {e}", file=sys.stderr, flush=True)
-
-            if not case_ids:
-                print(f"[{_ts()}] No cases to watch. Retrying next poll.", file=sys.stderr, flush=True)
-                continue
-
-            try:
-                new_evts, new_baselines = poller.fetch_all_changes(case_ids, baselines)
-                consecutive_cred_errors = 0
-                consecutive_poll_errors = 0
-                if cred_notified:
-                    bridge.send_to_claude(f"{_pfx()} Credentials recovered — resuming.")
-                    cred_notified = False
-            except Exception as e:
-                if _is_subscription_error(e):
-                    msg = f"{_pfx()} SubscriptionRequiredException — Business/Enterprise support plan required."
-                    bridge.send_to_claude(msg)
-                    bridge.clear_status(status_key)
-                    break
-
-                if _is_credential_error(e):
-                    consecutive_cred_errors += 1
-                    print(
-                        f"[{_ts()}] Credential error #{consecutive_cred_errors}: {e}",
-                        file=sys.stderr, flush=True,
-                    )
-                    if consecutive_cred_errors >= 5 and not cred_notified:
-                        msg = (
-                            f"{_pfx()} {consecutive_cred_errors} consecutive "
-                            f"AWS credential errors. Please re-authenticate your AWS credentials. "
-                            f"Watcher will auto-recover when credentials are refreshed."
-                        )
-                        bridge.send_to_claude(msg)
-                        bridge.notify("Support Watcher", "Credentials expired")
-                        bridge.clear_status(status_key)
-                        cred_notified = True
-                    time.sleep(min(60 * consecutive_cred_errors, 3600))
-                    continue
-
-                if _is_throttle_error(e):
-                    print(f"[{_ts()}] Throttled. Applying jittered backoff.", file=sys.stderr, flush=True)
-                    poll_interval = _throttle_sleep(poll_interval)
-                    restart_cmd = _build_restart_command(
-                        script_path, 'cmux-keystrokes', case_ids, all_open,
-                        watcher_id, profile, region, poll_interval,
-                        surface_ref=surface_ref, workspace_ref=workspace_ref,
-                        cmux_notify=args.cmux_notify,
-                        cmux_status=args.cmux_status,
-                        max_runtime_hours=max_runtime_hours,
-                    )
-                    state.update(poll_interval_seconds=poll_interval, launch_command=restart_cmd)
-                    continue
-
-                consecutive_poll_errors += 1
-                print(f"[{_ts()}] WARN: Poll error #{consecutive_poll_errors}: {e}", file=sys.stderr, flush=True)
-                if consecutive_poll_errors >= 3:
-                    msg = (
-                        f"{_pfx()} {consecutive_poll_errors} consecutive poll errors. "
-                        f"Last: {str(e)[:80]}. Still watching."
-                    )
-                    bridge.send_to_claude(msg)
-                    consecutive_poll_errors = 0
-                continue
-
-            baselines = new_baselines
-            state.update(last_poll_at=_now_iso(), baselines=baselines, case_ids=case_ids)
-
-            for evt in new_evts:
-                bridge.set_status(status_key, evt['event_type'])
-                formatted = evt.get('formatted', '')
-                subject = evt.get('subject', '')
-                if subject:
-                    parts = formatted.rsplit('(', 1)
-                    if len(parts) == 2:
-                        formatted = f"{parts[0].rstrip()} ('{subject[:40]}') ({parts[1]}"
-                if not bridge.send_to_claude(formatted):
-                    print(
-                        f"Surface {surface_ref} unreachable. Get fresh refs via `cmux identify --json` and re-launch:\n"
-                        f"  {restart_cmd}",
-                        file=sys.stderr, flush=True,
-                    )
+                if mode == 'long-poll-with-exit':
+                    output = {
+                        'events': new_evts,
+                        'watcher_id': watcher_id,
+                        'instruction': (
+                            f"Re-launch the watcher FIRST, then process events.\n"
+                            f"{restart_cmd}"
+                        ),
+                    }
                     _remove_pid_file(watcher_id)
-                    bridge.clear_status(status_key)
-                    sys.exit(1)
+                    print(json.dumps(output, indent=2))
+                    sys.exit(0)
+                else:
+                    for evt in new_evts:
+                        bridge.set_status(status_key, evt['event_type'])
+                        formatted = evt.get('formatted', '')
+                        subject = evt.get('subject', '')
+                        if subject:
+                            parts = formatted.rsplit('(', 1)
+                            if len(parts) == 2:
+                                formatted = f"{parts[0].rstrip()} ('{subject[:40]}') ({parts[1]}"
+                        if not bridge.send_to_claude(formatted):
+                            ref = (
+                                getattr(args, 'cmux_surface', None)
+                                or getattr(args, 'tmux_pane', None)
+                                or '(unknown)'
+                            )
+                            print(
+                                f"Surface/pane {ref} unreachable. Get fresh refs and re-launch:\n"
+                                f"  {restart_cmd}",
+                                file=sys.stderr, flush=True,
+                            )
+                            _remove_pid_file(watcher_id)
+                            bridge.clear_status(status_key)
+                            sys.exit(1)
 
             # Heartbeat
             now = time.monotonic()
@@ -1100,240 +949,8 @@ def _run_cmux_keystrokes(args, case_ids: list[str], all_open: bool):
                 last_version_check = now
 
         sig = received_signal[0] or 'timeout'
-        bridge.clear_status(status_key)
-        print(
-            f"[Support Watcher {_ver()}] Exiting ({sig}).\n"
-            f"Re-launch:\n  {restart_cmd}",
-            file=sys.stderr, flush=True,
-        )
-    finally:
-        _remove_pid_file(watcher_id)
-
-
-# ---------------------------------------------------------------------------
-# Subcommand: watch (tmux-keystrokes)
-# ---------------------------------------------------------------------------
-
-def _run_tmux_keystrokes(args, case_ids: list[str], all_open: bool):
-    poll_interval = args.poll_interval_seconds
-    watcher_id = args.watcher_id or _make_watcher_id()
-    script_path = os.path.abspath(__file__)
-    profile = args.profile
-    region = args.region
-    max_runtime_hours = args.max_runtime_hours
-    tmux_pane = args.tmux_pane
-
-    restart_cmd = _build_restart_command(
-        script_path, 'tmux-keystrokes', case_ids, all_open,
-        watcher_id, profile, region, poll_interval,
-        tmux_pane=tmux_pane,
-        max_runtime_hours=max_runtime_hours,
-    )
-
-    _check_instance_guard(watcher_id)
-
-    state = WatcherState(watcher_id)
-    saved = state.read()
-    baselines = saved.get('baselines', {})
-
-    client = SupportClient(profile=profile, region=region)
-    poller = SupportPoller(client)
-    bridge = TmuxBridge(tmux_pane=tmux_pane)
-
-    # Seed baselines
-    needs_seed = any(cid not in baselines for cid in case_ids)
-    if needs_seed:
-        print(f"[{_ts()}] Seeding baseline state...", file=sys.stderr, flush=True)
-        try:
-            baselines = poller.seed_baselines(case_ids, baselines)
-        except Exception as e:
-            if _is_subscription_error(e):
-                print(
-                    f"[{_ts()}] ERROR: SubscriptionRequiredException — Business/Enterprise support plan required.",
-                    file=sys.stderr, flush=True,
-                )
-                sys.exit(1)
-            print(f"[{_ts()}] WARN: seed failed: {e}. Continuing with empty baselines.", file=sys.stderr, flush=True)
-
-    state.write({
-        'watcher_id': watcher_id,
-        'mode': 'tmux-keystrokes',
-        'started_at': saved.get('started_at', _now_iso()),
-        'last_poll_at': _now_iso(),
-        'monitor_pid': os.getpid(),
-        'profile': profile,
-        'region': region,
-        'case_ids': case_ids,
-        'all_open': all_open,
-        'poll_interval_seconds': poll_interval,
-        'surface_id': None,
-        'workspace_ref': None,
-        'tmux_pane': tmux_pane,
-        'baselines': baselines,
-        'launch_command': restart_cmd,
-        'max_runtime_hours': max_runtime_hours,
-    })
-
-    print(
-        f"[Support Watcher {_ver()}] ID: {watcher_id} | Mode: tmux-keystrokes | "
-        f"Cases: {_case_summary(case_ids)} | Poll: {poll_interval}s | Pane: {tmux_pane}",
-        file=sys.stderr, flush=True,
-    )
-    print(f"Re-launch:\n  {restart_cmd}", file=sys.stderr, flush=True)
-
-    # Send startup confirmation
-    summary = _case_summary(case_ids)
-    if not bridge.send_to_claude(f"{_pfx()} Started. ID: {watcher_id} | Watching: {summary}"):
-        print(
-            f"tmux pane {tmux_pane} unreachable. Check pane ID and re-launch:\n"
-            f"  {restart_cmd}",
-            file=sys.stderr, flush=True,
-        )
-        sys.exit(1)
-
-    running = [True]
-    received_signal = ['']
-
-    def _handle_signal(signum, _):
-        running[0] = False
-        received_signal[0] = signal.Signals(signum).name
-
-    signal.signal(signal.SIGTERM, _handle_signal)
-    signal.signal(signal.SIGINT, _handle_signal)
-
-    def _handle_sigusr1(_signum, _frame):
-        """Handle SIGUSR1 from Claude Code background task manager (exit code 0, not 144)."""
-        print(f"[{_ts()}] Received SIGUSR1 — exiting cleanly.", file=sys.stderr, flush=True)
-        _remove_pid_file(watcher_id)
-        sys.exit(0)
-    signal.signal(signal.SIGUSR1, _handle_sigusr1)
-
-    _write_pid_file(watcher_id)
-
-    started_at = time.monotonic()
-    consecutive_cred_errors = 0
-    consecutive_poll_errors = 0
-    cred_notified = False
-    last_heartbeat = time.monotonic()
-    last_version_check = time.monotonic()
-    max_runtime_seconds = max_runtime_hours * 3600
-
-    try:
-        while running[0]:
-            time.sleep(poll_interval)
-
-            if not running[0]:
-                break
-
-            if time.monotonic() - started_at > max_runtime_seconds:
-                msg = (
-                    f"{_pfx()} Max runtime ({max_runtime_hours}h) reached. "
-                    f"Re-launch: {restart_cmd}"
-                )
-                bridge.send_to_claude(msg)
-                break
-
-            # Refresh case list if --all-open
-            if all_open:
-                try:
-                    open_cases = client.list_open_cases()
-                    case_ids = [c['caseId'] for c in open_cases if c.get('caseId')]
-                    baselines = poller.seed_baselines(case_ids, baselines)
-                    state.update(case_ids=case_ids, baselines=baselines)
-                except Exception as e:
-                    print(f"[{_ts()}] WARN: could not refresh open cases: {e}", file=sys.stderr, flush=True)
-
-            if not case_ids:
-                print(f"[{_ts()}] No cases to watch. Retrying next poll.", file=sys.stderr, flush=True)
-                continue
-
-            try:
-                new_evts, new_baselines = poller.fetch_all_changes(case_ids, baselines)
-                if consecutive_cred_errors > 0 and cred_notified:
-                    bridge.send_to_claude(f"{_pfx()} Credentials recovered — resuming.")
-                    cred_notified = False
-                consecutive_cred_errors = 0
-                consecutive_poll_errors = 0
-            except Exception as e:
-                if _is_subscription_error(e):
-                    msg = f"{_pfx()} SubscriptionRequiredException — Business/Enterprise support plan required."
-                    bridge.send_to_claude(msg)
-                    break
-
-                if _is_credential_error(e):
-                    consecutive_cred_errors += 1
-                    print(
-                        f"[{_ts()}] Credential error #{consecutive_cred_errors}: {e}",
-                        file=sys.stderr, flush=True,
-                    )
-                    if consecutive_cred_errors >= 5 and not cred_notified:
-                        msg = (
-                            f"{_pfx()} {consecutive_cred_errors} consecutive "
-                            f"AWS credential errors. Please re-authenticate your AWS credentials. "
-                            f"Watcher will auto-recover when credentials are refreshed."
-                        )
-                        bridge.send_to_claude(msg)
-                        bridge.notify("Support Watcher", "Credentials expired")
-                        cred_notified = True
-                    time.sleep(min(60 * consecutive_cred_errors, 3600))
-                    continue
-
-                if _is_throttle_error(e):
-                    print(f"[{_ts()}] Throttled. Applying jittered backoff.", file=sys.stderr, flush=True)
-                    poll_interval = _throttle_sleep(poll_interval)
-                    restart_cmd = _build_restart_command(
-                        script_path, 'tmux-keystrokes', case_ids, all_open,
-                        watcher_id, profile, region, poll_interval,
-                        tmux_pane=tmux_pane,
-                        max_runtime_hours=max_runtime_hours,
-                    )
-                    state.update(poll_interval_seconds=poll_interval, launch_command=restart_cmd)
-                    continue
-
-                consecutive_poll_errors += 1
-                print(f"[{_ts()}] WARN: Poll error #{consecutive_poll_errors}: {e}", file=sys.stderr, flush=True)
-                if consecutive_poll_errors >= 3:
-                    msg = (
-                        f"{_pfx()} {consecutive_poll_errors} consecutive poll errors. "
-                        f"Last: {str(e)[:80]}. Still watching."
-                    )
-                    bridge.send_to_claude(msg)
-                    consecutive_poll_errors = 0
-                continue
-
-            baselines = new_baselines
-            state.update(last_poll_at=_now_iso(), baselines=baselines, case_ids=case_ids)
-
-            for evt in new_evts:
-                formatted = evt.get('formatted', '')
-                subject = evt.get('subject', '')
-                if subject:
-                    parts = formatted.rsplit('(', 1)
-                    if len(parts) == 2:
-                        formatted = f"{parts[0].rstrip()} ('{subject[:40]}') ({parts[1]}"
-                if not bridge.send_to_claude(formatted):
-                    print(
-                        f"tmux pane {tmux_pane} unreachable. Check pane ID and re-launch:\n"
-                        f"  {restart_cmd}",
-                        file=sys.stderr, flush=True,
-                    )
-                    _remove_pid_file(watcher_id)
-                    sys.exit(1)
-
-            # Heartbeat
-            now = time.monotonic()
-            if now - last_heartbeat >= _HEARTBEAT_INTERVAL:
-                print(
-                    f"[{_ts()}] Watching {len(case_ids)} case(s) -- no changes (poll_interval={poll_interval}s)",
-                    file=sys.stderr, flush=True,
-                )
-                last_heartbeat = now
-
-            if now - last_version_check >= _VERSION_CHECK_INTERVAL:
-                _check_version_drift()
-                last_version_check = now
-
-        sig = received_signal[0] or 'timeout'
+        if mode in ('cmux-keystrokes', 'tmux-keystrokes'):
+            bridge.clear_status(status_key)
         print(
             f"[Support Watcher {_ver()}] Exiting ({sig}).\n"
             f"Re-launch:\n  {restart_cmd}",
@@ -1374,13 +991,26 @@ def cmd_watch(args):
         print("Error: --tmux-pane is required when --mode tmux-keystrokes.", file=sys.stderr)
         sys.exit(1)
 
+    mode = args.mode
+    profile = args.profile
+    region = args.region
+    poll_interval = args.poll_interval_seconds
+    max_runtime_hours = args.max_runtime_hours
+    watcher_id = args.watcher_id or _make_watcher_id()
+    script_path = os.path.abspath(__file__)
+
+    surface_ref = getattr(args, 'cmux_surface', None)
+    workspace_ref = getattr(args, 'cmux_workspace', None) or (
+        _detect_workspace_ref() if mode == 'cmux-keystrokes' else None
+    )
+    tmux_pane = getattr(args, 'tmux_pane', None)
+
     # Resolve case IDs
     all_open = args.all_open
     if all_open:
-        # Discover open cases now
         print(f"[{_ts()}] Discovering all open cases...", file=sys.stderr, flush=True)
         try:
-            client = SupportClient(profile=args.profile, region=args.region)
+            client = SupportClient(profile=profile, region=region)
             open_cases = client.list_open_cases()
             case_ids = [c['caseId'] for c in open_cases if c.get('caseId')]
         except Exception as e:
@@ -1403,13 +1033,99 @@ def cmd_watch(args):
             print("Error: --case-ids or --all-open is required.", file=sys.stderr)
             sys.exit(1)
 
+    restart_cmd = _build_restart_command(
+        script_path, mode, case_ids, all_open,
+        watcher_id, profile, region, poll_interval,
+        surface_ref=surface_ref,
+        workspace_ref=workspace_ref,
+        cmux_notify=getattr(args, 'cmux_notify', False),
+        cmux_status=getattr(args, 'cmux_status', False),
+        max_runtime_hours=max_runtime_hours,
+        tmux_pane=tmux_pane,
+    )
+
+    _check_instance_guard(watcher_id)
+
+    state = WatcherState(watcher_id)
+    saved = state.read()
+
+    state.write({
+        'watcher_id': watcher_id,
+        'mode': mode,
+        'started_at': saved.get('started_at', _now_iso()),
+        'last_poll_at': _now_iso(),
+        'monitor_pid': os.getpid(),
+        'profile': profile,
+        'region': region,
+        'case_ids': case_ids,
+        'all_open': all_open,
+        'poll_interval_seconds': poll_interval,
+        'surface_id': surface_ref,
+        'workspace_ref': workspace_ref,
+        'tmux_pane': tmux_pane,
+        'baselines': saved.get('baselines', {}),
+        'launch_command': restart_cmd,
+        'max_runtime_hours': max_runtime_hours,
+    })
+
+    print(
+        f"[Support Watcher {_ver()}] ID: {watcher_id} | Mode: {mode} | "
+        f"Cases: {_case_summary(case_ids)} | Poll: {poll_interval}s",
+        file=sys.stderr, flush=True,
+    )
+    print(f"Re-launch command:\n  {restart_cmd}", file=sys.stderr, flush=True)
+
+    bridge = None
+
+    if mode == 'cmux-keystrokes':
+        assert surface_ref is not None
+        bridge = CmuxBridge(
+            surface_id=surface_ref,
+            workspace_ref=workspace_ref,
+            enable_notify=args.cmux_notify,
+            enable_status=args.cmux_status,
+        )
+        summary = _case_summary(case_ids)
+        if not bridge.send_to_claude(f"{_pfx()} Started. ID: {watcher_id} | Watching: {summary}"):
+            print(
+                f"Surface {surface_ref} unreachable. Get fresh refs via `cmux identify --json` and re-launch:\n"
+                f"  {restart_cmd}",
+                file=sys.stderr, flush=True,
+            )
+            sys.exit(1)
+
+    elif mode == 'tmux-keystrokes':
+        assert tmux_pane is not None
+        bridge = TmuxBridge(tmux_pane=tmux_pane)
+        summary = _case_summary(case_ids)
+        if not bridge.send_to_claude(f"{_pfx()} Started. ID: {watcher_id} | Watching: {summary}"):
+            print(
+                f"tmux pane {tmux_pane} unreachable. Check pane ID and re-launch:\n"
+                f"  {restart_cmd}",
+                file=sys.stderr, flush=True,
+            )
+            sys.exit(1)
+
+    else:
+        # long-poll-with-exit: ExitBridge used for one-shot cred_notified messages
+        bridge = ExitBridge(watcher_id=watcher_id, restart_cmd=restart_cmd)
+        print("Watching for AWS Support case changes...", file=sys.stderr, flush=True)
+
     try:
-        if args.mode == 'long-poll-with-exit':
-            _run_long_poll_with_exit(args, case_ids, all_open)
-        elif args.mode == 'cmux-keystrokes':
-            _run_cmux_keystrokes(args, case_ids, all_open)
-        else:
-            _run_tmux_keystrokes(args, case_ids, all_open)
+        _poll_loop(
+            args=args,
+            mode=mode,
+            watcher_id=watcher_id,
+            case_ids=case_ids,
+            all_open=all_open,
+            profile=profile,
+            region=region,
+            poll_interval=poll_interval,
+            max_runtime_hours=max_runtime_hours,
+            restart_cmd=restart_cmd,
+            bridge=bridge,
+            state=state,
+        )
     except SystemExit:
         raise
     except Exception as exc:
