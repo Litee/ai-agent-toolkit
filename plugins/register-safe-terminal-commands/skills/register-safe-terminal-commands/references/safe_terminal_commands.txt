@@ -906,7 +906,6 @@ ls
 lsof
 make --version
 maven --version
-mcurl
 md5sum
 mkdir
 mktemp -d

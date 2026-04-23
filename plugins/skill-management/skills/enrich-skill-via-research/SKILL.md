@@ -43,7 +43,7 @@ Dispatch parallel sub-agents, each scoped to one source type. Each agent must re
 | Source | Examples | Priority |
 |---|---|---|
 | Official documentation | AWS docs, tool reference docs, language specs | Highest |
-| Team wikis and runbooks | Internal team wikis, oncall guides, post-mortems | High |
+| Team wikis and runbooks | Internal engineering wikis, runbooks, post-mortems (when available) | High |
 | Authoritative engineering blogs | AWS blog, Netflix tech blog, engineering post-mortems | Medium |
 | Code search | Patterns in existing repos, usage examples, test cases | Medium |
 | Community Q&A | Stack Overflow, GitHub issues | Low |
