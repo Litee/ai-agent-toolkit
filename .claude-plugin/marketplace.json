@@ -4,9 +4,9 @@
     "name": "litee"
   },
   "metadata": {
-    "description": "Collection of AI agent skills for AWS CDK development, AWS documentation search, AWS Athena SQL querying, CloudWatch Logs Insights querying, Anki flashcard management, Obsidian vault management, audio conversion, podcast generation, safe terminal command registration, image generation, ML system design interviews, and markdown note search",
+    "description": "Collection of AI agent skills for AWS CDK development, AWS documentation search, AWS Athena SQL querying, CloudWatch Logs Insights querying, Anki flashcard management, Obsidian vault management, audio conversion, subtitle/caption conversion, podcast generation, safe terminal command registration, image generation, ML system design interviews, and markdown note search",
 
-    "version": "1.1.40",
+    "version": "1.1.41",
     "homepage": "https://github.com/Litee/ai-agent-toolkit"
   },
   "plugins": [
@@ -266,6 +266,16 @@
       "category": "developer-tools",
       "keywords": ["skill", "skill-creator", "portability", "best-practices", "naming-conventions", "skill-dir", "evaluation", "synthetic-tasks", "quality-assurance", "audit", "review", "research", "enrich"],
       "skills": ["./skills/enrich-skill-via-research", "./skills/evaluate-skills-with-synthetic-tasks", "./skills/review-skill", "./skills/skill-creator-extra-tips"]
+    },
+    {
+      "name": "subtitle-tools",
+      "description": "This plugin contains a skill for converting WebVTT caption/subtitle files (.vtt) to deduplicated plaintext. Strips inline tags, drops cue headers, and collapses the overlapping-cue repetition common in auto-generated captions. Supports optional [HH:MM:SS] timestamp prefixes.",
+      "source": "./plugins/subtitle-tools",
+      "strict": false,
+      "version": "1.0.0",
+      "category": "user",
+      "keywords": ["subtitle", "caption", "transcript", "vtt", "webvtt", "plaintext"],
+      "skills": ["./skills/convert-vtt-to-text"]
     },
     {
       "name": "toon",

@@ -48,6 +48,7 @@ These skills can be installed as plugins in Claude Code.
 /plugin install qmd@litee-claude-code-plugins
 /plugin install register-safe-terminal-commands@litee-claude-code-plugins
 /plugin install skill-management@litee-claude-code-plugins
+/plugin install subtitle-tools@litee-claude-code-plugins
 /plugin install toon@litee-claude-code-plugins
 /plugin install update-versioned-permissions@litee-claude-code-plugins
 /plugin install writing@litee-claude-code-plugins
@@ -88,6 +89,7 @@ Each plugin installs a skill that extends Claude's capabilities:
 | `skill-management` (`evaluate-skills-with-synthetic-tasks`) | developer-tools | Customer-perspective skill evaluation using synthetic tasks: test skills by executing them as a real user would, score results (PASS/PARTIAL/FAIL/BLOCKED), dispatch evaluation sub-agents per skill, and file issues for failures |
 | `skill-management` (`review-skill`) | developer-tools | Quality review of one or more skills against a canonical checklist (skill-creator + skill-creator-extra-tips + superpowers:writing-skills + 4 additional criteria): single-skill manual review or bulk plugin audit with parallel sub-agents, severity classification (CRITICAL/SHOULD_FIX/NICE_TO_HAVE), and auto-filed issues via use-local-skills-issue-tracker |
 | `skill-management` (`skill-creator-extra-tips`) | developer-tools | Supplementary skill-authoring guidance: portability best practices, file naming conventions, `${SKILL_DIR}` placeholder, three-level context management, self-containment rules, and automated tooling references |
+| `subtitle-tools` (`convert-vtt-to-text`) | user | Convert WebVTT caption/subtitle files (.vtt) to deduplicated plaintext, stripping inline tags and collapsing overlapping-cue repetition from auto-generated captions; optional [HH:MM:SS] timestamp prefixes |
 | `toon` (`use-toon-cli`) | developer-tools | JSON/TOON format conversion using the toon CLI: encode JSON to compact TOON, decode TOON to JSON, measure token savings with --stats, select delimiters (comma/tab/pipe), key folding and path expansion, streaming support for large files, and LLM input optimization |
 | `update-versioned-permissions` | developer-tools | SessionStart hook that auto-clones stale versioned plugin path entries in permissions when plugins are upgraded; additive-only, also updates statusLine.command to latest installed version |
 | `writing` (`write-technical-design`, `write-well`) | productivity | Two skills: technical design document drafting (HLD/LLD templates, section standards, architecture diagrams, assembly checklists, red-flag detection); universal writing quality (clarity, structure, conciseness, AI writing hygiene, editing checklists, format-aware guidance for design docs, RFCs, emails, postmortems, and status updates) |
