@@ -29,6 +29,59 @@ Each session produces:
 - `<uuid>.jsonl` — main conversation transcript (top-level)
 - `<uuid>/subagents/agent-<id>.jsonl` — sub-agent transcripts (ignore for user message analysis)
 
+## Find Sessions by Working Directory
+
+### Quick lookup (encoded-path glob)
+
+Claude Code encodes the working directory into the project-directory name by replacing every `/` with `-`. Use this to narrow candidates:
+
+```bash
+DIR=/path/to/your/project
+ENCODED=$(printf '%s' "$DIR" | tr '/' '-')
+ls ~/.claude/projects/"$ENCODED"/*.jsonl 2>/dev/null
+```
+
+### Encoding caveat
+
+The encoding is lossy — treat the result above as a **candidate set, not a confirmed match**:
+
+- `/` and a literal `-` in the path both encode to `-`, so `/foo/bar-baz` and `/foo-bar/baz` map to the same encoded name.
+- `/.` encodes to `--`, which also matches a path component beginning with `-` (e.g. `/.claude` and `/-claude` are indistinguishable from the directory name alone).
+
+For any path containing `/.` or `-`, verify with the `cwd` field (see below).
+
+### Authoritative lookup (cwd field)
+
+Most non-metadata entries (`progress`, `assistant`, `user`, `system`) carry a `cwd` field with the real absolute working directory. Use it to confirm or reject candidates:
+
+```python
+import json, glob, os
+
+def sessions_for_cwd(target_cwd):
+    """Return JSONL paths whose session started in target_cwd."""
+    encoded = target_cwd.replace('/', '-')
+    candidates = glob.glob(os.path.expanduser(f'~/.claude/projects/{encoded}/*.jsonl'))
+    matches = []
+    for path in candidates:
+        with open(path) as f:
+            for line in f:
+                try:
+                    entry = json.loads(line)
+                except json.JSONDecodeError:
+                    continue
+                if 'cwd' in entry:
+                    if entry['cwd'] == target_cwd:
+                        matches.append(path)
+                    break  # first cwd-bearing entry identifies the session's home dir
+    return matches
+```
+
+Only the first `cwd`-bearing entry is checked because a session is filed under the directory where it *started*; subsequent `cd` calls within the session don't change the filing directory.
+
+If you need sessions that *ever touched* a directory (not just started there), scan all entries and omit the `break`.
+
+To search across all projects when you are unsure of the exact path (e.g. `/foo/bar` vs `/foo-bar`), widen the glob to `~/.claude/projects/*/*.jsonl` and rely entirely on the `cwd` filter.
+
 ## JSONL Format
 
 Each line is a JSON object. Entry types:

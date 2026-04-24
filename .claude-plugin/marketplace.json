@@ -291,7 +291,7 @@
       "description": "This plugin contains a skill for analyzing Claude Code session JSONL transcripts to identify recurring patterns, skill gaps, agent failure modes, and improvement opportunities. Covers transcript storage layout, JSONL entry types, user message extraction recipe, sub-agent dispatch for large volumes, and output format for pattern reporting.",
       "source": "./plugins/claude-code-session-history",
       "strict": false,
-      "version": "1.0.1",
+      "version": "1.0.2",
       "category": "developer-tools",
       "keywords": ["claude-code", "session", "transcript", "analysis", "patterns", "skill-gaps"],
       "skills": ["./skills/analyze-claude-code-session-transcripts"]
