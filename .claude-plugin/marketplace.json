@@ -6,7 +6,7 @@
   "metadata": {
     "description": "Collection of AI agent skills for AWS CDK development, AWS documentation search, AWS Athena SQL querying, CloudWatch Logs Insights querying, Anki flashcard management, Obsidian vault management, audio conversion, podcast generation, safe terminal command registration, image generation, ML system design interviews, and markdown note search",
 
-    "version": "1.1.39",
+    "version": "1.1.40",
     "homepage": "https://github.com/Litee/ai-agent-toolkit"
   },
   "plugins": [
@@ -54,7 +54,7 @@
       "description": "This plugin contains a skill for working with Anki flashcard software through the AnkiConnect API. Use for creating flashcards, managing decks, searching notes/cards, syncing collections, controlling review sessions, or any Anki automation tasks.",
       "source": "./plugins/anki",
       "strict": false,
-      "version": "1.0.9",
+      "version": "1.0.10",
       "category": "productivity",
       "keywords": ["anki", "flashcards", "spaced-repetition", "learning"],
       "skills": ["./skills/manage-anki-flashcards"]
@@ -74,7 +74,7 @@
       "description": "This plugin contains a skill for executing AWS Athena SQL queries, downloading results from S3, running queries in parallel, and optimizing query performance with Common Table Expressions (CTEs).",
       "source": "./plugins/aws-athena",
       "strict": false,
-      "version": "1.0.2",
+      "version": "1.0.3",
       "category": "developer-tools",
       "keywords": ["aws", "athena", "sql", "query", "s3"],
       "skills": ["./skills/query-aws-athena"]
@@ -94,7 +94,7 @@
       "description": "This plugin contains skills for AWS Glue ETL jobs and workflows: writing, configuring, debugging, and monitoring Glue jobs with update-job gotchas, worker type sizing, CloudWatch and Observability metrics, S3 shuffle, per-worker progress reporting, API call tracking via ApiCallTracker, live job monitoring with long-poll-with-exit, cmux-keystrokes, and tmux-keystrokes modes, resilient credential handling, VPC endpoint validation, Flex job cost savings, Spark UI setup, small files (groupFiles/coalesce), timeout anti-patterns, MaxConcurrentRuns gotchas, a troubleshooting quick-reference, and live workflow monitoring with per-node job/crawler state tracking.",
       "source": "./plugins/aws-glue",
       "strict": false,
-      "version": "1.1.18",
+      "version": "1.1.19",
       "category": "developer-tools",
       "keywords": ["aws", "glue", "etl", "cloudwatch", "s3", "pyspark", "data-engineering", "monitoring", "workflow"],
       "skills": ["./skills/use-aws-glue", "./skills/watch-aws-glue-job", "./skills/watch-aws-glue-workflow"]
@@ -104,7 +104,7 @@
       "description": "This plugin contains skills for Amazon CloudWatch: querying CloudWatch Logs with Log Insights (real-time progress tracking, flexible time ranges, multiple output formats, multi-log-group support); and publishing, querying, and designing monitoring with CloudWatch custom metrics (PutMetricData, EMF, GetMetricData, alarms, composite alarms, metric math, dimension cardinality, cost optimization, high-resolution metrics, metric streams, Contributor Insights).",
       "source": "./plugins/aws-cloudwatch",
       "strict": false,
-      "version": "1.0.4",
+      "version": "1.0.5",
       "category": "developer-tools",
       "keywords": ["aws", "cloudwatch", "logs", "log-insights", "query", "monitoring", "metrics", "alarms", "emf", "putmetricdata"],
       "skills": ["./skills/query-aws-cloudwatch-logs-insights", "./skills/use-aws-cloudwatch-metrics"]
@@ -114,7 +114,7 @@
       "description": "This plugin contains a skill for monitoring AWS Support cases for status changes, severity changes, and new communications with long-poll, cmux, and tmux delivery modes. Requires Business or Enterprise AWS support plan.",
       "source": "./plugins/aws-support",
       "strict": false,
-      "version": "1.0.6",
+      "version": "1.0.7",
       "category": "developer-tools",
       "keywords": ["aws", "support", "cases", "monitoring"],
       "skills": ["./skills/watch-aws-support-cases"]
@@ -124,7 +124,7 @@
       "description": "This plugin contains a skill for monitoring AWS Service Quotas increase requests for status changes, with approval/denial notifications across regions.",
       "source": "./plugins/aws-quota-service",
       "strict": false,
-      "version": "1.0.6",
+      "version": "1.0.7",
       "category": "developer-tools",
       "keywords": ["aws", "monitoring", "service-quotas", "quotas"],
       "skills": ["./skills/watch-aws-quota-requests"]
@@ -232,7 +232,7 @@
       "description": "This plugin contains a skill for generating images using Amazon Nova Canvas on AWS Bedrock. Use when creating images, illustrations, AI art, text-to-image generation, or visual content. Not for editing existing images.",
       "source": "./plugins/generate-image",
       "strict": false,
-      "version": "1.0.5",
+      "version": "1.0.6",
       "category": "user",
       "keywords": ["aws", "bedrock", "nova-canvas", "image-generation", "text-to-image", "ai-art"],
       "skills": ["./skills/generate-image"]

@@ -1205,6 +1205,7 @@ Examples:
   watch_quota_requests.py stop --watcher-id a1b2c3d4
         """,
     )
+    parser.add_argument('--version', action='version', version=f'%(prog)s {_VERSION}')
 
     subparsers = parser.add_subparsers(dest='subcommand', metavar='SUBCOMMAND')
     subparsers.required = True

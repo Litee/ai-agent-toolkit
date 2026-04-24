@@ -6,7 +6,6 @@ Execute CloudWatch Log Insights queries with progress tracking and flexible outp
 """
 
 import argparse
-import boto3
 import csv
 import json
 import sys
@@ -42,6 +41,7 @@ class CloudWatchLogsQueryExecutor:
             region: AWS region (optional, uses default if not specified)
             profile: AWS profile name (optional, uses default credential chain if not specified)
         """
+        import boto3
         session_kwargs = {}
         if profile:
             session_kwargs['profile_name'] = profile

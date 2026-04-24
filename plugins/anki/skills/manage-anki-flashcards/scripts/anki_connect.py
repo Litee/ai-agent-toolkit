@@ -484,7 +484,34 @@ def main():
     """Main entry point for CLI."""
     parser = argparse.ArgumentParser(
         description='AnkiConnect API Client - Interact with Anki',
-        formatter_class=argparse.RawDescriptionHelpFormatter
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  # Add a single note
+  %(prog)s add-note --deck "Default" --model "Basic" \\
+      --fields '{"Front":"What is Python?","Back":"A programming language"}'
+
+  # Add multiple notes from JSON
+  %(prog)s add-notes --json-file notes.json
+
+  # Search for notes
+  %(prog)s find-notes --query "deck:Default"
+
+  # Get note information (optionally filter fields)
+  %(prog)s notes-info --note-ids 1234567890 9876543210
+  %(prog)s notes-info --note-ids 1234567890 --fields "Front,Back"
+
+  # Deck / model management
+  %(prog)s deck-names
+  %(prog)s create-deck --deck "My New Deck"
+  %(prog)s model-names
+
+  # Sync with AnkiWeb
+  %(prog)s sync
+
+  # Raw API call
+  %(prog)s invoke --action "deckNames" --params '{}'
+    """,
     )
 
     parser.add_argument(

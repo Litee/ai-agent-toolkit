@@ -18,7 +18,6 @@ Usage:
 """
 
 import argparse
-import boto3
 import time
 import sys
 from pathlib import Path
@@ -37,6 +36,7 @@ class AthenaQueryExecutor:
             region: AWS region (optional, uses default if not specified)
             profile: AWS profile name (optional, uses default credential chain if not specified)
         """
+        import boto3
         self.database = database
         self.output_location = output_location
 
@@ -187,7 +187,22 @@ def main():
     """Main entry point for the script."""
     parser = argparse.ArgumentParser(
         description='Execute AWS Athena queries and download results from S3',
-        formatter_class=argparse.RawDescriptionHelpFormatter
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  # Inline query
+  %(prog)s --query "SELECT * FROM table LIMIT 10" \\
+           --database my_database \\
+           --output-location s3://my-bucket/athena-results/ \\
+           --profile my-profile
+
+  # Query from file with explicit format
+  %(prog)s --query-file query.sql \\
+           --database my_database \\
+           --output-location s3://my-bucket/athena-results/ \\
+           --profile my-profile \\
+           --format csv
+    """,
     )
 
     query_group = parser.add_mutually_exclusive_group(required=True)

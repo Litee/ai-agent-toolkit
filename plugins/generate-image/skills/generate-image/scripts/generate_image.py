@@ -14,8 +14,6 @@ import sys
 from datetime import datetime
 from typing import List, Optional
 
-import boto3
-
 
 class NovaCanvasGenerator:
     """Generator class for AWS Bedrock Nova Canvas model."""
@@ -31,6 +29,7 @@ class NovaCanvasGenerator:
             region: AWS region where Bedrock is available
             profile_name: AWS profile name to use (optional)
         """
+        import boto3
         # Create session with profile if specified
         if profile_name:
             session = boto3.Session(profile_name=profile_name)

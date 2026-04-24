@@ -1217,6 +1217,7 @@ Examples:
   watch_glue_job.py stop --watcher-id a1b2c3d4
         """,
     )
+    parser.add_argument('--version', action='version', version=f'%(prog)s {_VERSION}')
 
     sub = parser.add_subparsers(dest='command', required=True)
 
