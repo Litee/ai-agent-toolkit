@@ -5,7 +5,7 @@ description: "Use when asked to 'export a DynamoDB table', 'dump DDB to S3', 'co
 
 # manage-ddb-exports — DynamoDB Export Lifecycle
 
-> Found major gaps or factual errors in this skill? Report it via the `use-local-skills-issue-tracker` skill (if available).
+> Found major gaps or factual errors in this skill? Report it via the `local-skill-issues-tracker:use-local-skills-issue-tracker` skill (if available).
 
 ## Overview
 
@@ -67,11 +67,11 @@ Flatten before analysis. The type descriptors are: `S` (string), `N` (number as 
 
 ### Option A: AWS Glue Job (preferred for large tables)
 
-Use the `use-aws-glue` skill. Apply `DynamicFrame` with `unnest_ddb_json` transform or write custom flattening logic that maps DDB type descriptors to flat columns.
+Use the `aws-glue:use-aws-glue` skill. Apply `DynamicFrame` with `unnest_ddb_json` transform or write custom flattening logic that maps DDB type descriptors to flat columns.
 
 ### Option B: PySpark Locally (small tables, <1 GB)
 
-Use the `use-pyspark` skill with `boto3` to read from S3. Flatten the nested DDB JSON structure into a flat schema before writing to Parquet.
+Use the `pyspark:use-pyspark` skill with `boto3` to read from S3. Flatten the nested DDB JSON structure into a flat schema before writing to Parquet.
 
 ---
 
@@ -80,7 +80,7 @@ Use the `use-pyspark` skill with `boto3` to read from S3. Flatten the nested DDB
 Filtering happens **after** export — there is no way to filter during the export itself.
 
 Options:
-- **Athena** (see `query-aws-athena` skill): query the Parquet directly in S3 without moving data
+- **Athena** (see `aws-athena:query-aws-athena` skill): query the Parquet directly in S3 without moving data
 - **Glue job with pushdown predicates**: filter during the DDB JSON → Parquet conversion step
 
 Common filter patterns:
@@ -166,6 +166,6 @@ There is no in-place retry — each call creates a new export job. Clean up any 
 
 ## Related Skills
 
-- `use-aws-glue` — submit and manage AWS Glue PySpark jobs for large-scale format conversion
-- `use-pyspark` — PySpark patterns for local/small-scale conversion
-- `query-aws-athena` — query exported Parquet directly in S3 without moving data
+- `aws-glue:use-aws-glue` — submit and manage AWS Glue PySpark jobs for large-scale format conversion
+- `pyspark:use-pyspark` — PySpark patterns for local/small-scale conversion
+- `aws-athena:query-aws-athena` — query exported Parquet directly in S3 without moving data

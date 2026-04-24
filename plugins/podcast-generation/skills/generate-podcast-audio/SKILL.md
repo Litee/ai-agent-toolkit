@@ -1,6 +1,6 @@
 ---
 name: generate-podcast-audio
-description: Convert podcast scripts into high-quality audio using text-to-speech synthesis on AWS. Use when generating podcast audio, converting scripts to speech, producing TTS audio, creating voice content from text, or running the VibeVoice audio pipeline. Triggers on "generate podcast audio", "convert script to audio", "text-to-speech", "TTS", "podcast MP3", "produce audio from script", or any request to turn a formatted podcast script into a playable audio file.
+description: Use when generating podcast audio, converting scripts to speech, producing TTS audio, creating voice content from text, or running the VibeVoice audio pipeline. Triggers on "generate podcast audio", "convert script to audio", "text-to-speech", "TTS", "podcast MP3", "produce audio from script", or any request to turn a formatted podcast script into a playable audio file.
 ---
 
 # Podcast Audio Generator
@@ -9,7 +9,7 @@ description: Convert podcast scripts into high-quality audio using text-to-speec
 
 Convert formatted podcast scripts into high-quality audio using VibeVoice text-to-speech synthesis on AWS EC2 GPU instances.
 
-## 🚀 Implementation
+## Implementation
 
 This skill uses a **two-script workflow**: run `setup_infrastructure.py` once per account/region, then run `generate_podcast_audio.py` for each podcast.
 
@@ -30,24 +30,24 @@ Safe to re-run — all operations are idempotent.
 
 Generates audio for a single podcast script. Requires infrastructure from Step 1 to already exist.
 
-- ✅ **Guaranteed cleanup** even if script crashes or client disconnects
-- ✅ Visual workflow tracking in AWS console
-- ✅ Built-in retry logic and error handling
-- ✅ Can disconnect and check status later
-- ✅ Execution audit trails
+- Guaranteed cleanup even if script crashes or client disconnects
+- Visual workflow tracking in AWS console
+- Built-in retry logic and error handling
+- Can disconnect and check status later
+- Execution audit trails
 
 **Why Step Functions?**
 Step Functions provides stronger guarantees for cleanup and error handling compared to direct execution, making it production-ready for all workloads.
 
-## 🤖 CRITICAL DIRECTIVE: Automatic Cleanup
+## Automatic Cleanup
 
-**⚠️ MANDATORY:** The script handles resource cleanup automatically:
+The script handles resource cleanup automatically:
 - **Step Functions**: Cleanup guaranteed via Catch blocks, runs even if client disconnects
 - **Automatic cleanup** of temporary resources (EC2 instances, security groups deleted immediately; S3 files retained for 24-hour backup then auto-deleted via bucket lifecycle policy)
 
 **NEVER ask the user to manually clean up resources** unless the script is blocked/failed.
 
-## 💰 AWS Resources & Costs
+## AWS Resources & Costs
 
 **Per Run:** Creates temporary EC2 instance (~$1.35/hr for g6.4xlarge) that auto-terminates after completion.
 
@@ -55,9 +55,9 @@ Step Functions provides stronger guarantees for cleanup and error handling compa
 
 **One-Time Setup:** `setup_infrastructure.py` creates a permanent S3 bucket and IAM roles (reused across runs, minimal/no cost). Safe for concurrent executions.
 
-## ⚠️ MANDATORY: Read Detailed Instructions First
+## Required: Read Detailed Instructions First
 
-**🚨 CRITICAL: Before using this skill, you MUST read [`references/generate-podcast-audio.md`](references/generate-podcast-audio.md) in full.**
+Before using this skill, read [`references/generate-podcast-audio.md`](references/generate-podcast-audio.md) in full.
 
 The reference contains essential information about:
 - Complete parameter details, voice ordering, and usage examples
@@ -65,13 +65,13 @@ The reference contains essential information about:
 - Troubleshooting guide for common issues
 - Cost estimates and instance type options
 
-**Do NOT proceed without reading the reference.** The information below is only a quick overview.
+The information below is only a quick overview.
 
 ## Required Inputs
 
 - **Script file**: Must follow the "Speaker N:" format for each line
   - **Duration Limit**: The ML model has a maximum limit of 60 minutes (1 hour) for audio generation
-  - **Validation Required**: Before generating audio, you MUST validate the script duration and ask for user confirmation if it may exceed 60 minutes
+  - **Validation Required**: Before generating audio, validate the script duration and ask for user confirmation if it may exceed 60 minutes
 - **Voice selection**: Choose from available voice profiles for each speaker (built-in or custom)
 - **AWS region** (optional): AWS region for EC2 instance deployment; defaults to the profile's configured region
 - **Voices directory** (optional): Path to a local directory with custom voice WAV files, or an S3 URI (`s3://bucket/prefix/`) for voices already deployed to S3; if omitted, defaults to `assets/voices/` relative to the skill's scripts directory
@@ -79,7 +79,7 @@ The reference contains essential information about:
   - Used for mandatory tempo analysis after audio generation
   - Needed to calculate drift and determine if speed adjustment is required
 
-### 🚨 CRITICAL: Output File Naming
+### Output File Naming
 
 **ALWAYS include timestamps in output filenames to prevent file conflicts:**
 - Use script names with timestamps in `YYYYMMDDHHmmss` format: `--script-path podcast_20251025143000.md`
@@ -100,13 +100,13 @@ word_count=$(python3 ${SKILL_DIR}/scripts/calculate_podcast_metrics.py count-wor
 
 **Note**: First-run with cold cache may add 5-10 minutes
 
-### 🕐 CRITICAL: Communicate Expected Completion Time
+### Communicate Expected Completion Time
 
-**MANDATORY BEHAVIOR:** After starting audio generation, you MUST:
+After starting audio generation:
 1. Calculate estimated completion time: `20 + (word_count / 100)` minutes
 2. Tell the user the expected completion time and clock time
 3. Inform user they can ask for status after that time
-4. **DO NOT continuously poll** - this wastes tokens
+4. Do not continuously poll — this wastes tokens
 
 **Why:** Audio generation takes 45-120+ minutes. Continuous polling wastes tokens and provides no value.
 
@@ -132,16 +132,16 @@ word_count=$(python3 ${SKILL_DIR}/scripts/calculate_podcast_metrics.py count-wor
 4. **EC2 Launch** - Launch GPU instance and install dependencies
 5. **Audio Generation** - Generate audio using VibeVoice TTS
 6. **Download** - Download WAV file from S3
-7. **Tempo Analysis (MANDATORY)** - Analyze speech rate and calculate drift percentage
-8. **Metadata Extraction (MANDATORY)** - After successful generation:
+7. **Tempo Analysis** — Analyze speech rate and calculate drift percentage
+8. **Metadata Extraction** — After successful generation:
    - **Use a Task sub-agent** to extract title and description from the script file
    - Title should be consistent with the script filename
    - Collect artist information from the speaker names used in generation
-   - Display metadata in clear format for use with convert-audio skill
+   - Display metadata in clear format for use with convert-audio:convert-audio skill
 9. **Tempo Adjustment Decision** - Based on drift:
    - **0-5% drift**: No adjustment needed (optimal quality)
-   - **5-30% drift**: Recommend using convert-audio skill with speed adjustment
-   - **>30% drift**: Warn user, ask if they want to use convert-audio skill
+   - **5-30% drift**: Recommend using convert-audio:convert-audio skill with speed adjustment
+   - **>30% drift**: Warn user, ask if they want to use convert-audio:convert-audio skill
 10. **Cleanup** - Terminate EC2, delete security groups, retain S3 backup for 24 hours
 
 ### Output
@@ -149,7 +149,7 @@ word_count=$(python3 ${SKILL_DIR}/scripts/calculate_podcast_metrics.py count-wor
 - **WAV file**: High-quality uncompressed audio (always preserved)
 - **Tempo analysis report**: Actual vs. target WPM, drift percentage, speed factor
 - **Metadata display**: Title, artist, and description extracted from script for audio conversion
-- **Recommendation**: If drift > 5%, recommend using convert-audio skill
+- **Recommendation**: If drift > 5%, recommend using convert-audio:convert-audio skill
 - **Cleaned resources**: Temporary AWS resources automatically removed
 - **Orphaned resource report**: Detection of stuck instances from other runs
 
@@ -159,7 +159,7 @@ word_count=$(python3 ${SKILL_DIR}/scripts/calculate_podcast_metrics.py count-wor
 - **scripts/generate_podcast_audio.py** - Per-podcast Step Functions orchestration script
 - **scripts/_podcast_shared.py** - Shared utilities and naming conventions (internal module)
 - **scripts/calculate_podcast_metrics.py** - Python script for word counting and duration calculations
-- **references/generate-podcast-audio.md** - Complete usage guide (MANDATORY)
+- **references/generate-podcast-audio.md** — Complete usage guide
 - **assets/voices/** - Optional directory for custom voice WAV samples (not included; add your own)
 
 ## Related Skills

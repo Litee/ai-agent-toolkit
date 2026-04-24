@@ -1,6 +1,6 @@
 ---
 name: skill-creator-extra-tips
-description: Extra guidance for creating skills that work portably across machines and users. Trigger on "portable skill", "distribute skill", "package skill", "skill naming conventions", "hardcoded paths in skill", "validate skill structure", "skill for other users", "skill best practices", "skill guidelines", "skill quality", "what makes a good skill", "SKILL_DIR", "skill portability", "skill self-contained", "skill context management", "three-level loading", or when the skill-creator skill is active and the user mentions distribution, packaging, or portability.
+description: Use when creating a distributable skill, fixing hardcoded paths, packaging a skill for other users, or applying portability best practices. Triggers on "portable skill", "distribute skill", "package skill", "skill naming conventions", "hardcoded paths in skill", "skill for other users", "skill best practices", "skill quality", "SKILL_DIR", "skill portability", "skill self-contained", or "three-level loading".
 ---
 
 # Skill Creator Extra Tips

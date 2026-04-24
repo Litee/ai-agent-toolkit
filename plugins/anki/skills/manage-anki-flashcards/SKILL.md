@@ -1,6 +1,6 @@
 ---
 name: manage-anki-flashcards
-description: Manage Anki flashcards through the AnkiConnect API. Use for creating flashcards, managing decks, searching notes/cards, syncing collections, controlling review sessions, or any Anki automation tasks. Triggers on "create flashcards", "add to Anki", "make study cards", "add cards to Anki", "import flashcards", "bulk import into Anki", "create Anki deck", "add note to Anki", "sync Anki", or any request to manage or automate Anki flashcards.
+description: Use when creating Anki flashcards, managing decks, bulk-importing notes, syncing with AnkiWeb, controlling review sessions, or automating any AnkiConnect API task. Triggers on "create flashcards", "add to Anki", "make study cards", "add cards to Anki", "import flashcards", "bulk import into Anki", "create Anki deck", "add note to Anki", "sync Anki", or any request to manage or automate Anki flashcards.
 ---
 
 # Manage Anki

@@ -1,13 +1,11 @@
 ---
 name: watch-aws-glue-job
 description: >
-  Monitor AWS Glue job execution for state changes with background notifications.
-  Use when watching long-running Glue jobs, checking Glue job status, or setting
-  up background Glue job monitoring. Supports three modes: background long-poll-with-exit
-  (re-launch in loop, no cmux/tmux needed), cmux-keystrokes (background task, sends keystrokes
-  to Claude Code terminal), and tmux-keystrokes (no cmux dependency). Includes CloudWatch metrics (CPU, heap, records,
-  executors). Triggers on "watch glue job", "monitor glue run", "check glue status",
-  "glue job finished", "background glue monitor", or any request to track an AWS Glue job run.
+  Use when watching a running AWS Glue job or monitoring Glue job status in the background.
+  Three modes: long-poll-with-exit (re-launch in loop), cmux-keystrokes (sends keystrokes to
+  Claude Code terminal), tmux-keystrokes (no cmux dependency). Includes CloudWatch metrics
+  (CPU, heap, records, executors). Triggers on "watch glue job", "monitor glue run",
+  "check glue status", "glue job finished", or any request to track an AWS Glue job run.
 ---
 
 # AWS Glue Job Watcher
@@ -33,7 +31,7 @@ This skill solves it three ways:
 | **cmux** (recommended) | `watch --mode cmux-keystrokes` runs as a background task. On every state change, it sends a keystroke to the Claude Code terminal, waking the LLM to act. Poll output goes to the background task log — no cmux split needed. |
 | **tmux** | `watch --mode tmux-keystrokes` — same as cmux-keystrokes but uses `tmux send-keys` for delivery. No cmux dependency. Requires `--tmux-pane` (e.g. `main:0.0`). |
 
-This skill monitors existing job runs. Use other skills (e.g. `use-aws-glue`) for job submission.
+This skill monitors existing job runs. Use other skills (e.g. `aws-glue:use-aws-glue`) for job submission.
 
 ---
 

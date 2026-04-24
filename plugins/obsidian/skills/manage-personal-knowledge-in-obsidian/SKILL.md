@@ -1,11 +1,11 @@
 ---
 name: manage-personal-knowledge-in-obsidian
-description: Manage personal knowledge in Obsidian using atomic notes, linking strategies, tagging conventions, and structured workflows. Use for knowledge management, note organization, vault health analysis, and building a personal knowledge graph. Triggers on requests involving PKM, Zettelkasten, knowledge management, note-taking methodology, or managing an Obsidian vault as a knowledge base.
+description: Use when building, maintaining, or analyzing a personal-knowledge-management vault in Obsidian. Triggers on requests involving PKM, Zettelkasten, knowledge management, atomic notes, note organization, vault health analysis, or building a personal knowledge graph.
 ---
 
 # Personal Knowledge Management in Obsidian
 
-This skill provides opinionated guidance for building and maintaining a personal knowledge base in Obsidian. It assumes the `use-obsidian-cli` skill for CLI operations and `use-obsidian-markdown` for note content syntax.
+This skill provides opinionated guidance for building and maintaining a personal knowledge base in Obsidian. It assumes the `obsidian:use-obsidian-cli` skill for CLI operations and `obsidian:use-obsidian-markdown` for note content syntax.
 
 Obsidian stores everything as plain Markdown files — notes outlive any app. Favor simplicity and portability over plugin-dependent workflows.
 
@@ -184,7 +184,7 @@ obsidian read file="Redis Cache Invalidation Strategies"
 obsidian backlinks file="Cache Patterns"
 ```
 
-For shell escaping rules when content contains wikilinks or special characters, see the `use-obsidian-cli` skill.
+For shell escaping rules when content contains wikilinks or special characters, see the `obsidian:use-obsidian-cli` skill.
 
 ### Workflow 2: Capturing Quick Ideas via Daily Notes
 

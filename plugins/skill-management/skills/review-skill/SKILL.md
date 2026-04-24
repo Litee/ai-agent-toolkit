@@ -1,9 +1,9 @@
 ---
 name: review-skill
-description: "Use when asked to 'review a skill', 'check a skill for best practices', 'audit all skills', 'review skills for quality', 'find issues across skills', or any quality sweep of one or more skills. Supports both single-skill review and bulk plugin audit. Do NOT use when the user wants to fix a specific known issue (use use-local-skills-issue-tracker directly)."
+description: "Use when asked to 'review a skill', 'check a skill for best practices', 'audit all skills', 'review skills for quality', 'find issues across skills', or any quality sweep of one or more skills. Supports both single-skill review and bulk plugin audit. Do NOT use when the user wants to fix a specific known issue (use local-skill-issues-tracker:use-local-skills-issue-tracker directly)."
 ---
 
-> Found major gaps or factual errors in this skill? Report it via the `use-local-skills-issue-tracker` skill, if the skill exists.
+> Found major gaps or factual errors in this skill? Report it via the `local-skill-issues-tracker:use-local-skills-issue-tracker` skill, if the skill exists.
 
 # review-skill
 
@@ -18,7 +18,7 @@ This skill guides quality reviews of skills against a canonical checklist. It su
 
 ## Checklist
 
-**Before reviewing, invoke `skill-creator`, `skill-creator-extra-tips`, and `superpowers:writing-skills`** to load the full best practices. Use their criteria as the authoritative checklist — do not summarise or paraphrase them.
+**Before reviewing, invoke `skill-management:skill-creator-extra-tips` and `superpowers:writing-skills`** to load the full best practices. Use their criteria as the authoritative checklist — do not summarise or paraphrase them.
 
 In addition, each skill must be checked for these criteria not covered by those skills:
 
@@ -29,7 +29,7 @@ In addition, each skill must be checked for these criteria not covered by those 
 | 3 | **Knowledge skills: no stale claims** | Knowledge skills note that facts need verification against source; no unconditional present-tense assertions about dynamic systems |
 | 4 | **Action skills: error handling documented** | What to do when the tool/API fails is documented (retry, fallback, escalation path) |
 
-Always include the full criteria (from `skill-creator` + `skill-creator-extra-tips` + `superpowers:writing-skills` + the table above) verbatim in every sub-agent prompt — agents without the full list will invent their own criteria.
+Always include the full criteria (from `skill-management:skill-creator-extra-tips` + `superpowers:writing-skills` + the table above) verbatim in every sub-agent prompt — agents without the full list will invent their own criteria.
 
 ---
 
@@ -57,11 +57,11 @@ Apply type-specific emphasis when evaluating each criterion:
 
 For one skill, apply the checklist manually without spawning sub-agents:
 
-1. Invoke `skill-creator`, `skill-creator-extra-tips`, and `superpowers:writing-skills` to load the full criteria
+1. Invoke `skill-management:skill-creator-extra-tips` and `superpowers:writing-skills` to load the full criteria
 2. Read the skill's `SKILL.md`
 3. Evaluate each criterion from the checklist above plus all criteria from the three invoked skills
 4. Classify each finding by severity (CRITICAL / SHOULD_FIX / NICE_TO_HAVE)
-5. Report findings using the output format below; file CRITICAL and SHOULD_FIX items via `use-local-skills-issue-tracker`
+5. Report findings using the output format below; file CRITICAL and SHOULD_FIX items via `local-skill-issues-tracker:use-local-skills-issue-tracker`
 
 ---
 
@@ -85,7 +85,7 @@ Partition skills into batches of 3–5 per sub-agent. Prioritise grouping skills
 
 For each batch, dispatch a sub-agent with:
 
-1. The full criteria from `skill-creator`, `skill-creator-extra-tips`, `superpowers:writing-skills`, plus the 4 additional criteria above (copy verbatim — do not summarise)
+1. The full criteria from `skill-management:skill-creator-extra-tips`, `superpowers:writing-skills`, plus the 4 additional criteria above (copy verbatim — do not summarise)
 2. The skill type classification rules above
 3. The list of SKILL.md paths to evaluate
 4. This output format requirement:
@@ -106,7 +106,7 @@ After all sub-agents return, deduplicate: the same (skill-name, criterion-number
 
 ### Step 5 — Auto-file actionable items
 
-For each CRITICAL and SHOULD_FIX finding, call `use-local-skills-issue-tracker` to file a skill issue. Use the evidence string as the issue description. Do not file NICE_TO_HAVE items — they are noted in the summary but not filed.
+For each CRITICAL and SHOULD_FIX finding, call `local-skill-issues-tracker:use-local-skills-issue-tracker` to file a skill issue. Use the evidence string as the issue description. Do not file NICE_TO_HAVE items — they are noted in the summary but not filed.
 
 ### Step 6 — Report
 
@@ -143,7 +143,6 @@ Issues filed: <count> (CRITICAL + SHOULD_FIX)
 
 ## Related Skills
 
-- `use-local-skills-issue-tracker` — file and track the issues discovered during the review
-- `skill-creator` — consult when unsure whether a specific pattern violates best practices
-- `skill-creator-extra-tips` — additional best-practice tips complementing skill-creator
+- `local-skill-issues-tracker:use-local-skills-issue-tracker` — file and track the issues discovered during the review
+- `skill-management:skill-creator-extra-tips` — consult when unsure whether a specific pattern violates best practices; also covers additional best-practice tips
 - `superpowers:writing-skills` — additional skill writing best practices and quality standards

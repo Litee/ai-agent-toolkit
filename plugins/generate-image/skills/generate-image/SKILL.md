@@ -1,6 +1,6 @@
 ---
 name: generate-image
-description: Generate images using Amazon Nova Canvas on AWS Bedrock. Use when creating images, illustrations, pictures, artwork, AI art, text-to-image generation, or any visual content. Do NOT use for editing existing images.
+description: Use when creating images, illustrations, pictures, artwork, AI art, or any text-to-image visual content via AWS Bedrock Nova Canvas. Do NOT use for editing existing images.
 ---
 
 # Generate Image

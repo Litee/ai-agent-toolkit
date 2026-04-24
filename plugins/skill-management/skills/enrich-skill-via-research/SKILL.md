@@ -1,19 +1,19 @@
 ---
 name: enrich-skill-via-research
-description: "Use when asked to 'improve a skill', 'enrich a skill with best practices', 'add anti-patterns to a skill', 'research and update a skill', or 'find what's missing in a skill'. Distinct from skill-creator (creates skills from scratch) and review-skill (checks compliance against existing standards). This skill specifically adds NEW knowledge sourced from external references — internet, documentation, code examples, post-mortems — into an existing SKILL.md."
+description: "Use when asked to 'improve a skill', 'enrich a skill with best practices', 'add anti-patterns to a skill', 'research and update a skill', or 'find what is missing in a skill'. Adds new knowledge from external references (internet, docs, post-mortems) into an existing SKILL.md. Distinct from skill-management:skill-creator-extra-tips (creates skills) and skill-management:review-skill (compliance checks)."
 ---
 
 # enrich-skill-via-research
 
-> Found major gaps or factual errors in this skill? Report it via the `use-local-skills-issue-tracker` skill (if available).
+> Found major gaps or factual errors in this skill? Report it via the `local-skill-issues-tracker:use-local-skills-issue-tracker` skill (if available).
 
 ## Overview
 
 This skill guides the process of improving an existing skill by researching external sources and merging the findings into the skill's SKILL.md. The output is a richer skill with better coverage of failure modes, anti-patterns, and operational wisdom — without bloating it with noise or duplicating what is already there.
 
 **Distinct from:**
-- `skill-creator` — creates a skill from scratch
-- `review-skill` — checks an existing skill against structural/quality standards
+- `skill-management:skill-creator-extra-tips` — creates a skill from scratch
+- `skill-management:review-skill` — checks an existing skill against structural/quality standards
 
 ---
 
@@ -98,6 +98,5 @@ Apply these rules to every candidate finding before writing anything.
 
 ## Related Skills
 
-- `skill-creator` — creates a skill from scratch; this skill enriches existing ones
-- `skill-creator-extra-tips` — structural and quality tips for writing skills
-- `review-skill` — checks an existing skill against standards (does not add new content)
+- `skill-management:skill-creator-extra-tips` — creates a skill from scratch or adds structural quality tips; this skill enriches existing ones
+- `skill-management:review-skill` — checks an existing skill against standards (does not add new content)

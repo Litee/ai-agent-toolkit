@@ -59,7 +59,7 @@ Apply this rubric to each scenario:
    - The scoring rubric
    - Explicit instruction to NOT read the SKILL.md source before testing
 3. Each agent reports: scenario → score → evidence (what happened, what was missing or wrong).
-4. The primary agent aggregates results and files issues for FAIL/BLOCKED results via `use-local-skills-issue-tracker`.
+4. The primary agent aggregates results and files issues for FAIL/BLOCKED results via `local-skill-issues-tracker:use-local-skills-issue-tracker`.
 
 ## Issue Filing
 
@@ -80,6 +80,6 @@ For each FAIL or BLOCKED result, file a skill issue with:
 
 ## Related Skills
 
-- `review-skill` — checks compliance without executing; use for structural/format audits
-- `skill-creator` — canonical guidance for writing new skills
-- `use-local-skills-issue-tracker` — file issues for FAIL/BLOCKED results found during evaluation
+- `skill-management:review-skill` — checks compliance without executing; use for structural/format audits
+- `skill-management:skill-creator-extra-tips` — canonical guidance for writing new skills
+- `local-skill-issues-tracker:use-local-skills-issue-tracker` — file issues for FAIL/BLOCKED results found during evaluation

@@ -5,7 +5,7 @@ description: "Use when asked to 'analyze session logs', 'read session transcript
 
 # analyze-claude-code-session-transcripts
 
-> Found major gaps or factual errors in this skill? Report it via the `use-local-skills-issue-tracker` skill (if available).
+> Found major gaps or factual errors in this skill? Report it via the `local-skill-issues-tracker:use-local-skills-issue-tracker` skill (if available).
 
 Reads and analyzes Claude Code session JSONL transcripts to identify patterns, skill gaps, agent failure modes, and improvement opportunities.
 

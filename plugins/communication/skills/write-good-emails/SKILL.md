@@ -1,13 +1,13 @@
 ---
 name: write-good-emails
-description: "This skill should be used before composing, editing, or prompting AI to draft any email. Use for professional emails, cold outreach, follow-ups, difficult conversations, bad news, pushback, escalation, internal announcements, client communication, sales emails, support replies, or job-related correspondence. Triggers on 'write an email', 'draft an email', 'compose an email', 'email template', 'follow-up email', 'cold email', 'reply to this email', 'email subject line', 'how should I email', 'professional email', 'difficult email', 'email tone', 'outreach email', 'decline email', 'escalation email', 'bad news email', 'thank you email', 'introduction email', 'email structure', 'improve my email', 'rewrite this email', or any request involving composing or improving email. Does NOT cover general writing clarity (use write-well) or async channel etiquette for chat, tickets, or code reviews (use communicate-well)."
+description: "Use when composing, editing, or prompting AI to draft any email — professional, cold outreach, follow-up, difficult conversations, bad news, escalation, or announcements. Triggers on 'write an email', 'draft an email', 'email template', 'follow-up email', 'cold email', 'email subject line', 'difficult email', 'rewrite this email', or any request to compose or improve an email. For general writing clarity use writing:write-well; for chat/tickets/code reviews use communication:communicate-well."
 ---
 
 # write-good-emails
 
 <!-- NOTE: This skill is intentionally a single file with no references — all content is needed on every invocation. -->
 
-Guidelines for writing effective professional emails. For general writing clarity, see **write-well**. For async channel etiquette (Slack, tickets, code reviews), see **communicate-well**.
+Guidelines for writing effective professional emails. For general writing clarity, see **writing:write-well**. For async channel etiquette (Slack, tickets, code reviews), see **communication:communicate-well**.
 
 ---
 
@@ -50,7 +50,7 @@ Never: "I hope this email finds you well." "Per my last email." "As discussed." 
 
 ### Body
 
-- BLUF first: conclusion or request before reasoning. (See **write-well** for the full pyramid principle.)
+- BLUF first: conclusion or request before reasoning. (See **writing:write-well** for the full pyramid principle.)
 - Under 200 words. Research indicates longer emails receive fewer replies.
 - If longer than 5 sentences, switch to bullet points.
 - One screen on mobile = the entire email.
@@ -118,7 +118,7 @@ Treat AI like a capable intern — review everything before sending:
 - Add one personal or specific detail the AI could not have known.
 - Verify every fact, name, date, and number.
 - Remove: "I hope this email finds you well," "Furthermore," "Please do not hesitate to," "It is worth noting that."
-- Apply the AI Writing Hygiene checklist from **write-well** (vocabulary ban list, structural tells).
+- Apply the AI Writing Hygiene checklist from **writing:write-well** (vocabulary ban list, structural tells).
 
 ---
 

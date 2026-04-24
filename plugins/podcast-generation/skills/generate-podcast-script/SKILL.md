@@ -1,6 +1,6 @@
 ---
 name: generate-podcast-script
-description: Generate AI-powered podcast scripts with natural conversation flow. Use when creating podcast scripts, episodes, multi-speaker dialogue, conversational content for audio production, or writing dialogue for text-to-speech. Triggers on "write a podcast script", "create podcast episode", "generate dialogue", "podcast episode generation", "multi-speaker script", "script for audio", or any request to produce a formatted conversational script ready for TTS synthesis.
+description: Use when creating podcast scripts, episodes, multi-speaker dialogue, conversational content for audio production, or writing dialogue for text-to-speech. Triggers on "write a podcast script", "create podcast episode", "generate dialogue", "podcast episode generation", "multi-speaker script", "script for audio", or any request to produce a formatted conversational script ready for TTS synthesis.
 ---
 
 # Podcast Script Generator

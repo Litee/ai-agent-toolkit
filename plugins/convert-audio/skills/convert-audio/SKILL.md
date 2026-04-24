@@ -1,6 +1,6 @@
 ---
 name: convert-audio
-description: Convert audio files between formats using ffmpeg. Use when converting audio formats (MP3, WAV, AAC, FLAC, Opus, OGG), adjusting bitrate/quality, changing sample rate/channels, modifying playback speed, or adding/editing audio metadata (ID3 tags, title, artist, album). Triggers on "convert audio", "change audio format", "compress audio", "adjust bitrate", "audio metadata tags", "add ID3 tags", "change playback speed", or any request to process an audio file with ffmpeg.
+description: Use when converting audio files between formats (MP3, WAV, AAC, FLAC, Opus, OGG), adjusting bitrate/quality, changing sample rate/channels, modifying playback speed, or adding/editing audio metadata (ID3 tags, title, artist, album). Triggers on "convert audio", "change audio format", "compress audio", "adjust bitrate", "audio metadata tags", "add ID3 tags", "change playback speed", or any request to process an audio file with ffmpeg.
 ---
 
 # Audio Conversion Skill

@@ -1,6 +1,6 @@
 ---
 name: enrich-obsidian-notes-with-best-practices
-description: "Use when asked to 'add best practices to notes', 'enrich notes with best practices and anti-patterns', 'find notes missing BP/AP sections', or 'improve knowledge notes with practical guidance'. This is an Obsidian vault maintenance skill that guides the process of adding Best Practices and Anti-Patterns sections to knowledge base notes using parallel sub-agents and internet research. Do NOT use for concept/theory notes (Attention Mechanism, Gradient Descent — definitions, not guidance), biographical notes (people, companies), comparison notes (they have their own format), or index/hub notes (just links, no content)."
+description: "Use when asked to 'add best practices to notes', 'enrich notes with best practices and anti-patterns', 'find notes missing BP/AP sections', or 'improve knowledge notes with practical guidance'. Adds Best Practices and Anti-Patterns sections to knowledge base notes using parallel sub-agents and research. Do NOT use for concept/theory notes, biographical notes, comparison notes, or index/hub notes."
 ---
 
 # enrich-obsidian-notes-with-best-practices
@@ -34,7 +34,7 @@ This skill guides the process of adding `## Best Practices` and `## Anti-Pattern
 
 ### Phase 1: Select Notes
 
-1. List candidate notes from the vault (use `use-obsidian-cli` to list notes, or inspect the vault directory)
+1. List candidate notes from the vault (use `obsidian:use-obsidian-cli` to list notes, or inspect the vault directory)
 2. Filter to technology/tool/service/pattern notes
 3. Exclude already-enriched notes by checking for existing `## Best Practices` heading
 4. Present the candidate list to the user and confirm scope if it is large (>20 notes)
@@ -101,7 +101,7 @@ After writing the sections, scan the new content for concepts that have existing
 
 Example: if the best practices mention "connection pooling" and `Connection Pooling.md` exists in the vault, write `[[Connection Pooling]]`.
 
-Use `use-obsidian-cli` to check for existing notes before creating links.
+Use `obsidian:use-obsidian-cli` to check for existing notes before creating links.
 
 ---
 
@@ -125,6 +125,6 @@ If the note already has a `## See Also` or `## Related` section at the bottom, i
 
 ## Related Skills
 
-- `manage-personal-knowledge-in-obsidian` — general Obsidian vault management
-- `use-obsidian-cli` — list notes, read note content, write notes
+- `obsidian:manage-personal-knowledge-in-obsidian` — general Obsidian vault management
+- `obsidian:use-obsidian-cli` — list notes, read note content, write notes
 - web search — internet research for best practices content

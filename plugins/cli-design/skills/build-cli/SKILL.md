@@ -1,6 +1,6 @@
 ---
 name: build-cli
-description: This skill should be used when the user asks to "design a CLI", "build a command-line tool", "review my CLI design", "add a subcommand", "improve CLI ergonomics", "make my CLI scriptable", "add --json output", "fix CLI error messages", or asks about CLI best practices, CLI conventions, POSIX flags, shell completion, exit codes, or CLI anti-patterns. Also triggers when reviewing or critiquing an existing CLI's interface, output, or configuration design.
+description: Use when the user asks to "design a CLI", "build a command-line tool", "review my CLI design", "add a subcommand", "improve CLI ergonomics", "make my CLI scriptable", "add --json output", "fix CLI error messages", or asks about CLI best practices, CLI conventions, POSIX flags, shell completion, exit codes, or CLI anti-patterns. Also triggers when reviewing or critiquing an existing CLI's interface, output, or configuration design.
 version: 0.1.0
 ---
 

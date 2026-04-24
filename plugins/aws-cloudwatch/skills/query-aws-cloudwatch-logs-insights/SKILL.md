@@ -1,6 +1,6 @@
 ---
 name: query-aws-cloudwatch-logs-insights
-description: Query AWS CloudWatch Log Insights with real-time progress tracking and flexible time/output formats. Use when analyzing CloudWatch logs, investigating errors or patterns, or generating reports from log data. Triggers on "search CloudWatch logs", "find errors in logs", "CloudWatch Insights query", "log analysis", "what's in the logs", "CloudWatch log search", "query log groups", "investigate logs", or any request to query or analyze AWS CloudWatch logs.
+description: Use when searching CloudWatch logs, investigating errors or patterns in log data, running Log Insights queries, or generating reports from CloudWatch log groups. Triggers on "search CloudWatch logs", "find errors in logs", "CloudWatch Insights query", "log analysis", "what's in the logs", "CloudWatch log search", "query log groups", "investigate logs", or any request to query or analyze AWS CloudWatch logs.
 ---
 
 # Query CloudWatch Logs
@@ -319,5 +319,5 @@ Both reference files provide detailed guidance without cluttering this main skil
 
 ## Related Skills
 
-- **`query-aws-athena`** — Query structured data in S3 via SQL; complements CloudWatch Logs Insights when the data has been exported to S3 or lives in Glue tables rather than log groups.
-- **`use-aws-cloudwatch-metrics`** — Publish and query CloudWatch custom metrics; use alongside this skill when you need both metric time-series data and the raw log events behind them.
+- **`aws-athena:query-aws-athena`** — Query structured data in S3 via SQL; complements CloudWatch Logs Insights when the data has been exported to S3 or lives in Glue tables rather than log groups.
+- **`aws-cloudwatch:use-aws-cloudwatch-metrics`** — Publish and query CloudWatch custom metrics; use alongside this skill when you need both metric time-series data and the raw log events behind them.

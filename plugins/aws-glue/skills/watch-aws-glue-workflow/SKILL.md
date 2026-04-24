@@ -1,12 +1,10 @@
 ---
 name: watch-aws-glue-workflow
 description: >
-  Monitor AWS Glue workflow execution for state changes and per-node (job/crawler) progress
-  with background notifications. Use when watching a Glue workflow that orchestrates multiple
-  jobs, checking workflow status, or setting up background workflow monitoring. Supports three
-  modes: background long-poll-with-exit (re-launch in loop, no cmux/tmux needed),
-  cmux-keystrokes (background task, sends keystrokes to Claude Code terminal), and
-  tmux-keystrokes (no cmux dependency). Triggers on "watch glue workflow", "monitor glue
+  Use when watching a running AWS Glue workflow, monitoring per-node (job/crawler) progress,
+  or setting up background workflow monitoring. Supports three modes: long-poll-with-exit
+  (re-launch in loop, no cmux/tmux needed), cmux-keystrokes (background task, sends keystrokes
+  to Claude Code terminal), and tmux-keystrokes (no cmux dependency). Triggers on "watch glue workflow", "monitor glue
   workflow", "check workflow status", "glue workflow finished", or any request to track an
   AWS Glue workflow run.
 ---
@@ -35,12 +33,12 @@ This skill solves it three ways:
 | **cmux** (recommended) | `watch --mode cmux-keystrokes` runs as a background task. On every state change, it sends a keystroke to the Claude Code terminal, waking the LLM to act. Poll output goes to the background task log — no cmux split needed. |
 | **tmux** | `watch --mode tmux-keystrokes` — same as cmux-keystrokes but uses `tmux send-keys`. No cmux dependency. Requires `--tmux-pane`. |
 
-This skill monitors existing workflow runs. Use the AWS CLI or `use-aws-glue` to start a
+This skill monitors existing workflow runs. Use the AWS CLI or `aws-glue:use-aws-glue` to start a
 workflow: `aws glue start-workflow-run --name <workflow-name>`.
 
 ### Difference from watch-aws-glue-job
 
-| | watch-aws-glue-job | watch-aws-glue-workflow |
+| | aws-glue:watch-aws-glue-job | watch-aws-glue-workflow |
 |---|---|---|
 | Target | Single job run | Workflow run (many jobs/crawlers) |
 | API | `get_job_run` | `get_workflow_run` (with graph) |

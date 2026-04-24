@@ -1,6 +1,6 @@
 ---
 name: use-obsidian-cli
-description: Use the Obsidian CLI to interact with a running Obsidian vault. Use for creating, reading, updating, and deleting notes; searching the vault; managing tags, properties, links, tasks, daily notes, templates, bookmarks, sync, publish, plugins, themes, workspaces, and developer tools. Triggers on any request to perform operations on an Obsidian vault via the command line.
+description: Use when creating, reading, updating, or searching notes in an Obsidian vault via the CLI; managing tags, properties, links, tasks, daily notes, templates, bookmarks, or plugins. Triggers on any request to perform operations on an Obsidian vault via the command line.
 ---
 
 # Obsidian CLI

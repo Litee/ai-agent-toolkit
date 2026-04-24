@@ -1,6 +1,6 @@
 ---
 name: ml-system-design-interviewer
-description: Conduct, evaluate, or prepare for ML System Design interviews for Principal/Staff-level engineering candidates. Use when running mock interviews, assessing candidates, training interviewers, or preparing interview questions for ML engineering roles.
+description: Use when conducting or preparing ML System Design interviews for Principal/Staff-level engineering candidates, running mock interviews, assessing candidates, or training interviewers.
 ---
 
 # ML System Design Interviewer
@@ -18,7 +18,7 @@ Use this skill when:
 
 ## How to Use This Skill
 
-**⚠️ MANDATORY**: Read [`references/interviewer-guide.md`](references/interviewer-guide.md) before conducting any interview. The comprehensive guide contains:
+**Read [`references/interviewer-guide.md`](references/interviewer-guide.md) before conducting any interview.** The comprehensive guide contains:
 - Complete 5-phase interview structure (45-60 minutes) with timing and objectives
 - Detailed evaluation rubric for 8 principal-level competency dimensions
 - Example questions for system design, deep-dive, and strategic assessment
@@ -28,7 +28,7 @@ Use this skill when:
 
 ### Execution Steps
 
-1. **Read the complete guide** - Study [`references/interviewer-guide.md`](references/interviewer-guide.md) thoroughly
+1. **Read the complete guide** — `references/interviewer-guide.md`
 2. **Select interview problem** - Choose an open-ended ML system design question (fraud detection, recommendations, search ranking, anomaly detection, etc.)
 3. **Prepare evaluation criteria** - Review the 8-dimension rubric and decide what signals to prioritize
 4. **Conduct structured interview** - Follow the 5-phase framework (Problem Exploration → High-Level Design → Deep Dive → Trade-offs → Wrap-Up)

@@ -1,11 +1,11 @@
 ---
 name: use-pyspark
-description: "This skill should be used when writing, debugging, or reviewing PySpark scripts and Spark DataFrame transformations. Triggers on PySpark, spark.read.json, MapType schema, df.count before write, data skew, shuffle spill, broadcast join, AQE, Adaptive Query Execution, shuffle partitions, Python UDFs in Spark, PySpark column reference, df.colA, F.col, window frame, rowsBetween, rangeBetween, dropDuplicates join, withColumnRenamed, PySpark import aliases, pyspark.sql.functions as F, method chain length, join how parameter, F.lit(None), PySpark type hints, PySpark style guide, Spark anti-patterns, Spark best practices, Spark DataFrame, partition pruning, compress Spark output, or Parquet compression. For AWS Glue-specific practices (job configuration, worker types, CloudWatch metrics, S3 shuffle, API call tracking), see the use-aws-glue skill."
+description: "Use when writing, debugging, or reviewing PySpark scripts and Spark DataFrame transformations. Triggers on PySpark, MapType schema, data skew, shuffle spill, broadcast join, AQE, shuffle partitions, Python UDFs, F.col, window frame, PySpark import aliases, type hints, Spark anti-patterns, partition pruning, or Parquet compression. For AWS Glue-specific practices (job config, worker types, CloudWatch metrics), see aws-glue:use-aws-glue."
 ---
 
 # Use PySpark
 
-Best practices and anti-patterns for PySpark and Spark DataFrames, distilled from real sessions. Apply these before writing or modifying any PySpark script.
+Best practices and anti-patterns for PySpark and Spark DataFrames. Apply these before writing or modifying any PySpark script.
 
 ## Anti-Patterns
 
@@ -495,4 +495,4 @@ df = df.withColumn("region", F.lit(None).cast("string"))
 
 ---
 
-> For AWS Glue-specific practices (job configuration, worker types, CloudWatch metrics, S3 shuffle, API call tracking, cron monitoring), see the `use-aws-glue` skill.
+> For AWS Glue-specific practices (job configuration, worker types, CloudWatch metrics, S3 shuffle, API call tracking, cron monitoring), see the `aws-glue:use-aws-glue` skill.

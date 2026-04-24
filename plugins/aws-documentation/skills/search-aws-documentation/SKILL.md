@@ -1,6 +1,6 @@
 ---
 name: search-aws-documentation
-description: Search and read official AWS documentation via MCP. Use when looking up AWS service docs, API references, user guides, best practices, or tutorials from docs.aws.amazon.com. Also provides AWS architecture guidance and solution recommendations. Triggers on "how does X work in AWS", "AWS documentation for", "look up AWS service", "AWS API reference", "AWS best practices", "what AWS service should I use", or any question whose answer requires reading official AWS docs.
+description: Use when looking up AWS service docs, API references, user guides, best practices, or tutorials from docs.aws.amazon.com. Also provides AWS architecture guidance and solution recommendations. Triggers on "how does X work in AWS", "AWS documentation for", "look up AWS service", "AWS API reference", "AWS best practices", "what AWS service should I use", or any question whose answer requires reading official AWS docs.
 ---
 
 # Search AWS Documentation

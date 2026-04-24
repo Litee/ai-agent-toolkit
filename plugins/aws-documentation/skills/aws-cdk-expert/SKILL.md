@@ -1,6 +1,6 @@
 ---
 name: aws-cdk-expert
-description: AWS CDK expert guidance via MCP. Use when building CDK infrastructure, finding architecture patterns, discovering GenAI constructs, generating Bedrock agent schemas, or validating CDK Nag security rules and suppressions.
+description: Use when building AWS CDK infrastructure, finding Solutions Construct patterns, discovering GenAI constructs, generating Bedrock agent schemas, or validating CDK Nag security rules and suppressions.
 ---
 
 # AWS CDK Expert

@@ -1,6 +1,6 @@
 ---
 name: write-well
-description: "This skill should be used before or while composing any written document or text -- design docs, RFCs, emails, proposals, reports, README files, postmortems, status updates, meeting notes, or any professional writing. Also use when editing, reviewing, or improving existing text. Triggers on 'write a document', 'draft', 'compose', 'edit this text', 'improve my writing', 'make this clearer', 'review my draft', 'rewrite', 'proofread', 'writing style', 'document structure', 'how should I write this', 'too wordy', 'tighten this up', 'simplify', 'restructure', or any request involving creating or improving written text. Does NOT cover channel etiquette (when/where to post) -- use communicate-well for that."
+description: "Use when composing or editing any written document — design docs, RFCs, emails, proposals, reports, README files, postmortems, status updates, or meeting notes. Triggers on 'write a document', 'draft', 'compose', 'edit this text', 'improve my writing', 'make this clearer', 'review my draft', 'rewrite', 'proofread', 'too wordy', 'tighten this up', or any request involving creating or improving written text. Does NOT cover channel etiquette — use communication:communicate-well for that."
 ---
 
 # write-well
@@ -332,6 +332,6 @@ When writing specific document types, apply the core principles above plus these
 
 ## Related Skills
 
-- **`write-technical-design`** — Applies the principles here to technical design documents (HLD/LLD). Use alongside this skill when drafting architecture proposals, API specs, or system design docs.
-- **`communicate-well`** — Covers async channel etiquette: when to post, where to post, how to structure messages in Slack, tickets, and code reviews. Complements this skill for any written communication that goes through an async channel.
-- **`write-good-emails`** — Dedicated guidance for professional email: subject lines, tone calibration, follow-up strategy, and prompting AI for email drafts.
+- **`writing:write-technical-design`** — Applies the principles here to technical design documents (HLD/LLD). Use alongside this skill when drafting architecture proposals, API specs, or system design docs.
+- **`communication:communicate-well`** — Covers async channel etiquette: when to post, where to post, how to structure messages in Slack, tickets, and code reviews. Complements this skill for any written communication that goes through an async channel.
+- **`communication:write-good-emails`** — Dedicated guidance for professional email: subject lines, tone calibration, follow-up strategy, and prompting AI for email drafts.

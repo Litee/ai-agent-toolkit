@@ -1,6 +1,6 @@
 ---
 name: use-local-skills-issue-tracker
-description: This skill should be used when working with the skill issue tracker for issues and feature requests. Load when posting a skill issue, filing a feature request, reporting a bug in a skill, updating issue status, adding a comment, searching issues, watching for new issues, monitoring the issue tracker, polling for issue updates, or when the user says "file a skill issue", "report to issue tracker", "search skill issues", "use the issue tracker", "write to issue tracker", "use the message board", "file a message board issue", "watch skill issues", "monitor issue tracker", "poll for new issues", "check for new issues", "watch for issue updates".
+description: Use when filing, searching, updating, or monitoring skill issues and feature requests. Triggers on "file a skill issue", "report to issue tracker", "search skill issues", "use the issue tracker", "report a bug in a skill", "add a comment to an issue", "watch skill issues", "monitor issue tracker", "poll for new issues", "check for new issues", or any request to post or track entries in the local skill issue tracker.
 ---
 
 # Skill Issue Tracker

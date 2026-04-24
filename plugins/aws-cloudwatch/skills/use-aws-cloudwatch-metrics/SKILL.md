@@ -1,6 +1,6 @@
 ---
 name: use-aws-cloudwatch-metrics
-description: "Use when publishing, querying, designing, or troubleshooting Amazon CloudWatch custom metrics. Triggers on: PutMetricData, GetMetricData, GetMetricStatistics, CloudWatch custom metrics, EMF, Embedded Metric Format, CloudWatch alarms, composite alarms, anomaly detection, metric math, SEARCH() metric math, FILL() metric math, METRICS(), CloudWatch dimensions, dimension cardinality, high-resolution metrics, StorageResolution, CloudWatch namespaces, metric streams, Kinesis Firehose metrics, Contributor Insights, CloudWatch cost optimization, metric batching, PutMetricData throttling, metric retention, CloudWatch pricing, M-of-N alarms, missing data treatment, notBreaching breaching ignore, alarm evaluation period, CloudWatch agent StatsD, statistic sets, GetMetricData vs GetMetricStatistics, CloudWatch monitoring best practices, CloudWatch anti-patterns."
+description: "Use when publishing, querying, designing, or troubleshooting Amazon CloudWatch custom metrics. Triggers on PutMetricData, GetMetricData, EMF, CloudWatch alarms, metric math, dimension cardinality, high-resolution metrics, metric streams, Contributor Insights, CloudWatch cost optimization, PutMetricData throttling, M-of-N alarms, missing data treatment, or CloudWatch agent StatsD. For log analysis, use aws-cloudwatch:query-aws-cloudwatch-logs-insights."
 ---
 
 # Use AWS CloudWatch Metrics

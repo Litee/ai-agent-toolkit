@@ -1,11 +1,11 @@
 ---
 name: use-aws-glue
-description: "This skill should be used when writing, configuring, debugging, or monitoring AWS Glue ETL jobs. Triggers on AWS Glue, Glue job, glue update-job, GlueVersion, WorkerType, NumberOfWorkers, Glue CloudWatch metrics, Glue observability metrics, Glue job monitoring, S3 shuffle in Glue, worker type sizing, DPU right-sizing, G.025X, G.1X, G.2X, G.4X, G.8X, Parquet row count verification via pyarrow, Glue CloudWatch logs, /aws-glue/jobs/output, ApiCallTracker, Glue job naming, Glue cron monitor, Glue best practices, Glue anti-patterns, enable-metrics, enable-observability-metrics, Glue job progress reporting, Glue exit code 137, Glue OOM, Glue small files problem, groupFiles, groupSize, coalesce output Parquet, Glue Flex jobs, Spark UI Glue, VPC endpoint Glue S3, Glue timeout MaxConcurrentRuns, Glue troubleshooting, Glue job timeout 2880, Glue YARN container killed, Glue no space left on device, Glue connect timed out, Glue straggler task. For generic PySpark coding patterns (style, anti-patterns, joins, AQE, broadcast joins, shuffle partitions), see the use-pyspark skill."
+description: "Use when writing, configuring, debugging, or monitoring AWS Glue ETL jobs. Triggers on AWS Glue, Glue job, GlueVersion, WorkerType, DPU right-sizing, Glue CloudWatch metrics, Glue observability metrics, groupFiles, coalesce Parquet, Glue Flex jobs, Spark UI, Glue timeout, MaxConcurrentRuns, Glue OOM, exit code 137, no space left on device, YARN container killed, or straggler tasks. For PySpark patterns, see pyspark:use-pyspark. To monitor a running job, see aws-glue:watch-aws-glue-job."
 ---
 
 # Use AWS Glue
 
-Best practices and anti-patterns for AWS Glue ETL jobs, distilled from real sessions. Apply these before writing or modifying any Glue job script or configuration.
+Best practices and anti-patterns for AWS Glue ETL jobs. Apply these before writing or modifying any Glue job script or configuration.
 
 ## Anti-Patterns
 
@@ -155,9 +155,9 @@ This convention does **not** apply to jobs managed via IaC (Terraform, CloudForm
 
 After submitting a job, monitor it continuously until it reaches a terminal state.
 
-**Preferred: use the `watch-aws-glue-job` skill (if available)**
+**Preferred: use the `aws-glue:watch-aws-glue-job` skill (if available)**
 
-Check your loaded plugin list. If `watch-aws-glue-job` is available, invoke it — it launches a continuous background watcher that polls the job, prints status updates, and notifies you on completion. This is more responsive than periodic crons and does not consume cron slots.
+Check your loaded plugin list. If `aws-glue:watch-aws-glue-job` is available, invoke it — it launches a continuous background watcher that polls the job, prints status updates, and notifies you on completion. This is more responsive than periodic crons and does not consume cron slots.
 
 **Fallback: cron-based polling (if no watcher skill is available)**
 
@@ -494,7 +494,7 @@ Quick reference for common Glue job failures. Check CloudWatch logs first (`/aws
 | `No space left on device` | Local disk full from shuffle spill | Enable S3 shuffle (`--write-shuffle-files-to-s3 true`, `--write-shuffle-spills-to-s3 true`). See Best Practice #11. |
 | `Unable to execute HTTP request... connect timed out` | VPC networking: no S3 gateway endpoint or NAT gateway in the subnet | Add an S3 gateway VPC endpoint to the subnet's route table. See Anti-Pattern #4. |
 | Job enters `TIMEOUT` state | Job ran past the `Timeout` setting (default 2880 min / 48 hours if unset) | Set a tighter `--timeout` on the job or per-run. See Anti-Pattern #2. |
-| Job runs for hours with no progress / straggler task | Data skew causing one task to process most of the data | Enable Spark UI to inspect task distribution. Use `groupFiles` for small-file inputs. Repartition skewed keys with salting (see `use-pyspark` skill). |
+| Job runs for hours with no progress / straggler task | Data skew causing one task to process most of the data | Enable Spark UI to inspect task distribution. Use `groupFiles` for small-file inputs. Repartition skewed keys with salting (see `pyspark:use-pyspark` skill). |
 | `ConcurrentRunsExceededException: Max concurrent runs exceeded` | A previous run is still active or in a transitional state | Check `aws glue get-job-runs` for runs in `RUNNING` or `STOPPING` state. Wait for completion or increase `MaxConcurrentRuns`. See Anti-Pattern #3. |
 | `ThrottlingException` on Glue API calls | Polling too frequently or too many concurrent API calls | Use exponential backoff. Poll at 5 min then every 10–60 min (see Best Practice #5), not every few seconds. |
 | CloudWatch output logs missing for short jobs | Jobs completing in < ~2 min may not flush the log stream | Use pyarrow footer metadata (Best Practice #1) or post-write `spark.read.parquet().count()` for verification. See Best Practice #2. |
@@ -511,4 +511,4 @@ Quick reference for common Glue job failures. Check CloudWatch logs first (`/aws
 
 ---
 
-> For generic PySpark coding patterns (import conventions, anti-patterns, style guide, join hygiene, AQE tuning, broadcast joins, shuffle partitions), see the `use-pyspark` skill.
+> For generic PySpark coding patterns (import conventions, anti-patterns, style guide, join hygiene, AQE tuning, broadcast joins, shuffle partitions), see the `pyspark:use-pyspark` skill.

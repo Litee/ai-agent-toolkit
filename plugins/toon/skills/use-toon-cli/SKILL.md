@@ -1,6 +1,6 @@
 ---
 name: use-toon-cli
-description: Use the toon CLI to convert between JSON and TOON formats. Triggers on requests to encode JSON to TOON, decode TOON to JSON, reduce token usage when feeding data to LLMs, convert data files to compact representation, measure token savings, or work with .toon files. TOON (Token-Oriented Object Notation) is a compact human-readable format that encodes the JSON data model with minimal tokens, designed as a translation layer for LLM input.
+description: Use when encoding JSON to TOON, decoding TOON to JSON, reducing LLM token usage by compacting data, measuring token savings with --stats, or working with .toon files. TOON (Token-Oriented Object Notation) is a compact human-readable format designed as a translation layer for LLM input.
 ---
 
 # TOON CLI

@@ -1,6 +1,6 @@
 ---
 name: handle-large-files
-description: "This skill should be used before reading, analyzing, or processing any file that may be large enough to consume a significant portion of the context window. Use when opening files suspected to be >300 lines, analyzing logs, parsing large JSON/CSV/XML, exploring unfamiliar codebases, counting patterns in files, estimating file size or token count, extracting specific data from large files, or when a previous read was truncated. Triggers on 'large file', 'too many lines', 'context window', 'file is too big', 'analyze this log', 'parse this JSON', 'extract from CSV', 'how big is this file', 'count occurrences', 'find pattern in', 'summarize this file', 'explore this codebase', 'token estimate', 'read first N lines', 'file structure', or any situation where the agent encounters or anticipates a file too large to read whole. Does NOT cover disk space cleanup -- use free-disk-space for that. Does NOT cover file access protection rules -- use protect-file-system-access for that."
+description: "Use when reading, analyzing, or processing a file that may exceed the context window. Triggers on 'large file', 'too many lines', 'file is too big', 'analyze this log', 'parse this JSON', 'extract from CSV', 'token estimate', or any situation where the agent encounters a file too large to read whole. For disk space cleanup use file-system-tools:free-disk-space."
 ---
 
 # handle-large-files

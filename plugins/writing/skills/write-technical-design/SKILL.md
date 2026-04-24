@@ -1,13 +1,13 @@
 ---
 name: write-technical-design
-description: "Use when drafting or structuring technical design documents — high-level designs (HLD), low-level designs (LLD), architecture proposals, combined design docs, or technical specifications. Triggers on 'write a design doc', 'draft a technical design', 'HLD', 'LLD', 'architecture document', 'technical proposal', 'system design document', 'write an architecture doc', 'design specification', 'technical spec', 'design review prep', 'create a design', or any request involving creating or structuring a technical design. For general writing quality — clarity, conciseness, active voice — use write-well alongside this skill."
+description: "Use when drafting or structuring technical design documents — HLD, LLD, architecture proposals, or technical specs. Triggers on 'write a design doc', 'draft a technical design', 'HLD', 'LLD', 'architecture document', 'technical proposal', 'system design document', 'design specification', 'technical spec', 'design review prep', or any request to create or structure a technical design. For general writing quality use writing:write-well alongside this skill."
 ---
 
 # write-technical-design
 
 Guides drafting of technical design documents section-by-section with engineering standards built in.
 
-> For general writing quality — clarity, conciseness, active voice, cutting filler — apply the `write-well` skill alongside this one.
+> For general writing quality — clarity, conciseness, active voice, cutting filler — apply the `writing:write-well` skill alongside this one.
 
 ---
 
@@ -316,7 +316,7 @@ These thoughts mean STOP — address the underlying issue before continuing:
 - [ ] Risks have likelihood, impact, and mitigations — not just a list of fears
 - [ ] Security section addresses auth, encryption, and data classification
 - [ ] Milestones have concrete deliverables, definitions of done, and dates
-- [ ] Document passes the `write-well` editing checklist (structure, clarity, conciseness)
+- [ ] Document passes the `writing:write-well` editing checklist (structure, clarity, conciseness)
 
 ### LLD Checklist (add to HLD checklist)
 
@@ -330,7 +330,7 @@ These thoughts mean STOP — address the underlying issue before continuing:
 
 ## Weasel Words
 
-The `write-well` skill covers weasel word detection comprehensively — refer to its **Be Concrete and Specific** section. In design documents, the most damaging weasel words hide uncommitted requirements:
+The `writing:write-well` skill covers weasel word detection comprehensively — refer to its **Be Concrete and Specific** section. In design documents, the most damaging weasel words hide uncommitted requirements:
 
 - "should" / "might" — is this required or optional?
 - "fast" / "scalable" / "reliable" — what are the actual numbers?
@@ -343,11 +343,11 @@ Replace every instance before sending for review.
 
 ## After Drafting
 
-Once the draft is complete, run the `write-well` editing checklist (three passes: structure, clarity, conciseness) before sending for review.
+Once the draft is complete, run the `writing:write-well` editing checklist (three passes: structure, clarity, conciseness) before sending for review.
 
 ---
 
 ## Related Skills
 
-- **`write-well`** — Apply alongside this skill for sentence-level clarity, conciseness, active voice, and the full editing checklist. Every design doc should pass the `write-well` three-pass review before sharing.
-- **`communicate-well`** — Use when distributing the finished doc: choosing the right channel, crafting the announcement message, and managing async review threads in Slack or tickets.
+- **`writing:write-well`** — Apply alongside this skill for sentence-level clarity, conciseness, active voice, and the full editing checklist. Every design doc should pass the `writing:write-well` three-pass review before sharing.
+- **`communication:communicate-well`** — Use when distributing the finished doc: choosing the right channel, crafting the announcement message, and managing async review threads in Slack or tickets.

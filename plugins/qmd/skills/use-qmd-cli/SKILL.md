@@ -1,6 +1,6 @@
 ---
 name: use-qmd-cli
-description: Use the QMD CLI to search markdown notes on-device. Triggers on requests to search, query, retrieve, or manage indexed markdown note collections using hybrid BM25 + vector + LLM re-ranking search. Use for finding information across local markdown knowledge bases, retrieving specific documents, managing indexed collections, or running structured queries with query expansion.
+description: Use when searching a local markdown knowledge base, retrieving notes by path or docid, managing indexed collections, or running structured queries with hybrid BM25 + vector + LLM re-ranking search. Triggers on requests to search, query, or retrieve indexed markdown notes on-device with the QMD CLI.
 ---
 
 # QMD CLI

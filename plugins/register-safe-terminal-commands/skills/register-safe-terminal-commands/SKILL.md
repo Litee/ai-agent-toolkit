@@ -1,9 +1,9 @@
 ---
 name: register-safe-terminal-commands
-description: This skill should be used when registering or syncing safe terminal commands to Claude Code settings. Use when the user wants to configure which bash commands Claude Code can execute without requiring approval, whitelist commands for auto-approval, allow commands without confirmation prompts, or register/update their safe commands list. Triggers on "register safe commands", "sync safe commands", "allow commands without approval", "whitelist bash commands", "auto-approve terminal commands", "add commands to allowlist", or any request to configure Claude Code's bash permission settings.
+description: Use when registering or syncing safe terminal commands to Claude Code settings, whitelisting bash commands for auto-approval, or updating the commands allowlist. Triggers on "register safe commands", "sync safe commands", "allow commands without approval", "whitelist bash commands", "auto-approve terminal commands", "add commands to allowlist", or any request to configure which commands Claude Code can run without prompting.
 ---
 
-# Register Safe Terminal Commands Skill
+# Register Safe Terminal Commands
 
 **Prerequisites**: Python 3.
 

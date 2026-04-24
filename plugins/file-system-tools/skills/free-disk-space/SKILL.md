@@ -1,6 +1,6 @@
 ---
 name: free-disk-space
-description: This skill should be used when the user needs to free up disk space on a developer machine, clean development caches, or troubleshoot disk full errors. Also use when scanning for bloat directories like node_modules, virtual environments (.venv, venv), or build caches. Triggers on mentions of "free disk space", "disk full", "clean cache", "no space left on device", "find node_modules", "find virtual environments", "scan for bloat", disk cleanup, reclaim space, or storage management on dev desktops or Mac laptops.
+description: Use when freeing disk space on a developer machine, cleaning development caches, or troubleshooting disk full errors. Also use when scanning for bloat directories like node_modules, virtual environments (.venv, venv), or build caches. Triggers on mentions of "free disk space", "disk full", "clean cache", "no space left on device", "find node_modules", "find virtual environments", "scan for bloat", disk cleanup, reclaim space, or storage management on dev desktops or Mac laptops.
 ---
 
 # Free Disk Space
