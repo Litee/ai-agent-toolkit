@@ -6,6 +6,8 @@ const SHOW_CONTEXT_TEXT = true;   // "X/Y (Z%)" colored by usage level
 const SHOW_TOKEN_COUNTS = true;   // "Xm in / Ym out"
 const SHOW_COST         = true;   // "$X.XX" from pre-calculated cost
 const SHOW_MODEL        = true;   // Model ID
+const SHOW_EFFORT       = true;   // "effort: low|medium|high" colored by level
+const SHOW_THINKING     = true;   // "thinking" when extended thinking is enabled
 const SHOW_GIT_BRANCH   = true;   // Current git branch
 const SHOW_CWD          = true;   // Working directory path
 // ═══════════════════════════════════════════════════
@@ -61,6 +63,25 @@ function buildModel(data) {
   return id.startsWith('global.anthropic.') ? id.slice('global.anthropic.'.length) : id;
 }
 
+function buildEffort(data) {
+  if (!SHOW_EFFORT) return '';
+  const level = data.effort?.level;
+  if (level == null || level === '') return '';
+  const text = `effort: ${level}`;
+  const tier = String(level).toLowerCase();
+  if (tier === 'high')   return `${ORANGE}${text}${RESET}`;
+  if (tier === 'medium') return `${YELLOW}${text}${RESET}`;
+  if (tier === 'low')    return `${GREEN}${text}${RESET}`;
+  return text;
+}
+
+function buildThinking(data) {
+  if (!SHOW_THINKING) return '';
+  const enabled = data.thinking?.enabled;
+  if (enabled == null) return '';
+  return enabled ? 'thinking' : '';
+}
+
 function buildGitBranch(data) {
   if (!SHOW_GIT_BRANCH) return '';
   const cwd = data.workspace?.current_dir || process.cwd();
@@ -111,6 +132,8 @@ process.stdin.on('end', () => {
       buildCost(data),
       buildDuration(data),
       buildModel(data),
+      buildEffort(data),
+      buildThinking(data),
       buildGitBranch(data),
       buildCwd(data),
     ].filter(s => s !== '');
