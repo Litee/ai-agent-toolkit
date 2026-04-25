@@ -6,8 +6,7 @@ const SHOW_CONTEXT_TEXT = true;   // "X/Y (Z%)" colored by usage level
 const SHOW_TOKEN_COUNTS = true;   // "Xm in / Ym out"
 const SHOW_COST         = true;   // "$X.XX" from pre-calculated cost
 const SHOW_MODEL        = true;   // Model ID
-const SHOW_EFFORT       = true;   // "effort: low|medium|high" colored by level
-const SHOW_THINKING     = true;   // "thinking" when extended thinking is enabled
+const SHOW_EFFORT       = true;   // "effort: low|medium|high|xhigh|max" colored by level
 const SHOW_GIT_BRANCH   = true;   // Current git branch
 const SHOW_CWD          = true;   // Working directory path
 // ═══════════════════════════════════════════════════
@@ -16,6 +15,7 @@ const RESET     = '\x1b[0m';
 const GREEN     = '\x1b[32m';
 const YELLOW    = '\x1b[33m';
 const ORANGE    = '\x1b[38;5;208m';
+const RED       = '\x1b[31m';
 const RED_BLINK = '\x1b[5;31m';
 
 function buildContextText(data) {
@@ -69,17 +69,12 @@ function buildEffort(data) {
   if (level == null || level === '') return '';
   const text = `effort: ${level}`;
   const tier = String(level).toLowerCase();
+  if (tier === 'max')    return `${RED_BLINK}${text}${RESET}`;
+  if (tier === 'xhigh')  return `${RED}${text}${RESET}`;
   if (tier === 'high')   return `${ORANGE}${text}${RESET}`;
   if (tier === 'medium') return `${YELLOW}${text}${RESET}`;
   if (tier === 'low')    return `${GREEN}${text}${RESET}`;
   return text;
-}
-
-function buildThinking(data) {
-  if (!SHOW_THINKING) return '';
-  const enabled = data.thinking?.enabled;
-  if (enabled == null) return '';
-  return enabled ? 'thinking' : '';
 }
 
 function buildGitBranch(data) {
@@ -133,7 +128,6 @@ process.stdin.on('end', () => {
       buildDuration(data),
       buildModel(data),
       buildEffort(data),
-      buildThinking(data),
       buildGitBranch(data),
       buildCwd(data),
     ].filter(s => s !== '');
