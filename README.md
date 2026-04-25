@@ -97,3 +97,22 @@ Each plugin installs a skill that extends Claude's capabilities:
 | `writing` (`write-technical-design`, `write-well`) | productivity | Two skills: technical design document drafting (HLD/LLD templates, section standards, architecture diagrams, assembly checklists, red-flag detection); universal writing quality (clarity, structure, conciseness, AI writing hygiene, editing checklists, format-aware guidance for design docs, RFCs, emails, postmortems, and status updates) |
 
 **Note:** Each plugin may have additional dependencies. Check the individual [skill documentation](skills/) for prerequisites and detailed usage instructions.
+
+### Plugin Setup Notes
+
+#### `block-main-repo-writes`
+
+This plugin is opt-in per repository. After installing it globally, activate it for a specific repo by adding the following to that repo's `.claude/settings.local.json`:
+
+```json
+{
+  "enabledPlugins": {
+    "block-main-repo-writes@litee-claude-code-plugins": true
+  },
+  "env": {
+    "CC_HOOK_BLOCK_WRITING_TO_MAIN_REPO": "1"
+  }
+}
+```
+
+The `env` entry is what actually arms the hook — without it the plugin is installed but does nothing. Use `settings.local.json` (gitignored) to avoid forcing the restriction on teammates who haven't opted in.
