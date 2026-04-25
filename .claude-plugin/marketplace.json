@@ -6,7 +6,7 @@
   "metadata": {
     "description": "Collection of AI agent skills for AWS CDK development, AWS documentation search, AWS Athena SQL querying, CloudWatch Logs Insights querying, Anki flashcard management, Obsidian vault management, audio conversion, subtitle/caption conversion, podcast generation, safe terminal command registration, image generation, ML system design interviews, and markdown note search",
 
-    "version": "1.1.41",
+    "version": "1.1.42",
     "homepage": "https://github.com/Litee/ai-agent-toolkit"
   },
   "plugins": [
@@ -118,6 +118,15 @@
       "category": "developer-tools",
       "keywords": ["aws", "support", "cases", "monitoring"],
       "skills": ["./skills/watch-aws-support-cases"]
+    },
+    {
+      "name": "block-main-repo-writes",
+      "description": "This plugin contains a PreToolUse hook that blocks Write/Edit/NotebookEdit on files inside the main git checkout when the CC_HOOK_BLOCK_WRITING_TO_MAIN_REPO environment variable is set, forcing all edits to happen inside git worktrees. Optimized to cost nothing when the env var is unset.",
+      "source": "./plugins/block-main-repo-writes",
+      "strict": false,
+      "version": "1.0.0",
+      "category": "developer-tools",
+      "keywords": ["security", "hooks", "git", "worktree", "file-protection"]
     },
     {
       "name": "aws-quota-service",

@@ -1,0 +1,17 @@
+{
+  "description": "Blocks Write/Edit/NotebookEdit on files inside the main git repo when CC_HOOK_BLOCK_WRITING_TO_MAIN_REPO is set; allows edits inside git worktrees. No-op when the env var is unset (zero script startup cost).",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit|NotebookEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh -c '[ -n \"$CC_HOOK_BLOCK_WRITING_TO_MAIN_REPO\" ] && exec node \"$CLAUDE_PLUGIN_ROOT/hooks/scripts/block-main-repo-writes.js\" || exit 0'",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}
