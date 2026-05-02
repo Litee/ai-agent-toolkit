@@ -1,6 +1,6 @@
 ---
 name: use-obsidian-markdown
-description: Use when creating or editing Obsidian note content that requires Obsidian-specific syntax: wikilinks, embeds, callouts, properties, tags, math, or Mermaid diagrams. Triggers on any request to write, format, or structure Obsidian note content.
+description: "Use when creating or editing Obsidian note content that requires Obsidian-specific syntax: wikilinks, embeds, callouts, properties, tags, math, or Mermaid diagrams. Triggers on any request to write, format, or structure Obsidian note content."
 ---
 
 # Obsidian Flavored Markdown

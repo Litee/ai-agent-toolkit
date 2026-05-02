@@ -64,7 +64,7 @@
       "description": "This plugin contains four skills for Obsidian: CLI operations (use-obsidian-cli) for creating, reading, searching, and managing notes via the Obsidian CLI; Obsidian Flavored Markdown syntax (use-obsidian-markdown) covering wikilinks, embeds, callouts, properties, math, Mermaid, and more; personal knowledge management methodology (manage-personal-knowledge-in-obsidian) with atomic notes philosophy, linking strategies, tagging conventions, and structured workflows; and vault enrichment (enrich-obsidian-notes-with-best-practices) for adding Best Practices and Anti-Patterns sections to knowledge notes using parallel sub-agents and internet research.",
       "source": "./plugins/obsidian",
       "strict": false,
-      "version": "2.0.5",
+      "version": "2.0.6",
       "category": "productivity",
       "keywords": ["obsidian", "notes", "knowledge-management", "vault", "zettelkasten", "markdown", "callouts", "embeds", "pkm"],
       "skills": ["./skills/enrich-obsidian-notes-with-best-practices", "./skills/manage-personal-knowledge-in-obsidian", "./skills/use-obsidian-cli", "./skills/use-obsidian-markdown"]
