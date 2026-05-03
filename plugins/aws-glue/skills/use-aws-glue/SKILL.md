@@ -314,30 +314,9 @@ For per-executor breakdowns, use `sc.statusTracker()` or push per-partition coun
 
 ### 9. Choose the right worker type and right-size DPUs
 
-Worker types and their memory/vCPU:
+Start with G.1X and the minimum number of workers, then scale up worker **type** before scaling out worker **count** (vertical scaling is cheaper per unit of work). Enable auto-scaling (`--enable-auto-scaling: true`) so `NumberOfWorkers` acts as a cap and idle executors are released.
 
-| Worker type | vCPU | Memory | Use case |
-|-------------|------|--------|----------|
-| G.025X | 2 | 4 GB | Micro/dev jobs |
-| G.1X | 4 | 16 GB | Standard (default) |
-| G.2X | 8 | 32 GB | Memory-intensive transforms |
-| G.4X | 16 | 64 GB | Heavy aggregations/joins |
-| G.8X | 32 | 128 GB | Large-scale ML/compute |
-
-**Guidance:**
-- Start with G.1X and the minimum number of workers. Profile with CloudWatch metrics first.
-- Scale up worker **type** before scaling out worker **count** — vertical scaling is cheaper per unit of work.
-- Enable auto-scaling to avoid paying for idle executors:
-
-```bash
-aws glue create-job \
-  --name "$JOB_NAME" \
-  --number-of-workers 20 \
-  --default-arguments '{"--enable-auto-scaling": "true"}' \
-  ...
-```
-
-With auto-scaling, `NumberOfWorkers` becomes the maximum; Glue scales down workers that have been idle.
+Load `${SKILL_DIR}/references/worker-types.md` for the full vCPU/memory table (G.025X → G.8X), sizing guidance, and the `aws glue create-job` auto-scaling example.
 
 ---
 
@@ -484,21 +463,9 @@ SPARK_NO_DAEMONIZE=true spark-class org.apache.spark.deploy.history.HistoryServe
 
 ## Troubleshooting
 
-Quick reference for common Glue job failures. Check CloudWatch logs first (`/aws-glue/jobs/error` for driver errors, `/aws-glue/jobs/output` for driver stdout).
+Check CloudWatch logs first: `/aws-glue/jobs/error` for driver errors and `/aws-glue/jobs/output` for driver stdout.
 
-| Error / Symptom | Likely Cause | Fix |
-|---|---|---|
-| `Command failed with exit code 137` | OOM — YARN killed the container for exceeding memory | Scale up worker type (G.1X → G.2X). Check `glue.ALL.jvm.heap.usage` metric. Reduce partition size or avoid `collect()` / `toPandas()` on the driver. |
-| `Command failed with exit code 1` | Unhandled Python exception in the script | Check `/aws-glue/jobs/error` log stream for the traceback. Common causes: import error, bad S3 path, schema mismatch, missing argument. |
-| `Container killed by YARN for exceeding memory limits` | Executor OOM from large partitions, skewed joins, or too much data collected to the driver | Repartition data, avoid `collect()`, use `groupFiles`/`groupSize` for small-file input, or scale up worker type. |
-| `No space left on device` | Local disk full from shuffle spill | Enable S3 shuffle (`--write-shuffle-files-to-s3 true`, `--write-shuffle-spills-to-s3 true`). See Best Practice #11. |
-| `Unable to execute HTTP request... connect timed out` | VPC networking: no S3 gateway endpoint or NAT gateway in the subnet | Add an S3 gateway VPC endpoint to the subnet's route table. See Anti-Pattern #4. |
-| Job enters `TIMEOUT` state | Job ran past the `Timeout` setting (default 2880 min / 48 hours if unset) | Set a tighter `--timeout` on the job or per-run. See Anti-Pattern #2. |
-| Job runs for hours with no progress / straggler task | Data skew causing one task to process most of the data | Enable Spark UI to inspect task distribution. Use `groupFiles` for small-file inputs. Repartition skewed keys with salting (see `pyspark:use-pyspark` skill). |
-| `ConcurrentRunsExceededException: Max concurrent runs exceeded` | A previous run is still active or in a transitional state | Check `aws glue get-job-runs` for runs in `RUNNING` or `STOPPING` state. Wait for completion or increase `MaxConcurrentRuns`. See Anti-Pattern #3. |
-| `ThrottlingException` on Glue API calls | Polling too frequently or too many concurrent API calls | Use exponential backoff. Poll at 5 min then every 10–60 min (see Best Practice #5), not every few seconds. |
-| CloudWatch output logs missing for short jobs | Jobs completing in < ~2 min may not flush the log stream | Use pyarrow footer metadata (Best Practice #1) or post-write `spark.read.parquet().count()` for verification. See Best Practice #2. |
-| `Error: Could not find S3 endpoint or NAT gateway for subnetId` | VPC job has no route to S3 | Same as `connect timed out` — add an S3 gateway endpoint. See Anti-Pattern #4. |
+Load `${SKILL_DIR}/references/troubleshooting.md` for a quick-reference table of common Glue job failures (exit code 137 OOM, YARN container kills, `No space left on device`, VPC connect timeouts, `TIMEOUT` state, `ConcurrentRunsExceededException`, `ThrottlingException`, missing logs for short jobs) with likely causes and fixes.
 
 ---
 
@@ -508,6 +475,8 @@ Quick reference for common Glue job failures. Check CloudWatch logs first (`/aws
 |---|---|
 | `${SKILL_DIR}/references/cloudwatch-metrics.md` | Debugging job performance, checking JVM heap or spill metrics, setting up CloudWatch metric queries with the required `Name=Type,Value=gauge` dimension |
 | `${SKILL_DIR}/references/api-call-tracker.md` | Writing a Glue job that calls external APIs (SageMaker, DynamoDB, REST) and needs per-operation latency and success/failure tracking |
+| `${SKILL_DIR}/references/worker-types.md` | Choosing or sizing a Glue worker type (G.025X → G.8X vCPU/memory table, scaling guidance, auto-scaling example) |
+| `${SKILL_DIR}/references/troubleshooting.md` | Diagnosing a failing Glue job (OOM, exit code 137/1, YARN kills, VPC timeouts, `TIMEOUT`, `ConcurrentRunsExceededException`, `ThrottlingException`, missing logs) |
 
 ---
 

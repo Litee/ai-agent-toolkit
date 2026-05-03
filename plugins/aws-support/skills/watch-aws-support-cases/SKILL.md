@@ -14,6 +14,7 @@ description: >
 - Python 3 with `boto3` installed (activate `.venv` if present)
 - AWS account with **Business or Enterprise** support plan
   - `SubscriptionRequiredException` is raised on Basic and Developer plans
+  - Remediation: upgrade to Business or Enterprise Support, or switch to an AWS account with the required support plan.
 - AWS credentials configured (`--profile` recommended)
 - **cmux** — optional, required only for `cmux-keystrokes` mode
 - **tmux** — optional, required only for `tmux-keystrokes` mode
