@@ -1,11 +1,10 @@
 ---
 name: watch-aws-glue-job
 description: >
-  Use when watching a running AWS Glue job or monitoring Glue job status in the background.
-  Three modes: long-poll-with-exit (re-launch in loop), cmux-keystrokes (sends keystrokes to
-  Claude Code terminal), tmux-keystrokes (no cmux dependency). Includes CloudWatch metrics
-  (CPU, heap, records, executors). Triggers on "watch glue job", "monitor glue run",
-  "check glue status", "glue job finished", or any request to track an AWS Glue job run.
+  Use when watching a running AWS Glue job or monitoring Glue job status in the background,
+  including CloudWatch metrics such as CPU, heap, records, and executors. Triggers on
+  "watch glue job", "monitor glue run", "check glue status", "glue job finished", or any
+  request to track an AWS Glue job run.
 ---
 
 # AWS Glue Job Watcher

@@ -2,11 +2,9 @@
 name: watch-aws-quota-requests
 description: >
   Use when tracking AWS Service Quotas increase requests, waiting for quota approvals, or
-  monitoring pending quota changes. Three modes: long-poll-with-exit (exits on change),
-  cmux-keystrokes (continuous background via cmux), tmux-keystrokes (continuous via tmux).
-  Triggers on "watch quota request", "monitor service quota", "track quota increase",
-  "quota approval status", "notify when quota approved", or any request to monitor
-  AWS Service Quotas requests.
+  monitoring pending quota changes. Triggers on "watch quota request", "monitor service
+  quota", "track quota increase", "quota approval status", "notify when quota approved",
+  or any request to monitor AWS Service Quotas requests.
 ---
 
 # AWS Service Quota Request Watcher
