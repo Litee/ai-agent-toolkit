@@ -127,4 +127,3 @@ If the note already has a `## See Also` or `## Related` section at the bottom, i
 
 - `obsidian:manage-personal-knowledge-in-obsidian` — general Obsidian vault management
 - `obsidian:use-obsidian-cli` — list notes, read note content, write notes
-- web search — internet research for best practices content

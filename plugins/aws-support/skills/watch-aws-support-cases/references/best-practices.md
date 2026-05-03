@@ -161,7 +161,7 @@ without `caseIdList` returns all cases.
 **Support plan requirement**: AWS Support API calls (other than `DescribeSeverityLevels`)
 require a **Business or Enterprise** support plan. Accounts on Basic or Developer plans
 receive `SubscriptionRequiredException`. This is an account-level plan requirement, not an
-IAM permission issue.
+IAM permission issue. Remediation: upgrade to Business or Enterprise Support, or switch to an AWS account with the required support plan.
 
 ---
 
