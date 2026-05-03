@@ -7,11 +7,13 @@ description: Use when orchestrating terminal sessions, running parallel commands
 
 Use when orchestrating terminal sessions, running parallel commands, monitoring output, or reporting progress inside cmux. Works for Claude Code, Cursor, and Codex.
 
+**Platform:** macOS, bash/zsh. cmux is distributed as a macOS `.app` bundle; this skill assumes POSIX-shell invocation. Non-macOS platforms are not supported.
+
 ## Detection
 
 Check for the `CMUX_WORKSPACE_ID` environment variable. If set, you are inside cmux and can use the `cmux` CLI. If unset, do NOT attempt any cmux commands.
 
-The CLI binary is at `/Applications/cmux.app/Contents/Resources/bin/cmux` (also available as `cmux` on PATH inside cmux terminals).
+Invoke the CLI as `cmux` — it is on `PATH` inside every cmux terminal (via `CMUX_WORKSPACE_ID`-enabled shells). macOS fallback: the binary also lives at `/Applications/cmux.app/Contents/Resources/bin/cmux` if `cmux` is not on `PATH` for some reason (e.g. an external launcher that did not inherit cmux's env).
 
 Environment variables automatically set in cmux terminals:
 - `CMUX_WORKSPACE_ID` — current workspace ref

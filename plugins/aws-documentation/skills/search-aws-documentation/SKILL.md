@@ -11,7 +11,7 @@ This skill provides access to official AWS documentation using two MCP servers t
 
 ## Prerequisites
 
-- mcptools CLI (typically installed at `~/go/bin/mcptools`)
+- mcptools CLI (install from https://github.com/f/mcptools; ensure `mcptools` is on your `PATH`. Go users: `go install github.com/f/mcptools/cmd/mcptools@latest` typically places it at `$(go env GOPATH)/bin/mcptools` (e.g. `~/go/bin/mcptools`) — add that directory to `PATH` if needed)
 - awslabs.aws-documentation-mcp-server MCP server configured
 - awslabs.core-mcp-server MCP server configured (optional, for architecture guidance)
 
@@ -268,7 +268,7 @@ When researching a specific AWS service or feature in depth.
 
 **3. Tool not available**
 - Verify MCP server is configured correctly
-- Check that mcptools is installed: `~/go/bin/mcptools --version`
+- Check that mcptools is installed: `command -v mcptools && mcptools --version` (falls back to `~/go/bin/mcptools --version` if the Go install dir is not on PATH)
 - Test MCP server connection: `mcptools tools awslabs.aws-documentation-mcp-server`
 
 **4. China partition tools don't work**
@@ -286,7 +286,10 @@ When researching a specific AWS service or feature in depth.
 
 2. **Verify mcptools installation**
    ```bash
-   ~/go/bin/mcptools --version
+   command -v mcptools && mcptools --version
+   # If nothing is printed, mcptools is not on PATH.
+   # Go users can add the Go bin dir: export PATH="$(go env GOPATH)/bin:$PATH"
+   # Or as a last-resort fallback invoke directly: ~/go/bin/mcptools --version
    ```
 
 3. **Check MCP server configuration** in settings file

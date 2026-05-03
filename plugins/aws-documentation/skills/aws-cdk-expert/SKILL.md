@@ -11,7 +11,7 @@ This skill provides expert guidance for AWS Cloud Development Kit (CDK) developm
 
 ## Prerequisites
 
-- mcptools CLI (typically installed at `~/go/bin/mcptools`)
+- mcptools CLI (install from https://github.com/f/mcptools; ensure `mcptools` is on your `PATH`. Go users: `go install github.com/f/mcptools/cmd/mcptools@latest` typically places it at `$(go env GOPATH)/bin/mcptools` (e.g. `~/go/bin/mcptools`) — add that directory to `PATH` if needed)
 - uvx (Python package runner, installed via `pip install uv`)
 - Python 3.10+
 - Network access to download `awslabs.cdk-mcp-server` from PyPI
@@ -157,9 +157,10 @@ For complete tool documentation and examples, see `references/tool-reference.md`
 - mcptools not in PATH
 
 **Solutions:**
-1. Check if mcptools exists: `ls ~/go/bin/mcptools`
-2. Use full path: `~/go/bin/mcptools call <tool-name> ...`
-3. Add to PATH: `export PATH="$HOME/go/bin:$PATH"`
+1. Verify `mcptools` is on PATH: `command -v mcptools` (if it prints a path, you are done)
+2. If installed via Go but not on PATH, add the Go bin dir: `export PATH="$(go env GOPATH)/bin:$PATH"` (typically `~/go/bin`), then reopen your shell
+3. If `command -v mcptools` still returns nothing, install per https://github.com/f/mcptools (or `go install github.com/f/mcptools/cmd/mcptools@latest` for Go users)
+4. As a last-resort fallback, invoke the full path directly: `~/go/bin/mcptools call <tool-name> ...`
 
 ---
 
