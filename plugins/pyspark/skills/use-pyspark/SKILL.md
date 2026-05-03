@@ -488,6 +488,46 @@ df = df.withColumn("region", F.lit(None).cast("string"))
 
 ---
 
+## Troubleshooting Job Failures
+
+When a Spark job is actively failing, do not guess — classify the failure first, then jump to the matching row below.
+
+### Step 1 — Pull the diagnostic signals
+
+Before changing anything, gather three sources:
+
+- **Driver log** — stdout/stderr of the `spark-submit` process or driver pod. Surfaces the top-level exception, GC warnings (`GC overhead limit exceeded`), and shuffle-spill notices. This is almost always where the root exception first appears.
+- **Executor logs** — reachable from Spark UI → **Executors** tab → `stderr` link per executor, or from the cluster log aggregator: `yarn logs -applicationId <id>` on YARN, the cluster UI on EMR, the driver/executor log panes on Glue, or the cluster log UI on Databricks.
+- **Spark UI** — lives on driver port `4040` while the job is running, or in the Spark History Server post-mortem. Key tabs and columns:
+  - **Jobs** / **Stages** — stage duration histogram highlights stragglers; max vs median task time exposes skew.
+  - **Stages → offending stage → Task Metrics** — `Input Size` and `Shuffle Read` max-vs-median ratios diagnose data skew; `Spill (Memory)` and `Spill (Disk)` diagnose shuffle spill.
+  - **Executors** — `GC Time` column flags memory pressure; `Failed Tasks` and `stderr` link per executor.
+  - **Storage** — confirms whether a `.cache()` actually fit in memory.
+
+### Step 2 — Classify by symptom
+
+| Symptom | Likely cause | Remediation |
+|---|---|---|
+| Driver exits with `java.lang.OutOfMemoryError: Java heap space` or `GC overhead limit exceeded`; no executor errors visible | Driver OOM from `.collect()`, broadcast of a too-large table, or JSON schema inference over wide schemas | See **Anti-Pattern #1** (JSON inference). Remove `.collect()` calls; cap broadcast size with `spark.sql.autoBroadcastJoinThreshold`; raise `spark.driver.memory` only as a last resort |
+| Executor `ExecutorLostFailure` with `Container killed by YARN for exceeding memory limits` (or the EMR/Glue/Databricks equivalent) | Executor OOM from shuffle spill, an oversized partition, or a memory-hungry UDF | Raise `spark.executor.memory` or `spark.executor.memoryOverhead`; see **Anti-Pattern #5** (shuffle spill); replace Python UDFs with native expressions (**Anti-Pattern #3**); enable AQE (**Best Practice #3**) to coalesce partitions |
+| Job hangs on one stage with 99% of tasks complete for a long time | Data skew — a few tasks handle disproportionately large partitions | Spark UI → **Stages** → offending stage → **Task Metrics**: compare max vs median `Input Size` / `Shuffle Read`. See **Anti-Pattern #4** (skew); salt the skewed keys or enable AQE skew join (`spark.sql.adaptive.skewJoin.enabled=true`) |
+| Stage shows large `Spill (Disk)` values on the Executors/Stages tab | Insufficient executor memory for the current shuffle partition count | See **Anti-Pattern #5** (spill); raise executor memory or increase `spark.sql.shuffle.partitions`; enable AQE so it coalesces partitions adaptively |
+| Repeated `FetchFailedException` during shuffle | Executor crash or network issue during shuffle fetch | Usually downstream of an earlier executor OOM — check prior stages and per-executor `stderr`. If the network is genuinely flaky, raise `spark.network.timeout` and `spark.shuffle.io.retryWait` |
+| Job times out with no obvious exception in logs | Shuffle stuck or driver-heavy coordination | Spark UI → **Jobs** → active job → **Stages**: if one stage has been "running" with 0 tasks completing, it is likely a stuck fetch (see row above) or a CPU-starved driver. Enable AQE (`spark.sql.adaptive.enabled=true`), which often rescues stuck plans |
+| Serialization error mentioning `PythonUDFRunner` or `PickleException` | Non-picklable closure inside a Python UDF | See **Anti-Pattern #3**. Rewrite as a native expression or a Pandas UDF; avoid referencing `self` or large modules from within a UDF closure |
+| `AnalysisException: cannot resolve column` | Typo or special-character column name | See **Anti-Pattern #6**. Switch `df.colA` access to `F.col("col_a")` and verify with `df.printSchema()` |
+
+### Step 3 — Quick recovery attempts, in order
+
+1. **Enable AQE** if it isn't already: `.config("spark.sql.adaptive.enabled", "true")` plus `.config("spark.sql.adaptive.skewJoin.enabled", "true")`. This rescues a surprising number of failures with no code change.
+2. **Re-run with 2–4x more executor memory.** A cheap diagnostic — if the job succeeds, the failure is memory-bound and you can go hunt the real cause (spill, skew, UDF) instead of fighting it blind.
+3. **Sample the input**: re-run the pipeline with `df.limit(100_000)` inserted early to bisect which transform is actually expensive.
+4. **`git log` on the script and Spark config.** If the job used to succeed, the regression almost always traces to an innocuous-looking change — a new column, a broadcast that silently crossed the threshold, a UDF added, or a shuffle-partitions override.
+
+For deeper reading on the Spark UI, metrics, and memory tuning, see the official Spark docs linked under **External References** below.
+
+---
+
 ## External References
 
 - [Palantir PySpark Style Guide](https://github.com/palantir/pyspark-style-guide) — opinionated, community-endorsed PySpark coding conventions (1k+ stars)
