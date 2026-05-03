@@ -39,6 +39,13 @@ Generate AI-powered podcast scripts optimized for natural conversation flow usin
   - Examples: "Speaker 1 has 10 years healthcare industry experience", "Use casual Gen-Z communication style", "Speaker 2 is skeptical of cloud-native approaches"
   - These references will be incorporated into script generation to enhance speaker authenticity and consistency
 
+**Factual Grounding (when `speaker_role_references` or source materials are provided):**
+- You MUST use ONLY information explicitly stated in the provided source materials — do not pad with fabricated content
+- Statistics, quotes, company names, expert names, and specific figures must be reproduced exactly as they appear in the sources, or not used at all
+- If sources lack sufficient detail for the requested duration, produce a shorter accurate script rather than a longer fabricated one — a shorter accurate script is ALWAYS preferable to a longer invented one
+- For ambiguous or unsupported claims, use hedging language: "the article suggests...", "according to the provided materials...", "it appears that..."
+- You MAY speculate on implications with clear hedging: "This could mean...", "It's possible that...", "This might suggest..." — keep speculation clearly distinguished from sourced facts
+
 **Constraints:**
 - You MUST ask for all required parameters upfront in a single prompt
 - You MUST use default speaker configurations when speaker_configuration not provided
@@ -140,20 +147,24 @@ Generated scripts MUST follow the exact format specified above:
 - You MUST save generated script to file with .txt extension in the EXACT format required (Speaker N: dialog only)
 - You MUST use the filename format: `<topic>-script-<timestamp>.txt` where timestamp is `YYYYMMDDHHmmss` format without separators (e.g., `lambda-best-practices-script-20250131143000.txt`)
 - You MUST validate script meets length requirements AND format requirements
+- **Extended thinking discipline**: When using extended thinking to plan the script, think in English regardless of any output language. Use thinking to plan structure, segment outlines, and speaker dynamics — do NOT draft actual dialogue lines (`Speaker N: ...`) inside thinking. Drafting dialogue in thinking burns token budget and often leads to truncated final output; plan first, then write the full script in one pass.
 - **Script Length Verification:**
   - **CRITICAL: Count ONLY spoken dialogue** - Use the bundled Python script to exclude "Speaker N:" prefixes:
     ```bash
     python scripts/calculate_podcast_metrics.py count-words --file script.txt
     ```
   - **You MUST count the actual spoken words** in the generated script after creation (excluding "Speaker N:" prefixes)
-  - **You MUST verify** the word count matches the target duration calculation: `target_duration_minutes × 175 words per minute`
-  - **Example targets**: 5 min = 875 words minimum, 10 min = 1,750 words minimum, 15 min = 2,625 words minimum, 20 min = 3,500 words minimum
-  - **If the script is too short** (less than 90% of target word count), you MUST extend it by adding more details:
+  - **You MUST verify** the word count falls within the target range: `floor = target_duration_minutes × speech_tempo × 0.90`, `ceiling = target_duration_minutes × speech_tempo × 1.05`
+  - **Aim for the FLOOR, not the middle.** Overshooting is WORSE than undershooting — a script that runs long cannot be trimmed at TTS time, while a slightly short script is acceptable. Never pad to hit the ceiling.
+  - **Example targets** (at default 175 WPM): 5 min = 787–918 words (aim for 787), 10 min = 1,575–1,837 words (aim for 1,575), 15 min = 2,362–2,756 words (aim for 2,362), 20 min = 3,150–3,675 words (aim for 3,150)
+  - **If the script is too short** (below 90% of target), you MUST extend it — but surgical additions only:
     - Add deeper explanations of concepts
     - Include additional examples or use cases
     - Expand on technical details or business implications
     - Add more conversational elements (follow-ups, elaborations, tangents that enhance understanding)
     - Incorporate additional practical insights or real-world scenarios
+  - **If the script is too long** (above 105% of target), you MUST trim it — cut a single section, do not rewrite the whole script
+  - **Retry discipline**: On any word-count correction pass, edit exactly ONE section (the longest or most padded one). Do not regenerate the entire script — a good script that merely missed word count by 5–10% should not be discarded.
   - **You MUST report** the final word count and confirm it meets the target duration before completing
 - You MUST NOT include ANY markdown headers, comments, or section titles in generated script
 - You SHOULD structure with clear speaker indicators using "Speaker 1:", "Speaker 2:", etc.
@@ -214,6 +225,7 @@ Speaker 1: Actually, we should run comprehensive benchmarks first. [✅]
 - **CRITICAL for multi-speaker formats (tech_discussion, business_panel, interview)**: You MUST create distinct personalities for each speaker to avoid monotonous dialogue
 - **CRITICAL for all formats**: You MUST include natural conversation elements to avoid robotic delivery
 - **CRITICAL for multi-speaker formats**: You MUST ensure gender diversity in speaker selection - avoid all-men or all-women speaker setups unless using solo_expert mode
+- **CRITICAL: Public figure persona rules**: Style references are allowed ("like Lex Fridman's interview style", "in the style of a tech CEO"); fictional/mythological characters may be impersonated freely including first-person. However, you MUST NOT impersonate real public figures in first person — no first-person narration as a real person, no fabricated quotes from their perspective, even if the user explicitly requests it. Instead, adopt their general style or discuss them in third person. ✅ OK: "In the style of a documentary about a famous entrepreneur." ❌ NOT OK: "I revolutionized electric cars" as a named real person.
 
 **Universal Human-Like Dialogue Requirements (APPLIES TO ALL STYLES):**
 
@@ -228,6 +240,13 @@ Speaker 1: Actually, we should run comprehensive benchmarks first. [✅]
   - Mathematical operators: × → "times" or "multiplied by", ÷ → "divided by", ≈ → "approximately", ≤ → "less than or equal to", ≥ → "greater than or equal to", ≠ → "not equal to", √ → "square root of"
   - Formulas: E=mc² → "E equals m c squared", O(n log n) → "O of n log n", x² → "x squared", 2ⁿ → "two to the n"
   - Fractions: ½ → "one half", ¾ → "three quarters", a/b → "a over b" or "a divided by b"
+- **MUST normalize technical notation for speech**:
+  - URLs: Simple base URLs are fine ("example.com", "docs.aws.amazon.com"). NEVER read query parameters (`?key=value`), encoded characters (`%3D`), or long paths — truncate to the base URL or say "a link to [brief description]"
+  - CIDR notation: `192.168.0.0/24` → "the 192.168.0.0 slash 24 network range"
+  - JSON / raw syntax: Never read raw braces, brackets, or key-value pairs — describe the structure: `{"retries": 3}` → "a config with retries set to 3"
+  - Code blocks: Describe purpose, not literal syntax: `def retry(n):` → "a Python function that retries up to N times"
+  - Escape sequences: NEVER include `\n`, `\t`, or similar — use natural pauses or rewrite as prose
+  - Numbers: Natural speech preferred ("about two million" not "2,000,000"), but keep exact figures when precision matters (latency SLAs, cost numbers)
 
 **🚨 CRITICAL: Review for Repetitive Phrases 🚨**
 
@@ -244,6 +263,7 @@ After generating the script, you MUST search for repeated phrases and replace wi
 These requirements MUST be incorporated into ALL podcast scripts regardless of format:
 
 - **MUST include natural pauses and verbal thinking**: "...", "Hmm...", "Right...", "Well...", "Let me think about that...", "Interesting..."
+- **MUST include standalone backchannel reactions**: Short responses as their own separate speaker lines create natural pacing and signal active listening. Use them freely: `Speaker 2: Wow.` / `Speaker 1: Right?` / `Speaker 2: No way!` / `Speaker 1: Huh.` / `Speaker 2: Interesting.` / `Speaker 1: Wait, really?` / `Speaker 2: Haha!` — these should appear as dedicated lines, not tacked onto longer responses.
 - **MUST include emotional responses**: Show excitement, skepticism, surprise, enthusiasm, concern, curiosity, thoughtfulness, passion
 - **MUST include light humor**: Occasional jokes, witty observations, self-deprecating comments, relatable analogies
 - **MUST include conversational transitions**: "Before we move on...", "Let me give you another example...", "Here's where it gets interesting...", "Now, let's think about this..."
