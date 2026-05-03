@@ -229,6 +229,32 @@ credentials recover, it sends a "Credentials recovered" message and resumes norm
 
 ---
 
+## Error Handling
+
+The watcher's retry-on-credential-error loop (linear backoff, `60 * consecutive_errors` seconds,
+capped at 3600s) already absorbs transient API errors such as brief throttles or network blips.
+Persistent API failures, however, indicate a configuration or permissions problem that requires
+user action — the watcher will keep retrying but make no progress until you intervene.
+
+| Failure | Symptom | Diagnosis | Remediation |
+|---------|---------|-----------|-------------|
+| Invalid job name | `EntityNotFoundException: Job with name 'X' not found` | AWS account / region mismatch or typo in `--job-name` | Verify with `aws glue get-job --job-name <name> --profile <p> --region <r>`; double-check `--profile` and `--region` on the watcher invocation |
+| Invalid job-run ID | `EntityNotFoundException: Job run 'X' not found for job 'Y'` | Run ID from a different account/region, or the run aged out of retention (~90 days) | Re-fetch latest run IDs via `aws glue get-job-runs --job-name <name> --max-results 5`; pass a fresh `--run-id` from that output |
+| Insufficient IAM | `AccessDeniedException: User ... is not authorized to perform: glue:GetJobRun` | Profile lacks read-only Glue / CloudWatch permissions | Attach `AWSGlueConsoleFullAccess` or a least-privilege policy granting `glue:GetJob`, `glue:GetJobRun`, `glue:GetJobRuns`, `logs:GetLogEvents`, and `cloudwatch:GetMetricStatistics` |
+| Throttling | `ThrottlingException: Rate exceeded` (or `InternalServiceException`) | Shared AWS account with many concurrent Glue consumers | The watcher already backs off linearly on consecutive errors. Increase `--poll-interval-seconds` (e.g. `600`) or wait for the throttle window to clear |
+| Endpoint unreachable | `EndpointConnectionError: Could not connect to the endpoint URL` | VPN/network issue, wrong `--region`, or an AWS regional outage | Verify `--region` is correct; check https://health.aws.amazon.com/health/status for Glue regional status; retry after network is restored. The watcher's credential-error backoff applies to these too, so it will self-recover once connectivity returns |
+
+**One-shot diagnosis:**
+
+```bash
+# Verify job exists and you have read access:
+aws glue get-job --job-name <name> --profile <p> --region <r>
+# Verify last run and permissions in one call:
+python3 ${SKILL_DIR}/scripts/watch_glue_job.py status --job-name <name> --run-id <run-id> --profile <p> --region <r>
+```
+
+---
+
 ## Script Parameters
 
 ### `watch` — Start Watching
