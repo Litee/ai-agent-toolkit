@@ -1,8 +1,9 @@
 __pycache__
+.claude/scheduled_tasks.lock
 .claude/settings.local.json
+.claude/worktrees/
+.pi/settings.json
+.remember/
 .venv
 /tmp/
-.claude/scheduled_tasks.lock
 CLAUDE.local.md
-.claude/worktrees/
-.remember/
