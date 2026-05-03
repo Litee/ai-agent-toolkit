@@ -49,9 +49,11 @@ The script handles resource cleanup automatically:
 
 ## AWS Resources & Costs
 
-**Per Run:** Creates temporary EC2 instance (~$1.35/hr for g6.4xlarge) that auto-terminates after completion.
+> Pricing figures below are approximate as of 2026-05 and may change without notice. Verify against current AWS pricing (https://aws.amazon.com/ec2/pricing/, https://aws.amazon.com/step-functions/pricing/) for your region.
 
-**Step Functions Overhead:** ~$0.025 per 1,000 state transitions (<$0.05 per podcast, <5% of total cost)
+**Per Run:** Creates temporary EC2 instance (~$1.35/hr for g6.4xlarge, as of 2026-05) that auto-terminates after completion.
+
+**Step Functions Overhead:** ~$0.025 per 1,000 state transitions (<$0.05 per podcast, <5% of total cost) — as of 2026-05.
 
 **One-Time Setup:** `setup_infrastructure.py` creates a permanent S3 bucket and IAM roles (reused across runs, minimal/no cost). Safe for concurrent executions.
 

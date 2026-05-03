@@ -18,7 +18,7 @@ This skill provides expert guidance for AWS Cloud Development Kit (CDK) developm
 
 ## Available MCP Tools
 
-The awslabs CDK MCP server provides seven specialized tools for AWS CDK development.
+The awslabs CDK MCP server provides seven specialized tools for AWS CDK development (as of 2026-05; tool count may change across releases — verify via `mcptools tools uvx awslabs.cdk-mcp-server@latest`).
 
 For complete tool documentation and examples, see `references/tool-reference.md`.
 

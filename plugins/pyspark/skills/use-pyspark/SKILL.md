@@ -33,7 +33,7 @@ schema = StructType([
 df = spark.read.schema(schema).json("s3://bucket/prefix/")
 ```
 
-With an explicit schema the same job ran in 5 minutes instead of failing after 173.
+Providing an explicit schema skips the inference pass (which reads the full input to sample types) and avoids OOM/driver failures on large or deeply nested JSON, typically turning a failing or very long-running job into one bounded by the actual read/parse cost.
 
 ---
 

@@ -15,7 +15,7 @@
       "description": "This plugin contains skills for AWS CDK infrastructure development and searching official AWS documentation. Use for CDK guidance, architecture patterns, GenAI constructs, Bedrock agent schemas, CDK Nag rules, documentation search, and AWS architecture recommendations.",
       "source": "./plugins/aws-documentation",
       "strict": false,
-      "version": "1.0.5",
+      "version": "1.0.6",
       "category": "developer-tools",
       "keywords": ["aws", "cdk", "documentation", "architecture", "mcp", "bedrock", "infrastructure"],
       "skills": ["./skills/aws-cdk-expert", "./skills/search-aws-documentation"]
@@ -64,7 +64,7 @@
       "description": "This plugin contains four skills for Obsidian: CLI operations (use-obsidian-cli) for creating, reading, searching, and managing notes via the Obsidian CLI; Obsidian Flavored Markdown syntax (use-obsidian-markdown) covering wikilinks, embeds, callouts, properties, math, Mermaid, and more; personal knowledge management methodology (manage-personal-knowledge-in-obsidian) with atomic notes philosophy, linking strategies, tagging conventions, and structured workflows; and vault enrichment (enrich-obsidian-notes-with-best-practices) for adding Best Practices and Anti-Patterns sections to knowledge notes using parallel sub-agents and internet research.",
       "source": "./plugins/obsidian",
       "strict": false,
-      "version": "2.0.7",
+      "version": "2.0.8",
       "category": "productivity",
       "keywords": ["obsidian", "notes", "knowledge-management", "vault", "zettelkasten", "markdown", "callouts", "embeds", "pkm"],
       "skills": ["./skills/enrich-obsidian-notes-with-best-practices", "./skills/manage-personal-knowledge-in-obsidian", "./skills/use-obsidian-cli", "./skills/use-obsidian-markdown"]
@@ -94,7 +94,7 @@
       "description": "This plugin contains skills for AWS Glue ETL jobs and workflows: writing, configuring, debugging, and monitoring Glue jobs with update-job gotchas, worker type sizing, CloudWatch and Observability metrics, S3 shuffle, per-worker progress reporting, API call tracking via ApiCallTracker, live job monitoring with long-poll-with-exit, cmux-keystrokes, and tmux-keystrokes modes, resilient credential handling, VPC endpoint validation, Flex job cost savings, Spark UI setup, small files (groupFiles/coalesce), timeout anti-patterns, MaxConcurrentRuns gotchas, a troubleshooting quick-reference, and live workflow monitoring with per-node job/crawler state tracking.",
       "source": "./plugins/aws-glue",
       "strict": false,
-      "version": "1.1.21",
+      "version": "1.1.22",
       "category": "developer-tools",
       "keywords": ["aws", "glue", "etl", "cloudwatch", "s3", "pyspark", "data-engineering", "monitoring", "workflow"],
       "skills": ["./skills/use-aws-glue", "./skills/watch-aws-glue-job", "./skills/watch-aws-glue-workflow"]
@@ -152,7 +152,7 @@
       "description": "This plugin contains a skill for writing, debugging, and reviewing PySpark scripts and Spark DataFrame transformations. Covers anti-patterns (JSON inference OOM, data skew, shuffle spill, Python UDFs), coding style (import aliases, type hints, method chains, join hygiene, null handling), and Spark tuning (AQE, broadcast joins, shuffle partitions).",
       "source": "./plugins/pyspark",
       "strict": false,
-      "version": "1.0.2",
+      "version": "1.0.3",
       "category": "developer-tools",
       "keywords": ["pyspark", "spark", "dataframe", "etl", "data-engineering", "python"],
       "skills": ["./skills/use-pyspark"]
@@ -191,7 +191,7 @@
       "description": "This plugin contains skills for AI-powered podcast production: generating podcast scripts with natural conversation flow and converting scripts into high-quality audio using text-to-speech synthesis on AWS. Use when creating podcast scripts, multi-speaker dialogue, or generating podcast audio from scripts.",
       "source": "./plugins/podcast-generation",
       "strict": false,
-      "version": "1.1.6",
+      "version": "1.1.7",
       "category": "user",
       "keywords": ["podcast", "script", "tts", "audio", "conversation", "text-to-speech", "audio-generation", "voice", "aws", "ec2"],
       "skills": ["./skills/generate-podcast-script", "./skills/generate-podcast-audio"]
