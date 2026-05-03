@@ -181,3 +181,9 @@ Do NOT use this skill for:
 - Terraform or other IaC tools - CDK-specific guidance only
 - Runtime application code - this is for infrastructure code
 - Non-AWS cloud providers
+
+---
+
+## Related Skills
+
+- **`aws-documentation:search-aws-documentation`** — Look up official AWS service docs, API references, and architecture recommendations when CDK guidance alone is not enough.

@@ -189,3 +189,10 @@ Do not use `find` to locate skill scripts — rely on `${SKILL_DIR}` resolution 
 
 - Always invoke `skill-creator` first for core skill anatomy before using this skill for portability and packaging guidance.
 - Hardcoded paths (e.g., `/Users/yourname/`) make skills non-portable — use `${SKILL_DIR}` in SKILL.md and runtime path discovery (`__file__`, `$(dirname "$0")`) in scripts.
+
+---
+
+## Related Skills
+
+- **`skill-management:review-skill`** — Critique an existing SKILL.md for structure, progressive disclosure, and portability issues after applying the tips here.
+- **`skill-management:enrich-skill-via-research`** — Expand a skill with researched best-practices and examples once its scaffolding and portability are in good shape.

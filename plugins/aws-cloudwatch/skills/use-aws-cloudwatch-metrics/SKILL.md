@@ -960,3 +960,9 @@ Data published at 1-second resolution automatically rolls up to 60-second, then 
 - [CloudWatch Service Quotas](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/cloudwatch_limits.html)
 - [CloudWatch Pricing](https://aws.amazon.com/cloudwatch/pricing/)
 - [EMF Python SDK](https://github.com/awslabs/aws-embedded-metrics-python)
+
+---
+
+## Related Skills
+
+- **`aws-cloudwatch:query-aws-cloudwatch-logs-insights`** — Run CloudWatch Logs Insights queries when you need log analysis instead of metric publishing/alarming.

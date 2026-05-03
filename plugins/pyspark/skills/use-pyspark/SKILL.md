@@ -495,4 +495,6 @@ df = df.withColumn("region", F.lit(None).cast("string"))
 
 ---
 
-> For AWS Glue-specific practices (job configuration, worker types, CloudWatch metrics, S3 shuffle, API call tracking, cron monitoring), see the `aws-glue:use-aws-glue` skill.
+## Related Skills
+
+- **`aws-glue:use-aws-glue`** — AWS Glue-specific practices (job configuration, worker types, CloudWatch metrics, S3 shuffle, API call tracking, cron monitoring) that build on these PySpark patterns.

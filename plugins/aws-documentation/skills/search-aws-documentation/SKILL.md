@@ -322,3 +322,9 @@ Do NOT use this skill for:
 - Private or custom documentation not hosted by AWS
 - Community forums, blogs, or unofficial AWS content
 - AWS service console access (this is for documentation only)
+
+---
+
+## Related Skills
+
+- **`aws-documentation:aws-cdk-expert`** — Prescriptive AWS CDK guidance, Solutions Construct patterns, GenAI constructs, and CDK Nag rules via the awslabs CDK MCP server.

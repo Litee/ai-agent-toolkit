@@ -15,7 +15,7 @@
       "description": "This plugin contains skills for AWS CDK infrastructure development and searching official AWS documentation. Use for CDK guidance, architecture patterns, GenAI constructs, Bedrock agent schemas, CDK Nag rules, documentation search, and AWS architecture recommendations.",
       "source": "./plugins/aws-documentation",
       "strict": false,
-      "version": "1.0.6",
+      "version": "1.0.7",
       "category": "developer-tools",
       "keywords": ["aws", "cdk", "documentation", "architecture", "mcp", "bedrock", "infrastructure"],
       "skills": ["./skills/aws-cdk-expert", "./skills/search-aws-documentation"]
@@ -34,7 +34,7 @@
       "description": "This plugin contains a skill for converting audio files between formats using ffmpeg (MP3, WAV, AAC, FLAC, Opus, OGG), adjusting bitrate/quality, changing sample rate/channels, modifying playback speed, or adding/editing audio metadata (ID3 tags).",
       "source": "./plugins/convert-audio",
       "strict": false,
-      "version": "1.0.6",
+      "version": "1.0.7",
       "category": "user",
       "keywords": ["ffmpeg", "audio", "conversion", "mp3", "wav", "flac"],
       "skills": ["./skills/convert-audio"]
@@ -44,7 +44,7 @@
       "description": "This plugin contains a skill for a local JSON-based issue tracker where disconnected agents report skill bugs and feature requests. Includes a filesystem watcher with cmux integration for live notifications on new issues, status changes, and comments.",
       "source": "./plugins/local-skill-issues-tracker",
       "strict": false,
-      "version": "1.1.10",
+      "version": "1.1.11",
       "category": "developer-tools",
       "keywords": ["issues", "tracker", "bugs", "feature-requests", "skills", "watcher"],
       "skills": ["./skills/use-local-skills-issue-tracker"]
@@ -94,7 +94,7 @@
       "description": "This plugin contains skills for AWS Glue ETL jobs and workflows: writing, configuring, debugging, and monitoring Glue jobs with update-job gotchas, worker type sizing, CloudWatch and Observability metrics, S3 shuffle, per-worker progress reporting, API call tracking via ApiCallTracker, live job monitoring with long-poll-with-exit, cmux-keystrokes, and tmux-keystrokes modes, resilient credential handling, VPC endpoint validation, Flex job cost savings, Spark UI setup, small files (groupFiles/coalesce), timeout anti-patterns, MaxConcurrentRuns gotchas, a troubleshooting quick-reference, and live workflow monitoring with per-node job/crawler state tracking.",
       "source": "./plugins/aws-glue",
       "strict": false,
-      "version": "1.1.22",
+      "version": "1.1.23",
       "category": "developer-tools",
       "keywords": ["aws", "glue", "etl", "cloudwatch", "s3", "pyspark", "data-engineering", "monitoring", "workflow"],
       "skills": ["./skills/use-aws-glue", "./skills/watch-aws-glue-job", "./skills/watch-aws-glue-workflow"]
@@ -104,7 +104,7 @@
       "description": "This plugin contains skills for Amazon CloudWatch: querying CloudWatch Logs with Log Insights (real-time progress tracking, flexible time ranges, multiple output formats, multi-log-group support); and publishing, querying, and designing monitoring with CloudWatch custom metrics (PutMetricData, EMF, GetMetricData, alarms, composite alarms, metric math, dimension cardinality, cost optimization, high-resolution metrics, metric streams, Contributor Insights).",
       "source": "./plugins/aws-cloudwatch",
       "strict": false,
-      "version": "1.0.5",
+      "version": "1.0.6",
       "category": "developer-tools",
       "keywords": ["aws", "cloudwatch", "logs", "log-insights", "query", "monitoring", "metrics", "alarms", "emf", "putmetricdata"],
       "skills": ["./skills/query-aws-cloudwatch-logs-insights", "./skills/use-aws-cloudwatch-metrics"]
@@ -152,7 +152,7 @@
       "description": "This plugin contains a skill for writing, debugging, and reviewing PySpark scripts and Spark DataFrame transformations. Covers anti-patterns (JSON inference OOM, data skew, shuffle spill, Python UDFs), coding style (import aliases, type hints, method chains, join hygiene, null handling), and Spark tuning (AQE, broadcast joins, shuffle partitions).",
       "source": "./plugins/pyspark",
       "strict": false,
-      "version": "1.0.3",
+      "version": "1.0.4",
       "category": "developer-tools",
       "keywords": ["pyspark", "spark", "dataframe", "etl", "data-engineering", "python"],
       "skills": ["./skills/use-pyspark"]
@@ -191,7 +191,7 @@
       "description": "This plugin contains skills for AI-powered podcast production: generating podcast scripts with natural conversation flow and converting scripts into high-quality audio using text-to-speech synthesis on AWS. Use when creating podcast scripts, multi-speaker dialogue, or generating podcast audio from scripts.",
       "source": "./plugins/podcast-generation",
       "strict": false,
-      "version": "1.1.7",
+      "version": "1.1.8",
       "category": "user",
       "keywords": ["podcast", "script", "tts", "audio", "conversation", "text-to-speech", "audio-generation", "voice", "aws", "ec2"],
       "skills": ["./skills/generate-podcast-script", "./skills/generate-podcast-audio"]
@@ -201,7 +201,7 @@
       "description": "This plugin contains skills for AI agents communicating and writing emails. Covers async channel etiquette (message value test, signing conventions, message style, frequency, epistemic responsibility, anti-patterns, channel-type guidelines) and professional email writing (subject lines, tone calibration, difficult scenarios, follow-up strategy, AI prompting for emails).",
       "source": "./plugins/communication",
       "strict": false,
-      "version": "1.2.2",
+      "version": "1.2.3",
       "category": "productivity",
       "keywords": ["communication", "async", "messaging", "slack", "tickets", "code-review", "anti-patterns", "email"],
       "skills": ["./skills/communicate-well", "./skills/write-good-emails"]
@@ -231,7 +231,7 @@
       "description": "This plugin contains skills for freeing disk space on developer machines, scanning for bloat directories, and safely analyzing large files without exceeding the context window. Cleans package manager caches, IDE build artefacts, and Docker resources. Scans for node_modules, virtual environments, and build caches. Covers size-checking strategies, targeted extraction with Bash/Python/Node.js one-liners, structured data analysis (JSON, CSV, XML, logs), and token estimation. Use when disk is full, cleaning caches, reclaiming storage, finding bloat, or working with large files.",
       "source": "./plugins/file-system-tools",
       "strict": false,
-      "version": "1.1.2",
+      "version": "1.1.3",
       "category": "developer-tools",
       "keywords": ["disk", "cache", "cleanup", "storage", "free-space", "large-files", "context-window", "extraction", "analysis"],
       "skills": ["./skills/free-disk-space", "./skills/handle-large-files"]
@@ -271,7 +271,7 @@
       "description": "This plugin contains skills for skill development and quality assurance: portability best practices, file naming conventions, the ${SKILL_DIR} placeholder, context management, self-containment rules (skill-creator-extra-tips); customer-perspective skill evaluation using synthetic tasks to find bugs by executing skills as a real user would (evaluate-skills-with-synthetic-tasks); single-skill and bulk plugin quality reviews with parallel sub-agents and auto-filed issues (review-skill); and enriching existing skills with new knowledge from external sources such as official docs, post-mortems, and code examples (enrich-skill-via-research).",
       "source": "./plugins/skill-management",
       "strict": false,
-      "version": "1.0.8",
+      "version": "1.0.9",
       "category": "developer-tools",
       "keywords": ["skill", "skill-creator", "portability", "best-practices", "naming-conventions", "skill-dir", "evaluation", "synthetic-tasks", "quality-assurance", "audit", "review", "research", "enrich"],
       "skills": ["./skills/enrich-skill-via-research", "./skills/evaluate-skills-with-synthetic-tasks", "./skills/review-skill", "./skills/skill-creator-extra-tips"]

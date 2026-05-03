@@ -148,3 +148,9 @@ python3 ${SKILL_DIR}/scripts/clean_caches.py
 # 2. Clean everything
 python3 ${SKILL_DIR}/scripts/clean_caches.py --apply
 ```
+
+---
+
+## Related Skills
+
+- **`file-system-tools:handle-large-files`** — Safely analyze or extract from files that are too large to read whole once disk space is not the blocker.

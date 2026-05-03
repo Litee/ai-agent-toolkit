@@ -225,3 +225,10 @@ safe to copy-paste directly.
 - Use skill name only (no plugin prefix) for `--skill` values. Example: `my-auth-plugin`, not `my-plugin:my-auth-plugin`.
 - **Cross-workspace issues: leave status as `open`.** The issue tracker is shared across multiple workspaces, each watching a different set of skill repositories. If a skill does not exist in the current workspace, do NOT change the issue status — leave it `open` so the correct workspace picks it up. Add a comment explaining why it could not be addressed here. Never set `done` or `wont_fix` for an issue you simply could not reach.
 - **Issue authors can be wrong.** Before acting on an issue, exercise independent judgment. Authors may misdiagnose a root cause, propose a fix that changes trade-offs for other skill users, or file a request based on incomplete information. If you have concerns about an issue's technical accuracy, safety, or potential impact on other users, **ask the user for guidance before implementing anything**.
+
+---
+
+## Related Skills
+
+- **`skill-management:review-skill`** — Structured review of a target skill — useful when an issue in the tracker calls for broader quality feedback, not just a single fix.
+- **`skill-management:enrich-skill-via-research`** — Expand a skill with researched best-practices when an issue requests new coverage rather than a bug fix.

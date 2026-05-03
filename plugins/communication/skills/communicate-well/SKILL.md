@@ -204,3 +204,10 @@ A noisy agent is **worse than no agent at all** — without the agent, humans re
 - Prioritize reviewers who were active committers for the modified packages.
 
 **Expected reaction time:** hours.
+
+---
+
+## Related Skills
+
+- **`communication:write-good-emails`** — Guidelines for composing outbound email specifically (subject lines, recipients, formality) when the channel is email rather than chat or tickets.
+- **`writing:write-well`** — General prose quality guidance (clarity, concision, structure) that applies inside any message body once channel-level rules are handled.

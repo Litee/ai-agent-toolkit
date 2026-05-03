@@ -271,3 +271,9 @@ python3 -c "from collections import Counter; c=Counter(open('file.txt').read().s
 | **Verbose Dumper** | Printing every line of a file during analysis | Return aggregate results and summaries |
 | **Memory Bomb** | Loading the entire file into a variable before processing | Stream or chunk-process; read only what is needed |
 | **Wrong Tool** | Using Python to do what `head -20` does | Use the simplest tool; Bash for simple extraction |
+
+---
+
+## Related Skills
+
+- **`file-system-tools:free-disk-space`** — Reclaim disk space by cleaning package-manager and IDE caches when a large-file workflow is blocked by a full disk.

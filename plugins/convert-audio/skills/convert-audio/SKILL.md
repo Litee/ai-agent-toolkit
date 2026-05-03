@@ -250,3 +250,9 @@ ffmpeg -n -i input.mp3 -b:a 192k -af "atempo=0.5,atempo=0.5" output.mp3
 - Tempo must be between 0.5 and 2.0 (chain for extreme speeds)
 - Metadata tags are optional and can be added with `-metadata key="value"`
 - Let the user handle output file conflicts
+
+---
+
+## Related Skills
+
+- **`podcast-generation:generate-podcast-audio`** — Generates podcast WAV files that commonly need MP3 conversion, tempo adjustment, or ID3 tagging via this skill as a follow-up step.

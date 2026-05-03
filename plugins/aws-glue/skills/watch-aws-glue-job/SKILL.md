@@ -297,3 +297,10 @@ Load when:
 - Working with job bookmarks
 - Querying Glue CloudWatch logs
 - Looking up useful AWS CLI commands for Glue
+
+---
+
+## Related Skills
+
+- **`aws-glue:use-aws-glue`** — Best practices and anti-patterns for authoring and configuring the Glue jobs this watcher monitors.
+- **`aws-glue:watch-aws-glue-workflow`** — Equivalent watcher for multi-job Glue workflows (DAGs) instead of a single job run.

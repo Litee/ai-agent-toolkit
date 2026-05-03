@@ -480,4 +480,8 @@ Load `${SKILL_DIR}/references/troubleshooting.md` for a quick-reference table of
 
 ---
 
-> For generic PySpark coding patterns (import conventions, anti-patterns, style guide, join hygiene, AQE tuning, broadcast joins, shuffle partitions), see the `pyspark:use-pyspark` skill.
+## Related Skills
+
+- **`pyspark:use-pyspark`** — Generic PySpark coding patterns (imports, anti-patterns, join hygiene, AQE tuning, broadcast joins, shuffle partitions) that Glue jobs build on.
+- **`aws-glue:watch-aws-glue-job`** — Background watcher for a running Glue job run (state transitions, CloudWatch metrics, cmux/tmux keystroke delivery).
+- **`aws-glue:watch-aws-glue-workflow`** — Background watcher for multi-job Glue workflows when tracking a whole DAG instead of a single run.
