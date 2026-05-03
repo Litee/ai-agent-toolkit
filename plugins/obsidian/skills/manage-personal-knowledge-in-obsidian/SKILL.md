@@ -9,7 +9,7 @@ This skill provides opinionated guidance for building and maintaining a personal
 
 Obsidian stores everything as plain Markdown files — notes outlive any app. Favor simplicity and portability over plugin-dependent workflows.
 
-For advanced workflows (templates, bulk property updates, vault health analysis, task management, vault gardening), read `references/advanced-workflows.md`.
+For advanced workflows (templates, bulk property updates, vault health analysis, task management, vault gardening), read `${SKILL_DIR}/references/advanced-workflows.md`.
 
 ---
 
@@ -100,7 +100,7 @@ obsidian unresolved
 obsidian backlinks file="Core Concept" counts
 ```
 
-Run vault health checks periodically (see Workflow 7 and 10 in `references/advanced-workflows.md`) to keep the knowledge graph connected.
+Run vault health checks periodically (see Workflow 7 and 10 in `${SKILL_DIR}/references/advanced-workflows.md`) to keep the knowledge graph connected.
 
 ---
 
@@ -250,7 +250,7 @@ done
 
 ### Workflows 5–10: Templates, Bulk Updates, Health Analysis, Properties, Tasks, Gardening
 
-For these advanced workflows, load `references/advanced-workflows.md`. Quick reference:
+For these advanced workflows, load `${SKILL_DIR}/references/advanced-workflows.md`. Quick reference:
 
 ```bash
 obsidian templates                              # list templates
@@ -288,4 +288,4 @@ obsidian tags counts sort=count  # tag sprawl / inconsistencies
 obsidian unresolved verbose   # shows which notes have broken outgoing links
 ```
 
-For a complete periodic gardening workflow, see Workflow 10 in `references/advanced-workflows.md`.
+For a complete periodic gardening workflow, see Workflow 10 in `${SKILL_DIR}/references/advanced-workflows.md`.

@@ -64,7 +64,7 @@
       "description": "This plugin contains four skills for Obsidian: CLI operations (use-obsidian-cli) for creating, reading, searching, and managing notes via the Obsidian CLI; Obsidian Flavored Markdown syntax (use-obsidian-markdown) covering wikilinks, embeds, callouts, properties, math, Mermaid, and more; personal knowledge management methodology (manage-personal-knowledge-in-obsidian) with atomic notes philosophy, linking strategies, tagging conventions, and structured workflows; and vault enrichment (enrich-obsidian-notes-with-best-practices) for adding Best Practices and Anti-Patterns sections to knowledge notes using parallel sub-agents and internet research.",
       "source": "./plugins/obsidian",
       "strict": false,
-      "version": "2.0.8",
+      "version": "2.0.9",
       "category": "productivity",
       "keywords": ["obsidian", "notes", "knowledge-management", "vault", "zettelkasten", "markdown", "callouts", "embeds", "pkm"],
       "skills": ["./skills/enrich-obsidian-notes-with-best-practices", "./skills/manage-personal-knowledge-in-obsidian", "./skills/use-obsidian-cli", "./skills/use-obsidian-markdown"]
@@ -181,7 +181,7 @@
       "description": "This plugin auto-syncs safe terminal commands to Claude Code settings on session start, and contains a skill for manual sync with dry-run and verbose options. Use when configuring which bash commands Claude Code can execute without requiring approval.",
       "source": "./plugins/register-safe-terminal-commands",
       "strict": false,
-      "version": "1.1.7",
+      "version": "1.1.8",
       "category": "developer-tools",
       "keywords": ["terminal", "bash", "permissions", "safety"],
       "skills": ["./skills/register-safe-terminal-commands"]
@@ -231,7 +231,7 @@
       "description": "This plugin contains skills for freeing disk space on developer machines, scanning for bloat directories, and safely analyzing large files without exceeding the context window. Cleans package manager caches, IDE build artefacts, and Docker resources. Scans for node_modules, virtual environments, and build caches. Covers size-checking strategies, targeted extraction with Bash/Python/Node.js one-liners, structured data analysis (JSON, CSV, XML, logs), and token estimation. Use when disk is full, cleaning caches, reclaiming storage, finding bloat, or working with large files.",
       "source": "./plugins/file-system-tools",
       "strict": false,
-      "version": "1.1.3",
+      "version": "1.1.4",
       "category": "developer-tools",
       "keywords": ["disk", "cache", "cleanup", "storage", "free-space", "large-files", "context-window", "extraction", "analysis"],
       "skills": ["./skills/free-disk-space", "./skills/handle-large-files"]

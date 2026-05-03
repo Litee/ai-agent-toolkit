@@ -25,7 +25,7 @@ Use this skill when:
 
 ### Safe Commands Reference File
 
-The `references/safe_terminal_commands.txt` file contains pre-configured safe commands across these categories:
+The `${SKILL_DIR}/references/safe_terminal_commands.txt` file contains pre-configured safe commands across these categories:
 
 - **AWS CLI**: Read-only operations for 30+ AWS services (S3, EC2, Lambda, Athena, CloudWatch, etc.)
 - **Git**: Status, log, diff, branch, show, blame operations
@@ -54,7 +54,7 @@ ${SKILL_DIR}/scripts/sync_safe_commands.py
 ```
 
 This will:
-1. Read commands from `references/safe_terminal_commands.txt`
+1. Read commands from `${SKILL_DIR}/references/safe_terminal_commands.txt`
 2. Migrate any deprecated `Bash(command:*)` entries to `Bash(command *)`
 3. Add any new commands from the reference file in `Bash(command *)` format
 4. Sort permissions alphabetically
@@ -112,7 +112,7 @@ When a user requests to sync safe commands:
 
 To add new safe commands to the list:
 
-1. **Edit the reference file**: Open `references/safe_terminal_commands.txt`
+1. **Edit the reference file**: Open `${SKILL_DIR}/references/safe_terminal_commands.txt`
 2. **Add commands**: One command per line, can include comments
 3. **Run the sync script**: Execute the sync script to update Claude Code settings
 4. **Verify**: Use `--verbose` to confirm the new commands were added

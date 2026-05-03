@@ -28,14 +28,14 @@ du -sh ~/* | sort -rh | head -20
 
 **Before running any cleanup:**
 
-- Use `scripts/clean_caches.py` as the unified entry point — it covers both CLI-managed caches (npm, pip, yarn, pnpm, go, brew, docker, etc.) and directory caches (Maven, Gradle, JetBrains, etc.)
+- Use `${SKILL_DIR}/scripts/clean_caches.py` as the unified entry point — it covers both CLI-managed caches (npm, pip, yarn, pnpm, go, brew, docker, etc.) and directory caches (Maven, Gradle, JetBrains, etc.)
 - Always run the script without `--apply` first to review sizes, then with `--apply` to perform deletion
 - NEVER run raw `rm -rf` on cache directories manually; the script handles safety checks
 - The manual CLI commands in this file are for reference only — the script invokes them internally
 
 ## The Cleanup Script
 
-`scripts/clean_caches.py` is the primary cleanup tool. It covers all cache types — CLI-managed (npm, pip, yarn, pnpm, go, brew, docker, etc.), directory-based (Maven, Gradle, JetBrains, etc.), and scan-based (node_modules under a given root).
+`${SKILL_DIR}/scripts/clean_caches.py` is the primary cleanup tool. It covers all cache types — CLI-managed (npm, pip, yarn, pnpm, go, brew, docker, etc.), directory-based (Maven, Gradle, JetBrains, etc.), and scan-based (node_modules under a given root).
 
 ```bash
 # Step 1: Report all cache sizes without deleting anything
@@ -68,7 +68,7 @@ python3 ${SKILL_DIR}/scripts/clean_caches.py --apply --target node_modules --sca
 
 ## The Bloat Scanner
 
-`scripts/scan_bloat.py` scans a directory tree for known bloat directories (virtual environments, dependency caches, build caches). It reports paths and sizes — it does not delete anything.
+`${SKILL_DIR}/scripts/scan_bloat.py` scans a directory tree for known bloat directories (virtual environments, dependency caches, build caches). It reports paths and sizes — it does not delete anything.
 
 ```bash
 # Scan ~/projects and print a human-readable table
