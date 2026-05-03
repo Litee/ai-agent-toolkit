@@ -2,11 +2,9 @@
 name: watch-aws-support-cases
 description: >
   Use when watching open AWS Support cases, tracking case resolution, or getting notified about
-  status or severity changes. Requires Business or Enterprise support plan. Three modes:
-  long-poll-with-exit (re-launch in loop), cmux-keystrokes (background with keystroke delivery),
-  tmux-keystrokes (no cmux dependency). Triggers on "watch support case", "monitor AWS support",
-  "track support ticket", "notify on support reply", "watch case status", or any request to
-  monitor AWS Support cases.
+  status or severity changes. Requires Business or Enterprise support plan. Triggers on
+  "watch support case", "monitor AWS support", "track support ticket", "notify on support
+  reply", "watch case status", or any request to monitor AWS Support cases.
 ---
 
 # AWS Support Case Watcher
