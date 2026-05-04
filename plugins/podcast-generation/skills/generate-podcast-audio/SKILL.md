@@ -166,4 +166,5 @@ After starting audio generation:
 
 ## Related Skills
 
-- **generate-podcast-script** - Generate AI-powered podcast scripts
+- **`podcast-generation:generate-podcast-script`** — Generate the AI-powered podcast script that feeds into this audio pipeline.
+- **`convert-audio:convert-audio`** — Convert the generated WAV to MP3, apply tempo adjustment when drift > 5%, and embed ID3 metadata tags.

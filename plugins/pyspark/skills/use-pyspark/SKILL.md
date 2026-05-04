@@ -533,4 +533,6 @@ For deeper reading on the Spark UI, metrics, and memory tuning, see the official
 
 ---
 
-> For AWS Glue-specific practices (job configuration, worker types, CloudWatch metrics, S3 shuffle, API call tracking, cron monitoring), see the `aws-glue:use-aws-glue` skill.
+## Related Skills
+
+- **`aws-glue:use-aws-glue`** — AWS Glue-specific practices (job configuration, worker types, CloudWatch metrics, S3 shuffle, API call tracking, cron monitoring) that build on these PySpark patterns.
