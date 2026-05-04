@@ -218,6 +218,10 @@ ACTION REQUIRED
 The re-launch command uses the **resolved absolute path** of the script, so it is
 safe to copy-paste directly.
 
+## Error Handling
+
+See `${SKILL_DIR}/references/troubleshooting.md` for the full failure-mode matrix (`--db-root` missing, corrupted JSON, `Issue not found`, permission errors) and the partial-write / escalation paragraphs.
+
 ## Gotchas
 
 - Do NOT use the issue tracker if acting as a sub-agent of the skill-owning agent — use standard sub-agent mechanisms instead.
