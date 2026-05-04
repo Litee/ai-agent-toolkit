@@ -116,14 +116,7 @@ obsidian create name="Note" content='Cost: $100. Running `echo hello`.'
 
 ## Error Handling
 
-| Error | Cause | Solution |
-|-------|-------|---------|
-| `obsidian: command not found` | CLI not on PATH | Check `~/.zprofile`, restart terminal, or re-register CLI in Obsidian settings |
-| `Failed to connect` | Obsidian not running | Launch Obsidian app, wait a few seconds, retry |
-| `File not found` | Wrong file name or path | Use `obsidian files` to list files; try `path=` instead of `file=` for exact paths |
-| `Vault not found` | Wrong vault name | Use `obsidian vaults` to list vault names |
-| `Template not found` | Wrong template name | Use `obsidian templates` to list available templates |
-| `File already exists` | Attempting to create existing file | Add `overwrite` flag or choose a different name |
+See `${SKILL_DIR}/references/troubleshooting.md` for the common-errors table (connection/PATH/vault/template/file issues) and the retry-and-escalation policy (max 3 retries, filesystem fallback rules, when to escalate).
 
 ---
 

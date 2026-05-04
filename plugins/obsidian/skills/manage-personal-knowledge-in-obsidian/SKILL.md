@@ -289,3 +289,9 @@ obsidian unresolved verbose   # shows which notes have broken outgoing links
 ```
 
 For a complete periodic gardening workflow, see Workflow 10 in `${SKILL_DIR}/references/advanced-workflows.md`.
+
+---
+
+## When the CLI Fails
+
+See `${SKILL_DIR}/references/troubleshooting.md` for the fallback and escalation rules specific to PKM workflows (when to fall back to `rg`/`find`, when writes are forbidden, how to resume mid-workflow). The lower-level CLI error matrix lives in `obsidian:use-obsidian-cli` → `references/troubleshooting.md`.
