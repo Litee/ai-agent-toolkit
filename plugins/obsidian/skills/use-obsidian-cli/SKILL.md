@@ -7,7 +7,7 @@ description: Use when creating, reading, updating, or searching notes in an Obsi
 
 The `obsidian` CLI connects to a running Obsidian instance over a local socket. It exposes every Obsidian capability as terminal commands suitable for scripting and automation.
 
-For the complete command reference with all parameters and flags, read `references/cli-reference.md`.
+For the complete command reference with all parameters and flags, read `${SKILL_DIR}/references/cli-reference.md`.
 
 ## Prerequisites
 
@@ -150,7 +150,7 @@ obsidian create name="Note" content='Cost: $100. Running `echo hello`.'
 
 ## CLI Reference
 
-For the complete command reference with all commands, parameters, flags, and examples, read `references/cli-reference.md`.
+For the complete command reference with all commands, parameters, flags, and examples, read `${SKILL_DIR}/references/cli-reference.md`.
 
 Available command categories:
 - **Files and Folders**: `create`, `read`, `append`, `prepend`, `move`, `rename`, `delete`, `open`, `file`, `files`, `folders`
