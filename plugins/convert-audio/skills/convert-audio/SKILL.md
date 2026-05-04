@@ -221,6 +221,8 @@ For lossless conversion, metadata tagging, and complex combined-parameter exampl
    - Error: `Unable to find a suitable output format`
    - Solution: Check the output file extension is supported
 
+For silent corruption (ffmpeg exits 0 but output is bad), DRM-protected input, or missing-codec builds, load `${SKILL_DIR}/references/troubleshooting.md`.
+
 ## Advanced: Chaining Tempo for Extreme Speeds
 
 For tempo factors outside 0.5-2.0 range, chain multiple atempo filters:
@@ -239,6 +241,7 @@ ffmpeg -n -i input.mp3 -b:a 192k -af "atempo=0.5,atempo=0.5" output.mp3
 
 - **`references/advanced-examples.md`** — Examples 7–12: lossless conversion, slow-down, metadata tagging (podcast, album, combined), full metadata tag table, preserve/clear metadata commands
 - **`references/ffmpeg-parameters.md`** — Full codec details, format-specific support, and advanced ffmpeg options
+- **`references/troubleshooting.md`** — Silent-failure detection, DRM-protected input policy, unsupported-codec remediation
 
 ## Summary
 
