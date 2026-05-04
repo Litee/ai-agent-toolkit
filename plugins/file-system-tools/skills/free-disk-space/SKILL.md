@@ -149,6 +149,10 @@ python3 ${SKILL_DIR}/scripts/clean_caches.py
 python3 ${SKILL_DIR}/scripts/clean_caches.py --apply
 ```
 
+## Error Handling
+
+See `${SKILL_DIR}/references/troubleshooting.md` for the failure-mode matrix (Docker daemon not running, Homebrew locks, missing tools, interrupted deletion, permission errors, disk-full during cleanup) and the escalation path.
+
 ---
 
 ## Related Skills
