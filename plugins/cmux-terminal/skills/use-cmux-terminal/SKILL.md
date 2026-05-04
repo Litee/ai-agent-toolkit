@@ -240,6 +240,10 @@ For the markdown-to-HTML conversion script, use `${SKILL_DIR}/scripts/md-to-html
 - **Clean up when done** — close surfaces and workspaces you created
 - **Use `identify --json` first** to understand your current context before creating new terminals
 
+## Error Handling
+
+See `${SKILL_DIR}/references/troubleshooting.md` for the cmux failure-mode matrix (missing binary, non-terminal surfaces, stale refs, silent fallback, load-state timeouts) plus the don't-own-it and clean-up-on-failure rules.
+
 ## Known Gotchas
 
 - **`new-surface` and `new-pane --type terminal` create non-functional surfaces.** Surfaces created with these commands show as `[terminal]` in `cmux tree` but reject `cmux send` and `cmux read-screen` with `Error: invalid_params: Surface is not a terminal`. Use `cmux new-split <direction>` instead — it creates a usable terminal split within an existing pane.
