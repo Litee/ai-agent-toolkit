@@ -317,3 +317,12 @@ Load when:
 - Understanding the quota request status lifecycle
 - Looking up common quota codes (EC2, Lambda, ELB, VPC)
 - Troubleshooting `CASE_CLOSED` vs `DENIED` vs `NOT_APPROVED`
+
+## Error Handling
+
+See `${SKILL_DIR}/references/troubleshooting.md` for the full failure-mode matrix (`NoSuchResourceException`, throttling, expired creds, keystroke-delivery failures) and the escalation path.
+
+## Related Skills
+
+- **`aws-support:watch-aws-support-cases`** — Companion watcher for AWS Support cases. Quota requests that escalate to a support case show up in both watchers; use both in parallel for full visibility.
+- **`aws-cloudwatch:use-aws-cloudwatch-metrics`** — Publish custom metrics for quota-approaching alarms when you need automated alerting instead of one-off watchers.

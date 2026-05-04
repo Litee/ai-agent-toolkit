@@ -133,7 +133,7 @@
       "description": "This plugin contains a skill for monitoring AWS Service Quotas increase requests for status changes, with approval/denial notifications across regions.",
       "source": "./plugins/aws-quota-service",
       "strict": false,
-      "version": "1.0.8",
+      "version": "1.0.9",
       "category": "developer-tools",
       "keywords": ["aws", "monitoring", "service-quotas", "quotas"],
       "skills": ["./skills/watch-aws-quota-requests"]
