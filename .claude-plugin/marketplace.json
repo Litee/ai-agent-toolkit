@@ -15,7 +15,7 @@
       "description": "This plugin contains skills for AWS CDK infrastructure development and searching official AWS documentation. Use for CDK guidance, architecture patterns, GenAI constructs, Bedrock agent schemas, CDK Nag rules, documentation search, and AWS architecture recommendations.",
       "source": "./plugins/aws-documentation",
       "strict": false,
-      "version": "1.0.7",
+      "version": "1.0.8",
       "category": "developer-tools",
       "keywords": ["aws", "cdk", "documentation", "architecture", "mcp", "bedrock", "infrastructure"],
       "skills": ["./skills/aws-cdk-expert", "./skills/search-aws-documentation"]
@@ -221,7 +221,7 @@
       "description": "This plugin contains a skill for orchestrating terminal sessions, browser automation, and progress reporting inside the cmux terminal multiplexer. Also includes a SessionStart hook that detects whether the session is running in cmux and prints workspace/surface context and LLM behavioural instructions.",
       "source": "./plugins/cmux-terminal",
       "strict": false,
-      "version": "1.0.11",
+      "version": "1.0.12",
       "category": "developer-tools",
       "keywords": ["cmux", "terminal", "multiplexer", "browser", "automation", "sessions", "splits"],
       "skills": ["./skills/use-cmux-terminal"]
