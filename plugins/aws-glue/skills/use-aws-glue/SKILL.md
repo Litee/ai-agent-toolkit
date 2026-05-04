@@ -413,9 +413,9 @@ Use `coalesce` when only reducing partition count (avoids the shuffle cost of `r
 
 ---
 
-### 15. Use Flex execution for non-urgent batch jobs (~34% cost savings)
+### 15. Use Flex execution for non-urgent batch jobs (~34% cost savings as of 2026-05)
 
-Glue Flex jobs run on spare Glue capacity. They cost ~34% less than standard jobs but may wait in a queue before starting, and may be restarted mid-run if capacity is reclaimed.
+Glue Flex jobs run on spare Glue capacity. They cost ~34% less than standard jobs (per AWS Glue pricing at time of writing — verify current discount at https://aws.amazon.com/glue/pricing/) but may wait in a queue before starting, and may be restarted mid-run if capacity is reclaimed.
 
 **When to use:** Nightly/weekly batch loads, historical backfills, dev/test runs — any job where a delay of minutes to an hour is acceptable and idempotency makes restarts safe.
 

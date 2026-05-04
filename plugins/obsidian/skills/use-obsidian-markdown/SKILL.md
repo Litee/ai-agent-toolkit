@@ -150,7 +150,7 @@ Nesting callouts:
 > > Inner content.
 ```
 
-The 13 built-in types: `note`, `abstract`, `info`, `todo`, `tip`, `success`, `question`, `warning`, `failure`, `danger`, `bug`, `example`, `quote`. Each type has aliases (e.g. `hint` → `tip`, `faq` → `question`).
+The 13 built-in types (as of 2026-05; verify against current Obsidian docs): `note`, `abstract`, `info`, `todo`, `tip`, `success`, `question`, `warning`, `failure`, `danger`, `bug`, `example`, `quote`. Each type has aliases (e.g. `hint` → `tip`, `faq` → `question`).
 
 ---
 
@@ -203,7 +203,7 @@ $$
 $$
 ```
 
-Obsidian uses MathJax for rendering.
+Obsidian uses MathJax for rendering (implementation detail — verify against current Obsidian docs, as rendering engine may change).
 
 ---
 
@@ -220,7 +220,7 @@ graph TD
 ```
 ````
 
-Supported diagram types: `graph`, `flowchart`, `sequenceDiagram`, `classDiagram`, `stateDiagram`, `gantt`, `pie`, `erDiagram`, `journey`, and more.
+Supported diagram types: `graph`, `flowchart`, `sequenceDiagram`, `classDiagram`, `stateDiagram`, `gantt`, `pie`, `erDiagram`, `journey`, and more (as of 2026-05; verify against current Obsidian/Mermaid docs for the up-to-date list).
 
 ---
 
