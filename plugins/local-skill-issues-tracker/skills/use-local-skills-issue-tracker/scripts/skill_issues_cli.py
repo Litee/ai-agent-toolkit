@@ -15,13 +15,15 @@ Subcommands:
 Global options (before subcommand):
   --txt     Output human-readable text instead of JSON (default: JSON)
 
+Requires LOCAL_ISSUE_TRACKER_DB_ROOT environment variable to be set.
+
 Usage examples:
-  python3 skill_issues.py --db-root /path/to/tracker create --skill my-auth-plugin --skill-version 1.2.0 --title "Bug title" --description "Details"
-  python3 skill_issues.py --db-root /path/to/tracker list --skill my-auth-plugin --status open pending
-  python3 skill_issues.py --db-root /path/to/tracker show --skill my-auth-plugin --id 3
-  python3 skill_issues.py --db-root /path/to/tracker update --skill my-auth-plugin --id 3 --status done
-  python3 skill_issues.py --db-root /path/to/tracker comment --skill my-auth-plugin --id 3 --text "Fixed in abc123"
-  python3 skill_issues.py --db-root /path/to/tracker search --query "timeout"
+  python3 skill_issues.py create --skill my-auth-plugin --skill-version 1.2.0 --title "Bug title" --description "Details"
+  python3 skill_issues.py list --skill my-auth-plugin --status open pending
+  python3 skill_issues.py show --skill my-auth-plugin --id 3
+  python3 skill_issues.py update --skill my-auth-plugin --id 3 --status done
+  python3 skill_issues.py comment --skill my-auth-plugin --id 3 --text "Fixed in abc123"
+  python3 skill_issues.py search --query "timeout"
 """
 
 import argparse
@@ -328,22 +330,16 @@ def build_parser() -> argparse.ArgumentParser:
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=(
             "examples:\n"
-            '  %(prog)s --db-root /path/to/tracker create --skill my-auth-plugin --skill-version 1.2.0 --title "Bug title" --description "Details"\n'
-            "  %(prog)s --db-root /path/to/tracker list --skill my-auth-plugin\n"
-            "  %(prog)s --db-root /path/to/tracker list --status open pending\n"
-            "  %(prog)s --db-root /path/to/tracker list\n"
-            "  %(prog)s --db-root /path/to/tracker show --skill my-auth-plugin --id 3\n"
-            "  %(prog)s --db-root /path/to/tracker update --skill my-auth-plugin --id 3 --status done\n"
-            '  %(prog)s --db-root /path/to/tracker comment --skill my-auth-plugin --id 3 --text "Fixed in abc123"\n'
-            '  %(prog)s --db-root /path/to/tracker search --query "timeout"\n'
-            "  %(prog)s --db-root /path/to/tracker search --query \"fetch\" --skill my-data-fetcher\n"
+            '  %(prog)s create --skill my-auth-plugin --skill-version 1.2.0 --title "Bug title" --description "Details"\n'
+            "  %(prog)s list --skill my-auth-plugin\n"
+            "  %(prog)s list --status open pending\n"
+            "  %(prog)s list\n"
+            "  %(prog)s show --skill my-auth-plugin --id 3\n"
+            "  %(prog)s update --skill my-auth-plugin --id 3 --status done\n"
+            '  %(prog)s comment --skill my-auth-plugin --id 3 --text "Fixed in abc123"\n'
+            '  %(prog)s search --query "timeout"\n'
+            "  %(prog)s search --query \"fetch\" --skill my-data-fetcher\n"
         ),
-    )
-    parser.add_argument(
-        "--db-root",
-        required=True,
-        metavar="PATH",
-        help="Root directory for issue storage",
     )
     subparsers = parser.add_subparsers(dest="command", required=True)
 
@@ -416,7 +412,14 @@ def main() -> None:
     global _db_root_path
     parser = build_parser()
     args = parser.parse_args()
-    _db_root_path = os.path.expanduser(args.db_root)
+    db_root_raw = os.environ.get("LOCAL_ISSUE_TRACKER_DB_ROOT")
+    if not db_root_raw:
+        print(
+            "Error: LOCAL_ISSUE_TRACKER_DB_ROOT environment variable is not set.",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+    _db_root_path = os.path.expanduser(db_root_raw)
 
     handler = _HANDLERS.get(args.command)
     if handler is None:

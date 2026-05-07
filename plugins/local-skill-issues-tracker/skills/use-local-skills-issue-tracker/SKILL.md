@@ -9,7 +9,7 @@ The issue tracker is a local JSON-based store for disconnected agents to report 
 
 ## Storage
 
-- **Root**: A directory of your choice, passed as `--db-root` (required)
+- **Root**: Set via `LOCAL_ISSUE_TRACKER_DB_ROOT` environment variable
 - **Per issue**: `<skill-name>/<id>.json` (skill name only, NO plugin prefix)
 - **Statuses**: `open`, `in_progress`, `done`, `wont_fix`
 
@@ -18,17 +18,17 @@ The issue tracker is a local JSON-based store for disconnected agents to report 
 All operations go through the CLI script. Always use the full absolute path — do NOT store it in a shell variable:
 
 ```bash
-python3 ${SKILL_DIR}/scripts/skill_issues_cli.py --db-root <path> <subcommand> [options]
+python3 ${SKILL_DIR}/scripts/skill_issues_cli.py <subcommand> [options]
 ```
 
-Where `${SKILL_DIR}` resolves to the absolute path of this skill's directory and `<path>` is your tracker root directory.
+Where `${SKILL_DIR}` resolves to the absolute path of this skill's directory. `LOCAL_ISSUE_TRACKER_DB_ROOT` must be set in the environment before invoking the script.
 
 ## Operations
 
 ### Create an issue
 
 ```bash
-python3 ${SKILL_DIR}/scripts/skill_issues_cli.py --db-root <path> create \
+python3 ${SKILL_DIR}/scripts/skill_issues_cli.py create \
   --skill <skill-name> \
   --skill-version <version> \
   --title "Short summary" \
@@ -41,19 +41,19 @@ Required: `--skill-version` — the version of the skill the issue was observed 
 
 ```bash
 # All issues for a skill
-python3 ${SKILL_DIR}/scripts/skill_issues_cli.py --db-root <path> list --skill <skill-name>
+python3 ${SKILL_DIR}/scripts/skill_issues_cli.py list --skill <skill-name>
 
 # Filter by status (one or more)
-python3 ${SKILL_DIR}/scripts/skill_issues_cli.py --db-root <path> list --status open in_progress
+python3 ${SKILL_DIR}/scripts/skill_issues_cli.py list --status open in_progress
 
 # All issues across all skills
-python3 ${SKILL_DIR}/scripts/skill_issues_cli.py --db-root <path> list
+python3 ${SKILL_DIR}/scripts/skill_issues_cli.py list
 ```
 
 ### Show a specific issue
 
 ```bash
-python3 ${SKILL_DIR}/scripts/skill_issues_cli.py --db-root <path> show --skill <skill-name> --id <id>
+python3 ${SKILL_DIR}/scripts/skill_issues_cli.py show --skill <skill-name> --id <id>
 ```
 
 Displays issue details, description, and all comments.
@@ -62,18 +62,18 @@ Displays issue details, description, and all comments.
 
 ```bash
 # Change status
-python3 ${SKILL_DIR}/scripts/skill_issues_cli.py --db-root <path> update \
+python3 ${SKILL_DIR}/scripts/skill_issues_cli.py update \
   --skill <skill-name> --id <id> --status done
 
 # Update title or description
-python3 ${SKILL_DIR}/scripts/skill_issues_cli.py --db-root <path> update \
+python3 ${SKILL_DIR}/scripts/skill_issues_cli.py update \
   --skill <skill-name> --id <id> --title "New title" --description "New description"
 ```
 
 ### Add a comment
 
 ```bash
-python3 ${SKILL_DIR}/scripts/skill_issues_cli.py --db-root <path> comment \
+python3 ${SKILL_DIR}/scripts/skill_issues_cli.py comment \
   --skill <skill-name> --id <id> --text "Fixed in commit abc123"
 ```
 
@@ -81,14 +81,14 @@ python3 ${SKILL_DIR}/scripts/skill_issues_cli.py --db-root <path> comment \
 
 ```bash
 # Search across all skills
-python3 ${SKILL_DIR}/scripts/skill_issues_cli.py --db-root <path> search --query "timeout"
+python3 ${SKILL_DIR}/scripts/skill_issues_cli.py search --query "timeout"
 
 # Restrict to one skill
-python3 ${SKILL_DIR}/scripts/skill_issues_cli.py --db-root <path> search \
+python3 ${SKILL_DIR}/scripts/skill_issues_cli.py search \
   --query "fetch" --skill my-data-fetcher
 
 # Combine with status filter
-python3 ${SKILL_DIR}/scripts/skill_issues_cli.py --db-root <path> search \
+python3 ${SKILL_DIR}/scripts/skill_issues_cli.py search \
   --query "retry" --status open in_progress
 ```
 
@@ -97,9 +97,9 @@ python3 ${SKILL_DIR}/scripts/skill_issues_cli.py --db-root <path> search \
 JSON is the default output format. Append `--txt` for human-readable text:
 
 ```bash
-python3 ${SKILL_DIR}/scripts/skill_issues_cli.py --db-root <path> list --skill <skill-name>        # JSON (default)
-python3 ${SKILL_DIR}/scripts/skill_issues_cli.py --db-root <path> list --skill <skill-name> --txt  # human-readable table
-python3 ${SKILL_DIR}/scripts/skill_issues_cli.py --db-root <path> show --skill <skill-name> --id 3 --txt
+python3 ${SKILL_DIR}/scripts/skill_issues_cli.py list --skill <skill-name>        # JSON (default)
+python3 ${SKILL_DIR}/scripts/skill_issues_cli.py list --skill <skill-name> --txt  # human-readable table
+python3 ${SKILL_DIR}/scripts/skill_issues_cli.py show --skill <skill-name> --id 3 --txt
 ```
 
 ## Watch Issues (background mode)
@@ -117,7 +117,7 @@ The watcher polls issue JSON files on disk and notifies on changes. Three delive
 **long-poll-with-exit** (default — for `run_in_background`):
 
 ```bash
-python3 ${SKILL_DIR}/scripts/watch_issues.py --db-root <path>
+python3 ${SKILL_DIR}/scripts/watch_issues.py
 ```
 
 When a change is detected, the background task completes and you will be notified.
@@ -129,14 +129,14 @@ The output will contain:
 **cmux-keystrokes** (runs indefinitely, sends keystrokes to a cmux surface):
 
 ```bash
-python3 ${SKILL_DIR}/scripts/watch_issues.py --db-root <path> \
+python3 ${SKILL_DIR}/scripts/watch_issues.py \
     --mode cmux-keystrokes --cmux-surface surface:3
 ```
 
 **tmux-keystrokes** (runs indefinitely, sends keystrokes to a tmux pane):
 
 ```bash
-python3 ${SKILL_DIR}/scripts/watch_issues.py --db-root <path> \
+python3 ${SKILL_DIR}/scripts/watch_issues.py \
     --mode tmux-keystrokes --tmux-pane %0
 ```
 
@@ -144,7 +144,6 @@ python3 ${SKILL_DIR}/scripts/watch_issues.py --db-root <path> \
 
 | Parameter | Default | Description |
 |-----------|---------|-------------|
-| `--db-root` | *(required)* | Root directory of the issue tracker |
 | `--mode` | `long-poll-with-exit` | Delivery mode: `long-poll-with-exit`, `cmux-keystrokes`, or `tmux-keystrokes` |
 | `--poll-interval` | 300s | Poll interval in seconds (10–3600) |
 | `--max-runtime-hours` | 24h | Hard timeout before the watcher exits and asks to be re-launched |
@@ -220,7 +219,7 @@ safe to copy-paste directly.
 
 ## Error Handling
 
-See `${SKILL_DIR}/references/troubleshooting.md` for the full failure-mode matrix (`--db-root` missing, corrupted JSON, `Issue not found`, permission errors) and the partial-write / escalation paragraphs.
+See `${SKILL_DIR}/references/troubleshooting.md` for the full failure-mode matrix (`LOCAL_ISSUE_TRACKER_DB_ROOT` not set, corrupted JSON, `Issue not found`, permission errors) and the partial-write / escalation paragraphs.
 
 ## Gotchas
 

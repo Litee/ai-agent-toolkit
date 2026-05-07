@@ -486,7 +486,6 @@ def _changed_paths(old: dict, new: dict) -> set:
 # ---------------------------------------------------------------------------
 
 def _build_relaunch_cmd(
-    db_root: str,
     poll_interval: int,
     max_runtime_hours: float,
     state_dir: str,
@@ -500,8 +499,6 @@ def _build_relaunch_cmd(
 ) -> str:
     """Build a shell-safe re-launch command with all non-default args made explicit."""
     cmd = f"python3 {shlex.quote(_script_path())}"
-    # --db-root is always required
-    cmd += f" --db-root {shlex.quote(db_root)}"
     if poll_interval != POLL_INTERVAL_DEFAULT:
         cmd += f" --poll-interval {poll_interval}"
     if max_runtime_hours != 24.0:
@@ -629,17 +626,10 @@ def main() -> None:
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=(
             "examples:\n"
-            "  %(prog)s --db-root /path/to/tracker\n"
-            "  %(prog)s --db-root /path/to/tracker --mode cmux-keystrokes"
-            " --cmux-surface surface:3\n"
-            "  %(prog)s --db-root /path/to/tracker --mode tmux-keystrokes --tmux-pane %%0\n"
+            "  %(prog)s\n"
+            "  %(prog)s --mode cmux-keystrokes --cmux-surface surface:3\n"
+            "  %(prog)s --mode tmux-keystrokes --tmux-pane %%0\n"
         ),
-    )
-    parser.add_argument(
-        "--db-root",
-        required=True,
-        metavar="PATH",
-        help="Root directory of the issue tracker",
     )
     parser.add_argument(
         "--poll-interval",
@@ -734,7 +724,14 @@ def main() -> None:
         print("Error: --tmux-pane is required when --mode tmux-keystrokes.", file=sys.stderr)
         sys.exit(1)
 
-    db_root = os.path.expanduser(args.db_root)
+    _db_root_raw = os.environ.get("LOCAL_ISSUE_TRACKER_DB_ROOT")
+    if not _db_root_raw:
+        print(
+            "Error: LOCAL_ISSUE_TRACKER_DB_ROOT environment variable is not set.",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+    db_root = os.path.expanduser(_db_root_raw)
     state_dir = os.path.expanduser(args.state_dir)
     watcher_id = args.watcher_id if args.watcher_id is not None else os.getcwd()
     spath = _state_path(state_dir, watcher_id)
@@ -747,7 +744,7 @@ def main() -> None:
         cmux_workspace = args.cmux_workspace or _detect_workspace_ref()
 
     relaunch_cmd = _build_relaunch_cmd(
-        db_root, args.poll_interval, args.max_runtime_hours, state_dir, watcher_id,
+        args.poll_interval, args.max_runtime_hours, state_dir, watcher_id,
         mode=mode,
         cmux_surface=args.cmux_surface,
         cmux_workspace=cmux_workspace,
