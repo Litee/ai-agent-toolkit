@@ -192,7 +192,7 @@ def _print_issue(issue: dict) -> None:
         print("  (none)")
     for c in comments:
         print(f"  [{c['created_at']}]")
-        for line in c["text"].splitlines():
+        for line in (c.get("text") or c.get("body", "")).splitlines():
             print(f"    {line}")
 
 
@@ -302,7 +302,7 @@ def cmd_search(args: argparse.Namespace) -> None:
             issue.get("title", ""),
             issue.get("skill_version", ""),
             issue.get("description", ""),
-            " ".join(c.get("text", "") for c in issue.get("comments", [])),
+            " ".join(c.get("text") or c.get("body", "") for c in issue.get("comments", []))  # tolerate 'body' key from external tooling,
         ]).lower()
         if query in haystack:
             matches.append(issue)
