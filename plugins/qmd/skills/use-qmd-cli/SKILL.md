@@ -143,6 +143,9 @@ qmd get "notes/project.md" --line-numbers
 
 # By docid (6-char hash shown in search results)
 qmd get "#abc123"
+
+# Note: QMD paths/slugs in results are index identifiers — verify real filename with
+# obsidian search or ls before using in wikilinks or filesystem commands
 ```
 
 ### `qmd multi-get` — Batch Fetch
@@ -192,6 +195,16 @@ Rules:
 ## Output Formats for Agents
 
 All search commands support structured output formats suitable for scripting and AI agent pipelines:
+
+> **⚠ Result paths are index identifiers, not filesystem paths.**
+> The `filepath` field in QMD results (e.g. `qmd://obsidian-default-vault/harness-engineering.md` or a relative slug like `harness-engineering.md`) is an internal index key. It does **not** correspond to a real file on disk. Actual vault files may use completely different naming conventions (e.g. Title Case with spaces: `Harness Engineering.md`). Never use a QMD result path directly in wikilinks, `obsidian read`, `ls`, or any filesystem operation. Always resolve the real filename first:
+>
+>     ```bash
+>     # Find the real file after a QMD result mentions 'harness-engineering'
+>     obsidian search query="Harness Engineering" --files
+>     # or
+>     ls ~/vault/ | grep -i "harness"
+>     ```
 
 | Flag | Format | Use case |
 |------|--------|---------|

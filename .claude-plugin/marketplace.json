@@ -300,7 +300,7 @@
       "description": "This plugin contains a skill for searching markdown notes on-device using the QMD CLI. QMD combines BM25 full-text search, vector semantic search, and LLM re-ranking for hybrid retrieval across indexed markdown collections. Use for finding information in local knowledge bases, retrieving documents by path or docid, running structured queries with lex:/vec:/hyde: typed lines, and managing indexed collections.",
       "source": "./plugins/qmd",
       "strict": false,
-      "version": "1.0.1",
+      "version": "1.0.2",
       "category": "productivity",
       "keywords": [
         "qmd",
