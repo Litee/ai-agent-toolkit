@@ -80,6 +80,8 @@ Links between notes are the core value of Obsidian. Two complementary types:
 
 **Quality over quantity**: before creating a link, ask "would this note be useful in the target's backlink panel?" If a term appears in hundreds of notes, linking it everywhere adds noise, not signal. Don't link generic terms that lack their own meaningful note.
 
+**Linking in both directions:** when you add a new card to the vault, the outgoing links you write in it are only half the job. Existing neighboring notes do not automatically gain a link to the new card. After creating or substantially modifying a card, identify 2-5 existing notes that are conceptually close and update each to include a link back to the new card (inline or in Related Topics). This bidirectional linking is what weaves a new card into the existing graph rather than leaving it as an isolated leaf.
+
 **Wikilink naming conventions:**
 - Use Title Case canonical names: `[[Binary-to-Text Encoding]]`
 - Use pipe syntax for display text: `[[Consistent Hashing|consistent hashing]]` — especially mid-sentence where Title Case is jarring; at sentence start or for proper nouns, the bare wikilink is fine
@@ -182,7 +184,17 @@ obsidian read file="Redis Cache Invalidation Strategies"
 
 # 4. Check what already links to related concepts
 obsidian backlinks file="Cache Patterns"
+
+# 5. Update backward links — find existing notes that should link back to this new card
+obsidian search query="Redis cache invalidation"
+obsidian search query="cache eviction"
+# For each related note found, open it and add a contextual wikilink or Related Topics entry
+# pointing to "Redis Cache Invalidation Strategies" where the connection is meaningful
+obsidian read file="Cache Patterns"
+# Then update Cache Patterns to add: [[Redis Cache Invalidation Strategies]] - specific strategies for Redis
 ```
+
+> **Backward-linking is not optional.** A new note that nothing links to is invisible in the graph. After creating a card, always search for 2-5 existing notes that cover related concepts and add a contextual wikilink or Related Topics entry in each of those notes pointing back to the new card. Only add links where the connection is genuinely useful to a reader of the *existing* note — do not mass-link.
 
 For shell escaping rules when content contains wikilinks or special characters, see the `obsidian:use-obsidian-cli` skill.
 
@@ -266,7 +278,11 @@ obsidian properties counts sort=count          # all property names with counts
 
 When managing the vault as an AI agent, use these patterns:
 
-**Link suggestion**: after creating a note, search for related notes and suggest contextual links or Related Topics entries:
+**Link suggestion (bidirectional)**: after creating a note, search for related notes and:
+1. Add outgoing links from the new note to those related notes (inline or Related Topics).
+2. Update existing related notes to add a link *back* to the new note where the connection adds value to a reader of that note.
+
+Both directions matter — a note no existing note links to is invisible in graph view and backlink panels.
 ```bash
 # Search for notes related to a new concept
 obsidian search query="cache invalidation"

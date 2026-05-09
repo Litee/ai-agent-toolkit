@@ -5,7 +5,6 @@
   },
   "metadata": {
     "description": "Collection of AI agent skills for AWS CDK development, AWS documentation search, AWS Athena SQL querying, CloudWatch Logs Insights querying, Anki flashcard management, Obsidian vault management, audio conversion, subtitle/caption conversion, podcast generation, safe terminal command registration, image generation, ML system design interviews, and markdown note search",
-
     "version": "1.1.43",
     "homepage": "https://github.com/Litee/ai-agent-toolkit"
   },
@@ -17,8 +16,19 @@
       "strict": false,
       "version": "1.0.8",
       "category": "developer-tools",
-      "keywords": ["aws", "cdk", "documentation", "architecture", "mcp", "bedrock", "infrastructure"],
-      "skills": ["./skills/aws-cdk-expert", "./skills/search-aws-documentation"]
+      "keywords": [
+        "aws",
+        "cdk",
+        "documentation",
+        "architecture",
+        "mcp",
+        "bedrock",
+        "infrastructure"
+      ],
+      "skills": [
+        "./skills/aws-cdk-expert",
+        "./skills/search-aws-documentation"
+      ]
     },
     {
       "name": "cron-restoration-guard",
@@ -27,7 +37,13 @@
       "strict": false,
       "version": "1.0.1",
       "category": "developer-tools",
-      "keywords": ["cron", "session", "restore", "resume", "hooks"]
+      "keywords": [
+        "cron",
+        "session",
+        "restore",
+        "resume",
+        "hooks"
+      ]
     },
     {
       "name": "convert-audio",
@@ -36,8 +52,17 @@
       "strict": false,
       "version": "1.0.7",
       "category": "user",
-      "keywords": ["ffmpeg", "audio", "conversion", "mp3", "wav", "flac"],
-      "skills": ["./skills/convert-audio"]
+      "keywords": [
+        "ffmpeg",
+        "audio",
+        "conversion",
+        "mp3",
+        "wav",
+        "flac"
+      ],
+      "skills": [
+        "./skills/convert-audio"
+      ]
     },
     {
       "name": "local-skill-issues-tracker",
@@ -46,8 +71,17 @@
       "strict": false,
       "version": "1.1.14",
       "category": "developer-tools",
-      "keywords": ["issues", "tracker", "bugs", "feature-requests", "skills", "watcher"],
-      "skills": ["./skills/use-local-skills-issue-tracker"]
+      "keywords": [
+        "issues",
+        "tracker",
+        "bugs",
+        "feature-requests",
+        "skills",
+        "watcher"
+      ],
+      "skills": [
+        "./skills/use-local-skills-issue-tracker"
+      ]
     },
     {
       "name": "anki",
@@ -56,18 +90,40 @@
       "strict": false,
       "version": "1.0.10",
       "category": "productivity",
-      "keywords": ["anki", "flashcards", "spaced-repetition", "learning"],
-      "skills": ["./skills/manage-anki-flashcards"]
+      "keywords": [
+        "anki",
+        "flashcards",
+        "spaced-repetition",
+        "learning"
+      ],
+      "skills": [
+        "./skills/manage-anki-flashcards"
+      ]
     },
     {
       "name": "obsidian",
       "description": "This plugin contains four skills for Obsidian: CLI operations (use-obsidian-cli) for creating, reading, searching, and managing notes via the Obsidian CLI; Obsidian Flavored Markdown syntax (use-obsidian-markdown) covering wikilinks, embeds, callouts, properties, math, Mermaid, and more; personal knowledge management methodology (manage-personal-knowledge-in-obsidian) with atomic notes philosophy, linking strategies, tagging conventions, and structured workflows; and vault enrichment (enrich-obsidian-notes-with-best-practices) for adding Best Practices and Anti-Patterns sections to knowledge notes using parallel sub-agents and internet research.",
       "source": "./plugins/obsidian",
       "strict": false,
-      "version": "2.0.10",
+      "version": "2.0.11",
       "category": "productivity",
-      "keywords": ["obsidian", "notes", "knowledge-management", "vault", "zettelkasten", "markdown", "callouts", "embeds", "pkm"],
-      "skills": ["./skills/enrich-obsidian-notes-with-best-practices", "./skills/manage-personal-knowledge-in-obsidian", "./skills/use-obsidian-cli", "./skills/use-obsidian-markdown"]
+      "keywords": [
+        "obsidian",
+        "notes",
+        "knowledge-management",
+        "vault",
+        "zettelkasten",
+        "markdown",
+        "callouts",
+        "embeds",
+        "pkm"
+      ],
+      "skills": [
+        "./skills/enrich-obsidian-notes-with-best-practices",
+        "./skills/manage-personal-knowledge-in-obsidian",
+        "./skills/use-obsidian-cli",
+        "./skills/use-obsidian-markdown"
+      ]
     },
     {
       "name": "aws-athena",
@@ -76,8 +132,16 @@
       "strict": false,
       "version": "1.0.3",
       "category": "developer-tools",
-      "keywords": ["aws", "athena", "sql", "query", "s3"],
-      "skills": ["./skills/query-aws-athena"]
+      "keywords": [
+        "aws",
+        "athena",
+        "sql",
+        "query",
+        "s3"
+      ],
+      "skills": [
+        "./skills/query-aws-athena"
+      ]
     },
     {
       "name": "aws-dynamodb",
@@ -86,8 +150,19 @@
       "strict": false,
       "version": "1.0.2",
       "category": "developer-tools",
-      "keywords": ["aws", "dynamodb", "ddb", "export", "parquet", "s3", "glue", "athena"],
-      "skills": ["./skills/manage-ddb-exports"]
+      "keywords": [
+        "aws",
+        "dynamodb",
+        "ddb",
+        "export",
+        "parquet",
+        "s3",
+        "glue",
+        "athena"
+      ],
+      "skills": [
+        "./skills/manage-ddb-exports"
+      ]
     },
     {
       "name": "aws-glue",
@@ -96,8 +171,22 @@
       "strict": false,
       "version": "1.1.24",
       "category": "developer-tools",
-      "keywords": ["aws", "glue", "etl", "cloudwatch", "s3", "pyspark", "data-engineering", "monitoring", "workflow"],
-      "skills": ["./skills/use-aws-glue", "./skills/watch-aws-glue-job", "./skills/watch-aws-glue-workflow"]
+      "keywords": [
+        "aws",
+        "glue",
+        "etl",
+        "cloudwatch",
+        "s3",
+        "pyspark",
+        "data-engineering",
+        "monitoring",
+        "workflow"
+      ],
+      "skills": [
+        "./skills/use-aws-glue",
+        "./skills/watch-aws-glue-job",
+        "./skills/watch-aws-glue-workflow"
+      ]
     },
     {
       "name": "aws-cloudwatch",
@@ -106,8 +195,22 @@
       "strict": false,
       "version": "1.0.7",
       "category": "developer-tools",
-      "keywords": ["aws", "cloudwatch", "logs", "log-insights", "query", "monitoring", "metrics", "alarms", "emf", "putmetricdata"],
-      "skills": ["./skills/query-aws-cloudwatch-logs-insights", "./skills/use-aws-cloudwatch-metrics"]
+      "keywords": [
+        "aws",
+        "cloudwatch",
+        "logs",
+        "log-insights",
+        "query",
+        "monitoring",
+        "metrics",
+        "alarms",
+        "emf",
+        "putmetricdata"
+      ],
+      "skills": [
+        "./skills/query-aws-cloudwatch-logs-insights",
+        "./skills/use-aws-cloudwatch-metrics"
+      ]
     },
     {
       "name": "aws-support",
@@ -116,8 +219,15 @@
       "strict": false,
       "version": "1.0.9",
       "category": "developer-tools",
-      "keywords": ["aws", "support", "cases", "monitoring"],
-      "skills": ["./skills/watch-aws-support-cases"]
+      "keywords": [
+        "aws",
+        "support",
+        "cases",
+        "monitoring"
+      ],
+      "skills": [
+        "./skills/watch-aws-support-cases"
+      ]
     },
     {
       "name": "block-main-repo-writes",
@@ -126,7 +236,13 @@
       "strict": false,
       "version": "1.0.0",
       "category": "developer-tools",
-      "keywords": ["security", "hooks", "git", "worktree", "file-protection"]
+      "keywords": [
+        "security",
+        "hooks",
+        "git",
+        "worktree",
+        "file-protection"
+      ]
     },
     {
       "name": "aws-quota-service",
@@ -135,8 +251,15 @@
       "strict": false,
       "version": "1.0.9",
       "category": "developer-tools",
-      "keywords": ["aws", "monitoring", "service-quotas", "quotas"],
-      "skills": ["./skills/watch-aws-quota-requests"]
+      "keywords": [
+        "aws",
+        "monitoring",
+        "service-quotas",
+        "quotas"
+      ],
+      "skills": [
+        "./skills/watch-aws-quota-requests"
+      ]
     },
     {
       "name": "protect-file-system-access",
@@ -145,7 +268,13 @@
       "strict": false,
       "version": "1.0.5",
       "category": "developer-tools",
-      "keywords": ["security", "hooks", "file-protection", "aws", "ssh"]
+      "keywords": [
+        "security",
+        "hooks",
+        "file-protection",
+        "aws",
+        "ssh"
+      ]
     },
     {
       "name": "pyspark",
@@ -154,8 +283,17 @@
       "strict": false,
       "version": "1.0.5",
       "category": "developer-tools",
-      "keywords": ["pyspark", "spark", "dataframe", "etl", "data-engineering", "python"],
-      "skills": ["./skills/use-pyspark"]
+      "keywords": [
+        "pyspark",
+        "spark",
+        "dataframe",
+        "etl",
+        "data-engineering",
+        "python"
+      ],
+      "skills": [
+        "./skills/use-pyspark"
+      ]
     },
     {
       "name": "qmd",
@@ -164,8 +302,19 @@
       "strict": false,
       "version": "1.0.1",
       "category": "productivity",
-      "keywords": ["qmd", "markdown", "search", "notes", "vector", "semantic", "bm25", "knowledge-base"],
-      "skills": ["./skills/use-qmd-cli"]
+      "keywords": [
+        "qmd",
+        "markdown",
+        "search",
+        "notes",
+        "vector",
+        "semantic",
+        "bm25",
+        "knowledge-base"
+      ],
+      "skills": [
+        "./skills/use-qmd-cli"
+      ]
     },
     {
       "name": "claude-code-status-line",
@@ -174,7 +323,15 @@
       "strict": false,
       "version": "1.0.5",
       "category": "developer-tools",
-      "keywords": ["statusline", "status", "context", "tokens", "cost", "git", "effort"]
+      "keywords": [
+        "statusline",
+        "status",
+        "context",
+        "tokens",
+        "cost",
+        "git",
+        "effort"
+      ]
     },
     {
       "name": "register-safe-terminal-commands",
@@ -183,8 +340,15 @@
       "strict": false,
       "version": "1.1.8",
       "category": "developer-tools",
-      "keywords": ["terminal", "bash", "permissions", "safety"],
-      "skills": ["./skills/register-safe-terminal-commands"]
+      "keywords": [
+        "terminal",
+        "bash",
+        "permissions",
+        "safety"
+      ],
+      "skills": [
+        "./skills/register-safe-terminal-commands"
+      ]
     },
     {
       "name": "podcast-generation",
@@ -193,8 +357,22 @@
       "strict": false,
       "version": "1.1.9",
       "category": "user",
-      "keywords": ["podcast", "script", "tts", "audio", "conversation", "text-to-speech", "audio-generation", "voice", "aws", "ec2"],
-      "skills": ["./skills/generate-podcast-script", "./skills/generate-podcast-audio"]
+      "keywords": [
+        "podcast",
+        "script",
+        "tts",
+        "audio",
+        "conversation",
+        "text-to-speech",
+        "audio-generation",
+        "voice",
+        "aws",
+        "ec2"
+      ],
+      "skills": [
+        "./skills/generate-podcast-script",
+        "./skills/generate-podcast-audio"
+      ]
     },
     {
       "name": "communication",
@@ -203,8 +381,20 @@
       "strict": false,
       "version": "1.2.3",
       "category": "productivity",
-      "keywords": ["communication", "async", "messaging", "slack", "tickets", "code-review", "anti-patterns", "email"],
-      "skills": ["./skills/communicate-well", "./skills/write-good-emails"]
+      "keywords": [
+        "communication",
+        "async",
+        "messaging",
+        "slack",
+        "tickets",
+        "code-review",
+        "anti-patterns",
+        "email"
+      ],
+      "skills": [
+        "./skills/communicate-well",
+        "./skills/write-good-emails"
+      ]
     },
     {
       "name": "cli-design",
@@ -213,8 +403,19 @@
       "strict": false,
       "version": "1.0.2",
       "category": "developer-tools",
-      "keywords": ["cli", "command-line", "design", "best-practices", "posix", "ux", "exit-codes", "flags"],
-      "skills": ["./skills/build-cli"]
+      "keywords": [
+        "cli",
+        "command-line",
+        "design",
+        "best-practices",
+        "posix",
+        "ux",
+        "exit-codes",
+        "flags"
+      ],
+      "skills": [
+        "./skills/build-cli"
+      ]
     },
     {
       "name": "cmux-terminal",
@@ -223,8 +424,18 @@
       "strict": false,
       "version": "1.0.13",
       "category": "developer-tools",
-      "keywords": ["cmux", "terminal", "multiplexer", "browser", "automation", "sessions", "splits"],
-      "skills": ["./skills/use-cmux-terminal"]
+      "keywords": [
+        "cmux",
+        "terminal",
+        "multiplexer",
+        "browser",
+        "automation",
+        "sessions",
+        "splits"
+      ],
+      "skills": [
+        "./skills/use-cmux-terminal"
+      ]
     },
     {
       "name": "file-system-tools",
@@ -233,8 +444,21 @@
       "strict": false,
       "version": "1.1.5",
       "category": "developer-tools",
-      "keywords": ["disk", "cache", "cleanup", "storage", "free-space", "large-files", "context-window", "extraction", "analysis"],
-      "skills": ["./skills/free-disk-space", "./skills/handle-large-files"]
+      "keywords": [
+        "disk",
+        "cache",
+        "cleanup",
+        "storage",
+        "free-space",
+        "large-files",
+        "context-window",
+        "extraction",
+        "analysis"
+      ],
+      "skills": [
+        "./skills/free-disk-space",
+        "./skills/handle-large-files"
+      ]
     },
     {
       "name": "generate-image",
@@ -243,8 +467,17 @@
       "strict": false,
       "version": "1.0.6",
       "category": "user",
-      "keywords": ["aws", "bedrock", "nova-canvas", "image-generation", "text-to-image", "ai-art"],
-      "skills": ["./skills/generate-image"]
+      "keywords": [
+        "aws",
+        "bedrock",
+        "nova-canvas",
+        "image-generation",
+        "text-to-image",
+        "ai-art"
+      ],
+      "skills": [
+        "./skills/generate-image"
+      ]
     },
     {
       "name": "writing",
@@ -253,8 +486,31 @@
       "strict": false,
       "version": "1.0.5",
       "category": "productivity",
-      "keywords": ["writing", "editing", "clarity", "concise", "style", "document", "draft", "proofread", "rewrite", "structure", "RFC", "design doc", "postmortem", "email", "proposal", "technical-design", "HLD", "LLD", "architecture"],
-      "skills": ["./skills/write-technical-design", "./skills/write-well"]
+      "keywords": [
+        "writing",
+        "editing",
+        "clarity",
+        "concise",
+        "style",
+        "document",
+        "draft",
+        "proofread",
+        "rewrite",
+        "structure",
+        "RFC",
+        "design doc",
+        "postmortem",
+        "email",
+        "proposal",
+        "technical-design",
+        "HLD",
+        "LLD",
+        "architecture"
+      ],
+      "skills": [
+        "./skills/write-technical-design",
+        "./skills/write-well"
+      ]
     },
     {
       "name": "ml-system-design-interviewer",
@@ -263,8 +519,17 @@
       "strict": false,
       "version": "1.0.4",
       "category": "productivity",
-      "keywords": ["ml", "machine-learning", "interview", "system-design", "hiring", "evaluation"],
-      "skills": ["./skills/ml-system-design-interviewer"]
+      "keywords": [
+        "ml",
+        "machine-learning",
+        "interview",
+        "system-design",
+        "hiring",
+        "evaluation"
+      ],
+      "skills": [
+        "./skills/ml-system-design-interviewer"
+      ]
     },
     {
       "name": "skill-management",
@@ -273,8 +538,27 @@
       "strict": false,
       "version": "1.0.9",
       "category": "developer-tools",
-      "keywords": ["skill", "skill-creator", "portability", "best-practices", "naming-conventions", "skill-dir", "evaluation", "synthetic-tasks", "quality-assurance", "audit", "review", "research", "enrich"],
-      "skills": ["./skills/enrich-skill-via-research", "./skills/evaluate-skills-with-synthetic-tasks", "./skills/review-skill", "./skills/skill-creator-extra-tips"]
+      "keywords": [
+        "skill",
+        "skill-creator",
+        "portability",
+        "best-practices",
+        "naming-conventions",
+        "skill-dir",
+        "evaluation",
+        "synthetic-tasks",
+        "quality-assurance",
+        "audit",
+        "review",
+        "research",
+        "enrich"
+      ],
+      "skills": [
+        "./skills/enrich-skill-via-research",
+        "./skills/evaluate-skills-with-synthetic-tasks",
+        "./skills/review-skill",
+        "./skills/skill-creator-extra-tips"
+      ]
     },
     {
       "name": "subtitle-tools",
@@ -283,8 +567,17 @@
       "strict": false,
       "version": "1.0.0",
       "category": "user",
-      "keywords": ["subtitle", "caption", "transcript", "vtt", "webvtt", "plaintext"],
-      "skills": ["./skills/convert-vtt-to-text"]
+      "keywords": [
+        "subtitle",
+        "caption",
+        "transcript",
+        "vtt",
+        "webvtt",
+        "plaintext"
+      ],
+      "skills": [
+        "./skills/convert-vtt-to-text"
+      ]
     },
     {
       "name": "toon",
@@ -293,17 +586,35 @@
       "strict": false,
       "version": "1.0.1",
       "category": "developer-tools",
-      "keywords": ["toon", "json", "token", "format", "encode", "decode", "llm", "compact"],
-      "skills": ["./skills/use-toon-cli"]
+      "keywords": [
+        "toon",
+        "json",
+        "token",
+        "format",
+        "encode",
+        "decode",
+        "llm",
+        "compact"
+      ],
+      "skills": [
+        "./skills/use-toon-cli"
+      ]
     },
     {
       "name": "update-versioned-permissions",
-      "description": "This plugin contains a SessionStart hook that auto-clones stale versioned plugin path entries in Claude Code permissions when plugins are upgraded. For each permission entry referencing an old plugin version, it adds a matching entry for the currently installed version. Additive-only — never removes existing entries. Also updates statusLine.command to the latest installed version if stale.",
+      "description": "This plugin contains a SessionStart hook that auto-clones stale versioned plugin path entries in Claude Code permissions when plugins are upgraded. For each permission entry referencing an old plugin version, it adds a matching entry for the currently installed version. Additive-only \u2014 never removes existing entries. Also updates statusLine.command to the latest installed version if stale.",
       "source": "./plugins/update-versioned-permissions",
       "strict": false,
       "version": "1.0.1",
       "category": "developer-tools",
-      "keywords": ["permissions", "plugins", "upgrade", "hooks", "settings", "versioning"]
+      "keywords": [
+        "permissions",
+        "plugins",
+        "upgrade",
+        "hooks",
+        "settings",
+        "versioning"
+      ]
     },
     {
       "name": "claude-code-session-history",
@@ -312,8 +623,17 @@
       "strict": false,
       "version": "1.0.2",
       "category": "developer-tools",
-      "keywords": ["claude-code", "session", "transcript", "analysis", "patterns", "skill-gaps"],
-      "skills": ["./skills/analyze-claude-code-session-transcripts"]
+      "keywords": [
+        "claude-code",
+        "session",
+        "transcript",
+        "analysis",
+        "patterns",
+        "skill-gaps"
+      ],
+      "skills": [
+        "./skills/analyze-claude-code-session-transcripts"
+      ]
     }
   ]
 }
