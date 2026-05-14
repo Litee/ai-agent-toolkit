@@ -64,6 +64,22 @@ aws glue create-job \
 
 When polling for job completion and you hit `Max concurrent runs exceeded`, wait 30–60 seconds and check `get-job-runs` to see if the previous run is still in `RUNNING` or `STOPPING` state before retrying.
 
+> **`ConcurrentRunsExceededException` persists ~30s after a run reaches STOPPED state.** Glue's job-slot release lags the run-state transition. Even when `get-job-run` reports `JobRunState: STOPPED` and `get-job-runs` returns no active runs, `start-job-run` can still fail with `ConcurrentRunsExceededException` for up to 30 seconds. Verified on `MaxConcurrentRuns=1` jobs.
+>
+> **Fix:** after `batch-stop-job-run`, poll until STOPPED then add an explicit 30s buffer before starting the next run:
+>
+> ```bash
+> # Wait for STOPPED
+> while true; do
+>   state=$(aws glue get-job-run --job-name "$JOB" --run-id "$RUN_ID" >             --query 'JobRun.JobRunState' --output text)
+>   [[ "$state" == "STOPPED" || "$state" == "FAILED" || "$state" == "SUCCEEDED" ]] && break
+>   sleep 5
+> done
+> # Buffer: slot release lags state transition
+> sleep 30
+> aws glue start-job-run --job-name "$JOB" ...
+> ```
+
 ---
 
 ### 4. Attaching a Glue job to a VPC without S3/Glue VPC endpoints
@@ -82,6 +98,28 @@ aws ec2 describe-vpc-endpoints \
 ```
 
 If no endpoint exists and no NAT gateway is present, add an S3 gateway endpoint to the VPC before running the job.
+
+### 5. `df.coalesce(N).rdd.mapPartitions(fn)` silently delivers empty iterators on Glue 4.0
+
+**Verified bug on Glue 4.0 / Spark 3.3.0-amzn-1 (observed 2026-05-13):** a narrow `coalesce` immediately before `df.rdd.mapPartitions` causes every Python worker to receive an empty iterator. The job runs to completion (or hangs), outputs 0 rows, and raises no error.
+
+**Root cause:** the codegen → Python pipe (`FileSourceScanExec → WholeStageCodegenExec → javaToPython`) requires an `Exchange` (shuffle) operator in the physical plan to deliver rows to Python workers. A narrow `coalesce` has no Exchange — tasks are pipelined within a single stage — so no rows flow through to Python. `repartition(N)` always inserts an Exchange and restores correct delivery.
+
+**Workaround:** use `df.repartition(N)` instead of `df.coalesce(N)` before any `mapPartitions` call, even when you are only reducing partition count. The shuffle cost is negligible compared to silently losing all output.
+
+```python
+# WRONG — silently delivers empty iterators on Glue 4.0
+df.coalesce(20).rdd.mapPartitions(call_sagemaker).toDF(schema)
+
+# CORRECT — repartition inserts an Exchange; Python workers receive rows
+df.repartition(20).rdd.mapPartitions(call_sagemaker).toDF(schema)
+```
+
+To verify: run `df.explain()` before executing. The physical plan must contain an `Exchange` node between the file scan and the Python stage. If you see only `WholeStageCodegen` going directly into `mapPartitions`, rows will not flow to Python on Glue 4.0.
+
+**Alternatives that avoid the issue entirely:**
+- `mapInPandas` / `pandas_udf` — use Arrow IPC instead of the pickle pipe and are not affected by this bug (when the schema supports Arrow types).
+- `df.persist(StorageLevel.DISK_ONLY); df.count()` before `.rdd.mapPartitions` does **not** help — `df.rdd` rebuilds the plan from scratch, discarding the cache.
 
 ---
 
@@ -237,6 +275,67 @@ stop_evt.set()
 
 **When to skip:** For pure `df.write()` calls with no user-code loop (e.g., a simple read-transform-write pipeline), there is no natural place to inject progress — Spark controls execution entirely. Skip the reporter thread in that case and rely on the CloudWatch Glue metrics dashboard or post-job statistics (see Best Practice #8). For jobs that call external APIs, also add per-operation metrics (see #12).
 
+> **⚠ Driver progress logs are invisible without continuous CloudWatch logging.**
+> By default, Glue buffers all driver stdout/stderr locally and flushes it to CloudWatch only at job termination — meaning `[progress]` daemon-thread output and all `logger.info()` / `print(..., flush=True)` calls on the driver appear blank in CloudWatch while the job is running, even when the thread is firing correctly.
+>
+> **Fix:** add `--enable-continuous-cloudwatch-log: "true"` to your job's `DefaultArguments`. With this enabled, driver logs flush every few seconds to `/aws-glue/jobs/logs-v2/<run_id>-driver` instead of the legacy `/aws-glue/jobs/output/<run_id>` stream.
+>
+> ```bash
+> aws glue create-job ... \
+>   --default-arguments '{
+>     "--enable-continuous-cloudwatch-log": "true",
+>     "--enable-continuous-log-filter": "true"
+>   }'
+> ```
+>
+> Log stream layout changes when enabled:
+> - **Without:** driver in `/aws-glue/jobs/output/<run_id>` (coarse, end-of-job flush)
+> - **With:** driver in `/aws-glue/jobs/logs-v2/<run_id>-driver`; executors in `/aws-glue/jobs/logs-v2/<run_id>-<exec_num>`
+>
+> The legacy `/aws-glue/jobs/error/<run_id>_g-<container>` executor streams still exist alongside. Cost is negligible (< $0.01 per long-running job for typical log volume).
+
+**For DataFrame-only stages (no `mapPartitions`):** there is no executor hook to increment an accumulator. Use `SparkContext.statusTracker()` instead — it exposes per-stage task counters from the driver without any executor-side changes:
+
+```python
+import threading, time
+
+sc = spark.sparkContext
+job_start = time.time()
+_progress_stop = threading.Event()
+
+def _stage_progress_reporter():
+    tracker = sc.statusTracker()
+    while not _progress_stop.is_set():
+        try:
+            active = tracker.getActiveStageIds()
+            if not active:
+                print(f"[progress] elapsed={int(time.time()-job_start)}s no active stages", flush=True)
+            else:
+                parts = []
+                for sid in sorted(active):
+                    info = tracker.getStageInfo(sid)
+                    if info is None:
+                        continue  # recently completed — skip
+                    parts.append(
+                        f"stage{sid}({info.name[:40]}): "
+                        f"completed={info.numCompletedTasks}/{info.numTasks} "
+                        f"active={info.numActiveTasks} "
+                        f"failed={info.numFailedTasks}"
+                    )
+                print(f"[progress] elapsed={int(time.time()-job_start)}s | " + " | ".join(parts), flush=True)
+        except Exception as e:
+            print(f"[progress] reporter error: {e}", flush=True)
+        _progress_stop.wait(60)
+
+threading.Thread(target=_stage_progress_reporter, daemon=True).start()
+
+# ... rest of job (read / groupBy / write) ...
+
+_progress_stop.set()
+```
+
+This produces the same `[progress] elapsed=Ns ...` log format as the accumulator pattern and is compatible with the continuous CloudWatch logging callout above. `statusTracker.getStageInfo(sid)` returns `None` for very recently completed stages — the `if info is None: continue` guard handles that.
+
 ---
 
 ### 7. Use cmux for a visible progress bar while monitoring
@@ -391,7 +490,38 @@ dyf = glueContext.create_dynamic_frame.from_options(
 
 ---
 
-### 14. Coalesce output to avoid the small files problem on write
+### 14. Set `spark.sql.files.maxPartitionBytes` to tame tiny-file shuffle explosion (native DataFrame reads)
+
+The `groupFiles` fix above applies to Glue DynamicFrames. For native `spark.read.parquet()` the equivalent is `spark.sql.files.maxPartitionBytes`.
+
+**Problem:** the Spark default `128 MB` creates one or more input partitions per file. For inputs with many small files (e.g. 192K × 200 MB files = 37 TB), this produces ~192K input partitions. Combined with `spark.sql.shuffle.partitions=3000`, the shuffle block count becomes `192K × 3K = 576 million` — far beyond what Glue's S3 tiered-storage shuffle can handle reliably. The shuffle stage wedges indefinitely with no error.
+
+**Fix:** raise `maxPartitionBytes` so Spark packs multiple files per partition. Target 10K–30K input partitions regardless of file count.
+
+```python
+# Set before creating the DataFrame — cannot be changed after the plan is built
+spark.conf.set("spark.sql.files.maxPartitionBytes", str(2 * 1024**3))  # 2 GB
+spark.conf.set("spark.sql.files.openCostInBytes",   str(64 * 1024**2))  # 64 MB
+
+df = spark.read.parquet("s3://my-bucket/my-prefix/")
+
+# Verify: should be 10K–30K for large inputs
+print(f"Input partitions: {df.rdd.getNumPartitions()}")
+```
+
+Also keep `spark.sql.shuffle.partitions` proportional. For inputs already reduced to ~10K partitions, 200–500 shuffle partitions is sufficient for most groupBy/join workloads:
+
+```python
+spark.conf.set("spark.sql.shuffle.partitions", "500")
+```
+
+**Rule of thumb:** `shuffle_blocks = input_partitions × shuffle_partitions`. Keep this below ~15 million for reliable Glue shuffle. Verify with `df.explain()` after reading — the plan shows `FileScan` partition count.
+
+**Caveat:** this setting does not apply to DynamicFrame reads (`create_dynamic_frame.*`). Use `groupFiles` + `groupSize` for those (see Best Practice 13 above).
+
+---
+
+### 15. Coalesce output to avoid the small files problem on write
 
 Default Spark output partitioning often produces hundreds or thousands of tiny Parquet files. This degrades downstream Athena, Redshift Spectrum, and S3 Select performance significantly — each file requires a separate S3 GET, and query planners struggle with too many small row groups.
 
@@ -413,7 +543,7 @@ Use `coalesce` when only reducing partition count (avoids the shuffle cost of `r
 
 ---
 
-### 15. Use Flex execution for non-urgent batch jobs (~34% cost savings as of 2026-05)
+### 16. Use Flex execution for non-urgent batch jobs (~34% cost savings as of 2026-05)
 
 Glue Flex jobs run on spare Glue capacity. They cost ~34% less than standard jobs (per AWS Glue pricing at time of writing — verify current discount at https://aws.amazon.com/glue/pricing/) but may wait in a queue before starting, and may be restarted mid-run if capacity is reclaimed.
 
@@ -434,7 +564,7 @@ Note: Flex is only available for Glue ETL jobs (not streaming). Not available fo
 
 ---
 
-### 16. Enable the Spark UI for post-mortem debugging
+### 17. Enable the Spark UI for post-mortem debugging
 
 The Spark web UI exposes stage-level DAG execution, task distribution, shuffle read/write sizes, GC pressure, and executor time breakdowns. This is far more detailed than CloudWatch metrics alone and is essential for diagnosing stragglers, data skew, and OOM causes.
 
