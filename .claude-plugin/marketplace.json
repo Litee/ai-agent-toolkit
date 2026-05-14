@@ -66,10 +66,10 @@
     },
     {
       "name": "local-skill-issues-tracker",
-      "description": "This plugin contains a skill for a local JSON-based issue tracker where disconnected agents report skill bugs and feature requests. Includes a filesystem watcher with cmux integration for live notifications on new issues, status changes, and comments.",
+      "description": "This plugin contains a skill for a local JSON-based issue tracker where disconnected agents report skill bugs and feature requests. Includes a filesystem watcher (long-poll-with-exit) for notifications on new issues, status changes, and comments.",
       "source": "./plugins/local-skill-issues-tracker",
       "strict": false,
-      "version": "1.1.14",
+      "version": "1.1.15",
       "category": "developer-tools",
       "keywords": [
         "issues",
