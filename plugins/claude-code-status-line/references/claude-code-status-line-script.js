@@ -5,8 +5,8 @@ const path = require('path');
 const SHOW_CONTEXT_TEXT = true;   // "X/Y (Z%)" colored by usage level
 const SHOW_TOKEN_COUNTS = true;   // "Xm in / Ym out"
 const SHOW_COST         = true;   // "$X.XX" from pre-calculated cost
-const SHOW_MODEL        = true;   // Model ID
-const SHOW_EFFORT       = true;   // "effort: low|medium|high|xhigh|max" colored by level
+const SHOW_MODEL        = true;   // Model display name
+const SHOW_THINKING     = true;   // "thinking: off|low|medium|high|xhigh|max"
 const SHOW_GIT_BRANCH   = true;   // Current git branch
 const SHOW_CWD          = true;   // Working directory path
 // ═══════════════════════════════════════════════════
@@ -20,23 +20,13 @@ const RED_BLINK = '\x1b[5;31m';
 
 function buildContextText(data) {
   if (!SHOW_CONTEXT_TEXT) return '';
-  const totalInput  = data.context_window?.total_input_tokens  || 0;
-  const totalOutput = data.context_window?.total_output_tokens || 0;
   const contextSize = data.context_window?.context_window_size || 0;
-  const total = totalInput + totalOutput;
-
-  const remaining = data.context_window?.remaining_percentage;
-  const pct = remaining != null
-    ? (100 - remaining).toFixed(1)
-    : (contextSize > 0 ? ((total * 100) / contextSize).toFixed(1) : '0.0');
-  const usedTokens = remaining != null
-    ? Math.round(contextSize * (100 - remaining) / 100)
-    : total;
-  const text = `${usedTokens}/${contextSize} (${pct}%)`;
-
-  if (remaining == null) return text;
-  const scaled = Math.min(Math.round(((100 - remaining) / 80) * 100), 100);
-
+  const usedPct     = data.context_window?.used_percentage;
+  if (usedPct == null || contextSize === 0) return '';
+  const usedTokens  = Math.round(contextSize * usedPct / 100);
+  const toK = n => `${Math.round(n / 1000)}K`;
+  const text        = `${toK(usedTokens)}/${toK(contextSize)} (${usedPct.toFixed(1)}%)`;
+  const scaled      = Math.min(Math.round((usedPct / 80) * 100), 100);
   if (scaled >= 95) return `${RED_BLINK}${text}${RESET}`;
   if (scaled >= 81) return `${ORANGE}${text}${RESET}`;
   if (scaled >= 63) return `${YELLOW}${text}${RESET}`;
@@ -59,22 +49,26 @@ function buildCost(data) {
 
 function buildModel(data) {
   if (!SHOW_MODEL) return '';
+  const display = data.model?.display_name;
+  if (display) return display;
   const id = data.model?.id || 'unknown';
   return id.startsWith('global.anthropic.') ? id.slice('global.anthropic.'.length) : id;
 }
 
-function buildEffort(data) {
-  if (!SHOW_EFFORT) return '';
+function buildThinking(data) {
+  if (!SHOW_THINKING) return '';
+  const enabled = data.thinking?.enabled;
+  if (enabled == null) return '';
+  if (!enabled) return 'thinking: off';
   const level = data.effort?.level;
-  if (level == null || level === '') return '';
-  const text = `effort: ${level}`;
-  const tier = String(level).toLowerCase();
+  const tier  = level ? String(level).toLowerCase() : '';
+  const text  = `thinking: ${tier || 'on'}`;
   if (tier === 'max')    return `${RED_BLINK}${text}${RESET}`;
   if (tier === 'xhigh')  return `${RED}${text}${RESET}`;
   if (tier === 'high')   return `${ORANGE}${text}${RESET}`;
   if (tier === 'medium') return `${YELLOW}${text}${RESET}`;
   if (tier === 'low')    return `${GREEN}${text}${RESET}`;
-  return text;
+  return `${GREEN}${text}${RESET}`;
 }
 
 function buildGitBranch(data) {
@@ -98,8 +92,8 @@ function buildCwd(data) {
   const cwd = data.workspace?.current_dir || process.cwd();
   const sep = path.sep;
   const parts = cwd.split(sep);
-  if (parts.length <= 4) return cwd;
-  return parts.map((p, i) => i < parts.length - 3 ? (p === '' ? '' : p[0]) : p).join(sep);
+  if (parts.length <= 3) return cwd;
+  return parts.map((p, i) => i < parts.length - 2 ? (p === '' ? '' : p[0]) : p).join(sep);
 }
 
 function buildDuration(data) {
@@ -127,11 +121,11 @@ process.stdin.on('end', () => {
       buildCost(data),
       buildDuration(data),
       buildModel(data),
-      buildEffort(data),
+      buildThinking(data),
       buildGitBranch(data),
       buildCwd(data),
     ].filter(s => s !== '');
-    process.stdout.write(segments.join(' │ '));
+    process.stdout.write(segments.join(' · '));
   } catch (e) {
     // Silent failure — statusline output must not contain error text
   }

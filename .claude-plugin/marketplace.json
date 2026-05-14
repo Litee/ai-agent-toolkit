@@ -318,10 +318,10 @@
     },
     {
       "name": "claude-code-status-line",
-      "description": "This plugin configures Claude Code to use a rich statusline script that displays context usage, token counts, cost, session duration, model ID, effort level, git branch, and working directory. A SessionStart hook checks if the statusline is already configured and updates user-level settings if not.",
+      "description": "This plugin configures Claude Code to use a rich statusline script that displays context usage, token counts, cost, session duration, model display name, thinking mode (with effort level), git branch, and working directory. A SessionStart hook checks if the statusline is already configured and updates user-level settings if not.",
       "source": "./plugins/claude-code-status-line",
       "strict": false,
-      "version": "1.0.5",
+      "version": "1.0.9",
       "category": "developer-tools",
       "keywords": [
         "statusline",
