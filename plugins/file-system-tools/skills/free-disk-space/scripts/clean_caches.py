@@ -205,6 +205,17 @@ def build_cli_targets() -> list[dict]:
             "size_paths": [],
             "clean_cmds": [["docker", "system", "prune", "--force"]],
         },
+        {
+            # https://docs.astral.sh/uv/concepts/cache/
+            "name": "uv",
+            "description": "uv cache (~/.cache/uv or ~/Library/Caches/uv)",
+            "cmd": "uv",
+            "size_paths": [
+                Path.home() / "Library" / "Caches" / "uv" if platform.system() == "Darwin"
+                else Path.home() / ".cache" / "uv"
+            ],
+            "clean_cmds": [["uv", "cache", "clean"]],
+        },
     ]
     return targets
 

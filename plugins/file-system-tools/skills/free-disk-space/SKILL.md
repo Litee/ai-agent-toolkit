@@ -28,7 +28,7 @@ du -sh ~/* | sort -rh | head -20
 
 **Before running any cleanup:**
 
-- Use `${SKILL_DIR}/scripts/clean_caches.py` as the unified entry point — it covers both CLI-managed caches (npm, pip, yarn, pnpm, go, brew, docker, etc.) and directory caches (Maven, Gradle, JetBrains, etc.)
+- Use `${SKILL_DIR}/scripts/clean_caches.py` as the unified entry point — it covers both CLI-managed caches (npm, pip, yarn, pnpm, go, brew, docker, uv, etc.) and directory caches (Maven, Gradle, JetBrains, etc.)
 - Always run the script without `--apply` first to review sizes, then with `--apply` to perform deletion
 - NEVER run raw `rm -rf` on cache directories manually; the script handles safety checks
 - The manual CLI commands in this file are for reference only — the script invokes them internally
@@ -125,6 +125,7 @@ The scanner does not descend into matched directories (so nested `node_modules` 
 | `brew` | `brew cleanup --prune=all` | Homebrew cache (`~/Library/Caches/Homebrew`) |
 | `rustup` | manual only | Lists unused toolchains — must remove manually with `rustup toolchain remove <name>` |
 | `docker` | `docker system prune --force` | Stopped containers, dangling images, build cache |
+| `uv` | `uv cache clean` | uv package manager cache (`~/.cache/uv` or `~/Library/Caches/uv`) |
 
 ### Directory caches (deleted directly by the script)
 
