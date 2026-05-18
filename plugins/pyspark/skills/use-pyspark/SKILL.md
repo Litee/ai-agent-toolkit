@@ -254,6 +254,60 @@ Rules for `select`-as-contract:
 
 ---
 
+### 11. Side-effecting Python UDFs with accumulators require `.cache()` + a single materialising action
+
+If a Python UDF has side effects (DynamoDB writes, external API calls, etc.) and you read accumulators on the driver for live progress, the DataFrame **must** be `.cache()`'d and explicitly materialised with one action before any downstream transformations. Without caching, each downstream action (`.show()`, `.filter().count()`, `.write()`) independently re-executes the full UDF — wasting work, double-writing to the external system, and causing accumulator values on the driver to read as **0**.
+
+```python
+# BAD — multiple actions re-execute the UDF; accumulator always reads 0
+enriched = df.withColumn("status", _side_effecting_udf(F.struct(*cols))).cache()
+enriched.show(10)               # action 1 — UDF fires
+enriched.filter(...).count()    # action 2 — UDF fires again
+write_parquet(enriched)         # action 3 — UDF fires a third time
+print(acc_processed.value)      # → 0 (driver never received consistent updates)
+
+# GOOD — materialise once; all downstream reads hit the cache
+enriched = df.withColumn("status", _side_effecting_udf(F.struct(*cols))).cache()
+enriched.count()                # single materialising action — accumulator syncs
+write_parquet(enriched)         # reads from cache, UDF does NOT re-fire
+print(acc_processed.value)      # → correct value
+```
+
+**Rule:** one side-effecting UDF execution = one `.cache()` + one `.count()`. Every downstream action after that reads from the cache.
+
+**Verified on PySpark 3.5 / Glue 5.0:** without cache → `acc_processed.value` reported 0 for the entire 5-min run on a 2M-row dataset; with cache → value climbed monotonically to 2,000,000.
+
+> **Failure mode is 0 OR overcount, not always 0.** Without `.cache()`, each downstream action re-executes the UDF independently: if no action has run yet the accumulator reads 0; if multiple actions have run the accumulator is overcounted (UDF fired N× per logical row). Both are wrong. `.cache()` + `.count()` prevents *planned* re-execution but does **not** protect against task-retry overcounting (Spark has no exactly-once guarantee for accumulators inside transformations). For production-grade side-effect tracking, prefer `foreachPartition` (an action) where the exactly-once guarantee applies.
+
+---
+
+### 12. `.limit(N)` collapses the DataFrame to 1 partition, serialising all downstream work
+
+`.limit(N)` is compiled into `LocalLimit` (per-partition early exit) + `GlobalLimit`. `GlobalLimit` inserts an `ExchangeSingle` shuffle that routes all surviving rows into **one partition on one executor**. Any UDF or write applied downstream runs as a single task, regardless of cluster size.
+
+> **Only the `GlobalLimit` path is affected.** `.limit(N).show()` and `.limit(N).collect()` use the optimised `CollectLimit` path (Spark stops scanning early and returns to the driver) and are not affected. The parallelism collapse only happens when the limited DataFrame feeds further transformations or writes.
+
+```python
+# BAD — post-limit UDF runs on 1 task even with 800 executor slots
+df = read_parquet(...)          # 33 input partitions
+df = df.filter(...).limit(2_000_000)
+df.withColumn("status", _udf(...)).write.parquet(...)   # 1 task, ~750 rows/s
+
+# GOOD — repartition after limit to restore parallelism
+df = read_parquet(...)
+df = df.filter(...).limit(2_000_000)
+df = df.repartition(min(2_000_000, sc.defaultParallelism))  # redistribute
+df.withColumn("status", _udf(...)).write.parquet(...)   # many tasks, ~21k rows/s
+```
+
+Set `repartition(N)` to `min(limit_value, cluster_task_slots)` — using a value larger than `limit_value` produces empty partitions with no benefit. Verify with `df.rdd.getNumPartitions()`.
+
+**Canary / smoke-test trap:** `.limit()` is commonly used to run a small sample against real infrastructure. The 1-partition collapse silently hides parallelism regressions — the canary validates correctness but masks throughput issues that surface only on full-scale runs.
+
+**Verified on PySpark 3.5 / Glue 5.0:** 50 × G.8X workers (800 slots), 2M-row limit — without repartition: 1 task, ~750 rows/s, cancelled at 12 min; with `.repartition(800)`: 800 tasks, peak 21k rows/s, completed in ~5 min.
+
+---
+
 ## Best Practices
 
 ### 1. Use partitions for large datasets
