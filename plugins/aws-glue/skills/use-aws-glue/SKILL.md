@@ -123,6 +123,65 @@ To verify: run `df.explain()` before executing. The physical plan must contain a
 
 ---
 
+### 6. `try: getResolvedOptions / except: DEFAULT_ARGS` silently reruns with wrong arguments
+
+A common scaffold pattern (seen in CDK-generated Glue templates) wraps `getResolvedOptions` in a bare `except` and falls back to in-script `DEFAULT_ARGS` on any failure — intended as a local-test convenience. In production, when a new required argument is added to `JOB_ARGS` but a caller forgets to pass it, `getResolvedOptions` raises `GlueArgumentError`. The `except` clause silently replaces **all** args with `DEFAULT_ARGS` (which typically point at a dev bucket/table). The job runs to `SUCCEEDED` state and writes to the wrong destination.
+
+```python
+# BAD — any arg mistake silently falls back to DEFAULT_ARGS in production
+try:
+    args = getResolvedOptions(sys.argv, job_args)
+except Exception:
+    args = default_args   # ← silently runs with stale dev config
+```
+
+**Fix:** distinguish in-Glue vs local by checking for `--JOB_NAME`, which Glue always injects:
+
+```python
+# GOOD — only falls back if genuinely running locally (no --JOB_NAME)
+in_glue = any(a == "--JOB_NAME" or a.startswith("--JOB_NAME=") for a in sys.argv)
+try:
+    args = getResolvedOptions(sys.argv, job_args)
+    logger.info("[init] args resolved: %s", {k: args.get(k) for k in job_args})
+except Exception as exc:
+    if in_glue:
+        logger.error("[init] FATAL: missing Glue arg. required=%s err=%s", job_args, exc)
+        raise   # surface the error; never silently fall back during a real run
+    if not default_args:
+        raise
+    logger.warning("[init] No --JOB_NAME — using DEFAULT_ARGS for local test: %s", default_args)
+    args = dict(default_args)
+```
+
+---
+
+### 7. `--arguments` shorthand in `start-job-run` breaks on `=` or `,` in values
+
+The AWS CLI shorthand parser for `Map` types uses `=` as a key/value separator and `,` as a pair separator. S3 paths with Hive-style partition components (e.g. `year=2026/month=05/day=07/`) and any value containing `,` silently confuse it, producing an `expected one argument` error or — worse — silently wrong values.
+
+```bash
+# BAD — breaks when S3 path contains '=' (Hive partitions)
+aws glue start-job-run --job-name FOO \
+  --arguments "--image_path=s3://bucket/year=2026/month=05/,--output=s3://x/y/"
+# → error: argument --arguments: expected one argument
+```
+
+**Fix:** always use the JSON form for `--arguments`, which handles any string value without escaping:
+
+```bash
+# GOOD — JSON form, no shorthand parser involved
+ARGS=$(python3 -c "import json; print(json.dumps({
+    '--image_path': 's3://bucket/year=2026/month=05/day=07/',
+    '--output_path': 's3://x/y/',
+    '--limit': '2000000',
+}))")
+aws glue start-job-run --job-name FOO --arguments "$ARGS"
+```
+
+The shorthand form (`key1=val1,key2=val2`) is safe only when all values are plain identifiers with no `=` or `,`. For anything involving S3 URIs, dates, or numeric strings, always use JSON.
+
+---
+
 ## Best Practices
 
 ### 1. Verify Parquet row counts via pyarrow footer (no data download)
