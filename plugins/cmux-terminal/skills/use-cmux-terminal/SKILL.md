@@ -167,10 +167,10 @@ cmux notify --title "Build Complete" --body "All tests passed"
 
 ```bash
 # Open a browser panel in a split (two-step for reliability)
-cmux browser surface:1 open-split --direction right
+cmux new-pane --type browser --direction right
 sleep 1 && cmux browser surface:2 navigate "https://example.com"
 # Wait for it to load
-cmux browser surface:2 wait --load-state networkidle
+cmux browser surface:2 wait --load-state complete
 # Get a DOM snapshot to understand the page
 cmux browser surface:2 snapshot --compact
 # Find and click a button
@@ -184,9 +184,9 @@ cmux browser surface:2 screenshot --out /tmp/result.png
 ### Check a web app's state (e.g., verify a deploy)
 
 ```bash
-cmux browser surface:1 open-split --direction right
+cmux new-pane --type browser --direction right
 sleep 1 && cmux browser surface:2 navigate "https://myapp.com"
-cmux browser surface:2 wait --load-state networkidle
+cmux browser surface:2 wait --load-state complete
 cmux browser surface:2 get title
 cmux browser surface:2 eval "document.querySelector('.version')?.textContent"
 cmux browser surface:2 console list    # check for errors
@@ -195,42 +195,19 @@ cmux browser surface:2 errors list
 
 ## Markdown Preview in Browser Panel
 
-When the user asks to open/view/preview a `.md` file in cmux (e.g., "open foo.md on the right", "show the plan"), render it as styled HTML in a cmux browser panel. Do NOT use `less`, `cat`, or `file://` URLs.
+When the user asks to open/view/preview a `.md` file in cmux (e.g., "open foo.md on the right", "show the plan"), use the native `cmux markdown open` command — it renders markdown with live reload, no HTTP server or HTML conversion required:
 
-### File naming
+```bash
+cmux markdown open /path/to/file.md --direction right
+```
 
-Derive the HTML filename from the source markdown filename:
-- `/path/to/my-plan.md` → `/tmp/my-plan.html`
-- Use `os.path.basename` and replace `.md` with `.html`
-
-**Track which HTML file you created.** When the user asks to update/refresh the preview, or when you modify the source markdown, regenerate the **same HTML file** and `cmux browser <surface> reload`. Do not create a second HTML file with a different name.
-
-### Steps
-
-1. **Convert markdown to HTML** using `${SKILL_DIR}/scripts/md-to-html.py`. Write output to `/tmp/<basename>.html`:
-   ```bash
-   python3 ${SKILL_DIR}/scripts/md-to-html.py /path/to/file.md --dark
-   ```
-   The script prints the output filename so you can use it in the browser URL.
-2. **Start a local HTTP server** (if not already running — check with `lsof -ti:18923`):
-   ```bash
-   python3 -m http.server 18923 --directory /tmp --bind 127.0.0.1 &>/dev/null &
-   ```
-3. **Open in cmux browser panel** using the two-step pattern (direct URL on `open-split` is unreliable):
-   ```bash
-   cmux browser <your-surface> open-split --direction right
-   sleep 1 && cmux browser <new-surface> navigate "http://127.0.0.1:18923/<basename>.html"
-   cmux browser <new-surface> wait --load-state networkidle
-   ```
-
-For the markdown-to-HTML conversion script, use `${SKILL_DIR}/scripts/md-to-html.py`.
+The panel live-reloads automatically whenever the file changes on disk.
 
 ### Defaults
 
-- **Default to dark mode** (`--dark`). Only use light mode if the user explicitly asks for light mode.
-- Use `open-split` with a direction matching the user's request (right, down, etc.). Default to `open-split` (which splits below).
-- **When you modify the source markdown**, always regenerate the same HTML file and `cmux browser <surface> reload`. Never create a second HTML file.
-- Reuse the same HTTP server port (18923) across previews. Before starting a new server, check: `lsof -ti:18923`. If already running, skip.
+- Use `--direction right` by default; match the user's request (right, down, etc.) when specified.
+- **When you modify the source markdown**, the panel reloads automatically — no manual reload needed.
+- To close the panel, close the browser surface it opened.
 
 ## Safety Rules
 
@@ -246,9 +223,9 @@ See `${SKILL_DIR}/references/troubleshooting.md` for the cmux failure-mode matri
 
 ## Known Gotchas
 
-- **`new-surface` and `new-pane --type terminal` create non-functional surfaces.** Surfaces created with these commands show as `[terminal]` in `cmux tree` but reject `cmux send` and `cmux read-screen` with `Error: invalid_params: Surface is not a terminal`. Use `cmux new-split <direction>` instead — it creates a usable terminal split within an existing pane.
+- **`new-surface` creates non-functional terminal surfaces.** Surfaces created with `new-surface` (default type) show as `[terminal]` in `cmux tree` but reject `cmux send` and `cmux read-screen` with `Error: invalid_params: Surface is not a terminal`. Use `cmux new-pane --type terminal --direction <dir>` or `cmux new-split <direction>` instead — these create usable interactive terminal splits within an existing pane.
 - **`new-split` without `--workspace` creates the split in the focused workspace, not the caller's.** Always pass `--workspace <caller.workspace_ref>` to pin the split to the correct workspace: `cmux new-split right --workspace workspace:9`. Additionally, if the workspace is not currently focused, the resulting split is non-interactive. Call `cmux select-workspace --workspace workspace:9` before **each** `new-split` call — focus is not retained between calls, so a single `select-workspace` before the first split is not sufficient.
 - **Smart split placement:** Use `right` when the workspace has a single pane; use `down --surface <last-non-CC-surface>` when it already has a horizontal split, to stack new panels vertically on the right rather than creating a cramped third column. The `watch_issues.py create-split` subcommand implements this automatically.
-- **`send` without `--workspace` fails for non-focused workspaces.** Always pass both flags together: `cmux send --surface surface:N --workspace workspace:W 'text'`. The positional form `cmux send surface:N 'text'` fails with `Surface is not a terminal` when the surface is not in the focused workspace.
+- **`send` without `--workspace` fails for non-focused workspaces.** Always pass both flags together: `cmux send --surface surface:N --workspace workspace:W 'text'`. Note: `cmux send` has **no positional surface argument** — `<text>` is the only positional. Writing `cmux send surface:N 'text'` silently sends the literal string `surface:N` as text to the default surface (no error, wrong behaviour). Always use `--surface` and `--workspace` flags.
 - **`send-key` ctrl key names:** Use lowercase with hyphen: `ctrl-c`, `ctrl-l`. Capital `C-c` is not recognised. `enter` and `Return` are both valid for the Enter key.
 - **`cmux send` silently falls back to the focused surface on a wrong ref.** If the target surface ref is invalid or not in the specified workspace, `cmux send` exits 0 without error and delivers input to whichever surface is currently focused. Always pre-validate the surface exists before sending: `cmux tree --workspace <ref> --json` and confirm the ref appears in `windows[].workspaces[].panes[].surfaces[].ref`.
