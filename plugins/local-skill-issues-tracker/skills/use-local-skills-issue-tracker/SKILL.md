@@ -21,7 +21,7 @@ All operations go through the CLI script. Always use the full absolute path — 
 python3 ${SKILL_DIR}/scripts/skill_issues_cli.py <subcommand> [options]
 ```
 
-Where `${SKILL_DIR}` resolves to the absolute path of this skill's directory. `LOCAL_ISSUE_TRACKER_DB_ROOT` must be set in the environment before invoking the script.
+Where `${SKILL_DIR}` resolves to the absolute path of this skill's directory. `LOCAL_ISSUE_TRACKER_DB_ROOT` must be present in the environment — it is typically pre-configured in the user's shell profile or rules. **Do not set it inline on every command.** Only set it explicitly if the script fails with a `LOCAL_ISSUE_TRACKER_DB_ROOT is not set` error, or if the user explicitly provides a path.
 
 ## Operations
 
