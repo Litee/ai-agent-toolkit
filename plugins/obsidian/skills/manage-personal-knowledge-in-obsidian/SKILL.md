@@ -76,7 +76,12 @@ Links between notes are the core value of Obsidian. Two complementary types:
 
 **Related Topics** (at card bottom): for conceptually adjacent notes that don't fit naturally in prose. Always annotate each link — a bare link list offers no more value than a search result.
 
-**Virtual links**: link freely to notes that don't exist yet. Unresolved links appear in Obsidian's graph view and signal future cards to create. It is normal to have some unresolved links.
+**Virtual links**: link freely to notes that don't exist yet. Unresolved links appear in Obsidian's graph view and signal future cards to create. It is normal to have some unresolved links. Guidance for choosing virtual links:
+- **Wikipedia test**: anything that could plausibly be its own Wikipedia article is a good virtual-link candidate. Concrete concepts, named techniques, technologies, people, and places qualify; generic adjectives and one-off phrases do not.
+- **Link first mention only**: link the first occurrence of a notion within each top-level (`##`) section. Second and later mentions in the same section stay unlinked to avoid visual noise.
+- **Related Topics complement, not replace**: a Related Topics entry never substitutes for an inline link. If a notion is meaningfully discussed in the main content, link it there too — Related Topics is for adjacent notes that didn't earn an inline mention.
+- **Avoid acronyms as link names**: don't make the canonical link an acronym unless it is universally well known (e.g. `USA`, `HTTP`). Prefer the spelled-out name: `[[Cache Invalidation]]`, not `[[CI]]`.
+- **Abbreviations are fine once expanded**: it is acceptable to use an abbreviation in a link if the full name is rendered at least once in the document, e.g. introduce `[[Test-Driven Development]] (TDD)` once, then `[[Test-Driven Development|TDD]]` afterwards.
 
 **Quality over quantity**: before creating a link, ask "would this note be useful in the target's backlink panel?" If a term appears in hundreds of notes, linking it everywhere adds noise, not signal. Don't link generic terms that lack their own meaningful note.
 
@@ -309,5 +314,7 @@ For a complete periodic gardening workflow, see Workflow 10 in `${SKILL_DIR}/ref
 ---
 
 ## When the CLI Fails
+
+> **The `obsidian` CLI acts on the app's active vault, not your shell's working directory.** A git worktree or checkout of a vault is *not* automatically targeted — edits land in the active vault and worktree files stay invisible to the CLI. Open the intended vault as the active vault first.
 
 See `${SKILL_DIR}/references/troubleshooting.md` for the fallback and escalation rules specific to PKM workflows (when to fall back to `rg`/`find`, when writes are forbidden, how to resume mid-workflow). The lower-level CLI error matrix lives in `obsidian:use-obsidian-cli` → `references/troubleshooting.md`.
