@@ -2,6 +2,7 @@ __pycache__
 .claude/scheduled_tasks.lock
 .claude/settings.local.json
 .claude/worktrees/
+.worktrees/
 .pi/settings.json
 .remember/
 .venv
