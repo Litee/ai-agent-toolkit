@@ -65,6 +65,52 @@ Consistent hashing distributes keys across a virtual ring of nodes, minimizing k
 - Use Title Case for note names in wikilinks: `[[Binary-to-Text Encoding]]`
 - Use pipe syntax when display text differs from the canonical name: `[[Consistent Hashing|consistent hashing]]`
 
+> **Comparison notes follow different rules.** See [## Comparison Notes](#comparison-notes) below — they prohibit opening definitions and Related Topics sections.
+
+---
+
+## Comparison Notes
+
+Comparison notes have their own conventions. Apply these **instead of** the standard card rules where they conflict.
+
+### Naming conventions
+
+- `X vs Y` — use when the pairing is idiomatic or widely recognised (e.g. *Correlation vs Causation*, *Compute Bound vs Memory Bound*)
+- `Comparison of X and Y` / `Comparison of X, Y, and Z` — use for multi-subject comparisons or when the subjects don't form a well-known paired concept
+
+Add an `aliases` frontmatter entry for the alternative form when it is commonly used (e.g. a `Comparison of X and Y` note may alias `X vs Y`).
+
+### Structure options (all valid — choose by complexity)
+
+1. **Bullet list with bold subject labels** — flat list of dimension bullets, each prefixed `**Subject:**`. Best for compact comparisons with few dimensions.
+
+2. **`###` dimension sections, each containing bold-labeled subject bullets** — repeated `**Subject:**` entries under each `###` heading. Best for 5–10 dimension comparisons.
+
+3. **Markdown table** — one row per subject, one column per dimension. Best when there are many subjects or when the comparison is at-a-glance. Richer notes may combine a summary table with prose `###` sections.
+
+### Required opening line
+
+Unlike standard knowledge cards, comparison notes must **not** open with a definition of either concept. Instead, write a single framing sentence that names the subjects and states the key tension or purpose:
+
+> *"A side-by-side comparison of Apache Arrow and Apache Parquet — two columnar formats designed for different purposes."*
+
+This orients the reader without defining either concept.
+
+### Prohibited elements
+
+- **No opening definition** (the 1–2 sentence prose opener before a `##` header that standard cards require). Comparison notes use a framing sentence instead — see above.
+- **No Related Topics section** — no exceptions. Comparison notes are primarily designed to be embedded into parent notes as collapsed callouts (default pattern):
+  ```markdown
+  > [!info]- Comparison
+  > ![[Comparison of X and Y]]
+  ```
+  A Related Topics section creates visual noise inside the callout. Use inline wikilinks within comparison bullets instead.
+
+### Optional elements
+
+- **`### When to Choose`** (or similar) at the end of richer comparisons (3+ subjects) — practical guidance on which subject is appropriate in which scenario.
+- **`### External Resources`** — include when genuinely useful; omit otherwise. Standard card rules apply here.
+
 ---
 
 ## Linking Strategy
