@@ -46,25 +46,6 @@
       ]
     },
     {
-      "name": "convert-audio",
-      "description": "This plugin contains a skill for converting audio files between formats using ffmpeg (MP3, WAV, AAC, FLAC, Opus, OGG), adjusting bitrate/quality, changing sample rate/channels, modifying playback speed, or adding/editing audio metadata (ID3 tags).",
-      "source": "./plugins/convert-audio",
-      "strict": false,
-      "version": "1.0.7",
-      "category": "user",
-      "keywords": [
-        "ffmpeg",
-        "audio",
-        "conversion",
-        "mp3",
-        "wav",
-        "flac"
-      ],
-      "skills": [
-        "./skills/convert-audio"
-      ]
-    },
-    {
       "name": "local-skill-issues-tracker",
       "description": "This plugin contains a skill for a local JSON-based issue tracker where disconnected agents report skill bugs and feature requests. Includes a filesystem watcher (long-poll-with-exit) for notifications on new issues, status changes, and comments.",
       "source": "./plugins/local-skill-issues-tracker",
@@ -614,6 +595,43 @@
         "hooks",
         "settings",
         "versioning"
+      ]
+    },
+    {
+      "name": "multimedia-tools",
+      "description": "This plugin contains skills for multimedia processing: driving the yt-dlp CLI against YouTube (download videos/audio, enumerate channels/playlists/search, extract metadata, fetch captions, pull comments, split by chapters, clip by timestamp, wait for livestreams, build JSONL corpora); and converting audio files between formats using ffmpeg (MP3, WAV, AAC, FLAC, Opus, OGG) with bitrate/speed adjustment and ID3 tag editing.",
+      "source": "./plugins/multimedia-tools",
+      "strict": false,
+      "version": "1.0.21",
+      "category": "user",
+      "keywords": [
+        "youtube",
+        "video",
+        "multimedia",
+        "yt-dlp",
+        "channel",
+        "transcript",
+        "captions",
+        "subtitles",
+        "vtt",
+        "download",
+        "playlist",
+        "search",
+        "comments",
+        "chapters",
+        "livestream",
+        "metadata",
+        "clip",
+        "ffmpeg",
+        "audio",
+        "conversion",
+        "mp3",
+        "wav",
+        "flac"
+      ],
+      "skills": [
+        "./skills/convert-audio",
+        "./skills/use-yt-dlp-cli"
       ]
     },
     {

@@ -36,12 +36,12 @@ These skills can be installed as plugins in Claude Code.
 /plugin install cli-design@litee-claude-code-plugins
 /plugin install cmux-terminal@litee-claude-code-plugins
 /plugin install communication@litee-claude-code-plugins
-/plugin install convert-audio@litee-claude-code-plugins
 /plugin install cron-restoration-guard@litee-claude-code-plugins
 /plugin install file-system-tools@litee-claude-code-plugins
 /plugin install generate-image@litee-claude-code-plugins
 /plugin install local-skill-issues-tracker@litee-claude-code-plugins
 /plugin install ml-system-design-interviewer@litee-claude-code-plugins
+/plugin install multimedia-tools@litee-claude-code-plugins
 /plugin install obsidian@litee-claude-code-plugins
 /plugin install podcast-generation@litee-claude-code-plugins
 /plugin install protect-file-system-access@litee-claude-code-plugins
@@ -69,18 +69,18 @@ Each plugin installs a skill that extends Claude's capabilities:
 | `aws-glue` (`use-aws-glue`, `watch-aws-glue-job`, `watch-aws-glue-workflow`) | developer-tools | AWS Glue ETL job writing, configuration, debugging, monitoring with CloudWatch and Observability metrics, S3 shuffle, worker sizing, per-worker progress reporting, API call tracking, live job monitoring, VPC endpoint validation, Flex job cost savings, Spark UI setup, small files handling (groupFiles/coalesce), timeout/MaxConcurrentRuns anti-patterns, troubleshooting quick-reference; and live workflow monitoring with per-node job/crawler state tracking, node failure early-exit, and workflow run statistics |
 | `aws-quota-service` (`watch-aws-quota-requests`) | developer-tools | AWS Service Quotas increase request monitoring with approval/denial notifications |
 | `aws-support` (`watch-aws-support-cases`) | developer-tools | AWS Support case monitoring with status/severity/communication change detection. Requires Business or Enterprise AWS support plan |
+| `block-main-repo-writes` | developer-tools | PreToolUse hook (gated on `CC_HOOK_BLOCK_WRITING_TO_MAIN_REPO`) that blocks direct writes to the main git checkout, forcing edits into git worktrees |
 | `claude-code-session-history` (`analyze-claude-code-session-transcripts`) | developer-tools | Analyze Claude Code session JSONL transcripts to identify recurring patterns, skill gaps, agent failure modes, and improvement opportunities |
 | `claude-code-status-line` | developer-tools | SessionStart hook that configures Claude Code statusline to display context usage, token counts, cost, session duration, model ID, effort level, thinking state, git branch, and working directory |
+| `cli-design` (`build-cli`) | developer-tools | Language-agnostic CLI design: naming conventions, flags, help text, stdout/stderr routing, error messages, exit codes, interactivity, configuration precedence (XDG), authentication patterns, signal handling, idempotency, testing (black-box binary testing, snapshot tests), SemVer breaking-change rules, performance budgets (< 100ms startup), distribution (binary packaging, signing), plugin architectures, and AI-agent-friendly design (structured output, schema introspection, terse output) |
 | `cmux-terminal` (`use-cmux-terminal`) | developer-tools | Terminal multiplexer integration: orchestrate sessions, browser automation, progress reporting; SessionStart hook prints cmux context and LLM behavioural instructions when running inside cmux |
 | `communication` (`communicate-well`, `write-good-emails`) | productivity | Async communication guidelines for AI agents: value test, message style, frequency, anti-patterns, and channel-type rules; professional email writing: subject lines, tone calibration, difficult scenarios, follow-up strategy, and AI prompting for emails |
-| `cli-design` (`build-cli`) | developer-tools | Language-agnostic CLI design: naming conventions, flags, help text, stdout/stderr routing, error messages, exit codes, interactivity, configuration precedence (XDG), authentication patterns, signal handling, idempotency, testing (black-box binary testing, snapshot tests), SemVer breaking-change rules, performance budgets (< 100ms startup), distribution (binary packaging, signing), plugin architectures, and AI-agent-friendly design (structured output, schema introspection, terse output) |
-| `convert-audio` | user | Audio format conversion using ffmpeg (MP3, WAV, AAC, FLAC, Opus, OGG), bitrate/speed adjustment, and metadata tagging (ID3 tags) |
-| `block-main-repo-writes` | developer-tools | PreToolUse hook (gated on `CC_HOOK_BLOCK_WRITING_TO_MAIN_REPO`) that blocks direct writes to the main git checkout, forcing edits into git worktrees |
 | `cron-restoration-guard` | developer-tools | SessionStart hook (resume only) that instructs the agent to verify and re-register any cron jobs from the previous session that are no longer active |
 | `file-system-tools` (`free-disk-space`, `handle-large-files`) | developer-tools | Free disk space by cleaning development caches, IDE artefacts, and Docker resources. Scan for bloat directories (node_modules, virtual environments, build caches). Safely analyze large files without exceeding the context window: size-checking strategies, targeted extraction one-liners (Bash/Python/Node.js), structured data probing (JSON, CSV, XML, logs), and token estimation |
 | `generate-image` | user | Image generation using Amazon Nova Canvas on AWS Bedrock |
 | `local-skill-issues-tracker` (`use-local-skills-issue-tracker`) | developer-tools | Local JSON-based issue tracker for disconnected agents to report skill bugs and feature requests. Includes a filesystem watcher (long-poll-with-exit) for notifications on new issues, status changes, and comments |
 | `ml-system-design-interviewer` | productivity | ML System Design interview framework for Principal/Staff-level candidates |
+| `multimedia-tools` (`convert-audio`, `use-yt-dlp-cli`) | user | Audio format conversion using ffmpeg (MP3, WAV, AAC, FLAC, Opus, OGG), bitrate/speed adjustment, and metadata tagging (ID3 tags); drive yt-dlp against YouTube: download videos/audio, enumerate channels/playlists/search results, extract metadata, fetch captions, pull comments, split by chapters, clip by timestamp, wait for livestreams, build JSONL corpora |
 | `obsidian` (`enrich-obsidian-notes-with-best-practices`, `manage-personal-knowledge-in-obsidian`, `use-obsidian-cli`, `use-obsidian-markdown`) | productivity | Four skills: Obsidian CLI operations (CRUD, search, tags, properties, daily notes, templates, tasks); Obsidian Flavored Markdown syntax (wikilinks, embeds, callouts, properties, math, Mermaid); personal knowledge management methodology (atomic notes, PKM workflows, vault health); vault enrichment — adding Best Practices and Anti-Patterns sections to knowledge notes using parallel sub-agents and internet research |
 | `podcast-generation` | user | AI-powered podcast script generation and audio synthesis using AWS TTS |
 | `protect-file-system-access` | developer-tools | PreToolUse hook blocking direct edits to AWS credentials, SSH keys, shell profiles, and lockfiles |
