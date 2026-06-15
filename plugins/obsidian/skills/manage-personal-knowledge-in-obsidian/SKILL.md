@@ -64,6 +64,9 @@ Consistent hashing distributes keys across a virtual ring of nodes, minimizing k
 - Default to minimalistic cards; expand only when the idea genuinely requires it
 - Use Title Case for note names in wikilinks: `[[Binary-to-Text Encoding]]`
 - Use pipe syntax when display text differs from the canonical name: `[[Consistent Hashing|consistent hashing]]`
+- **No section header that repeats the card name at the top of the note.** Obsidian renders the filename as the H1 heading automatically — adding a `# Card Name` header creates a duplicate title.
+- **Section order at the bottom of a card:** if both `## External Resources` and `## Related Topics` are present, External Resources must appear first (immediately before Related Topics).
+- **Spelling convention:** use the convention specified in the project's `AGENTS.md`. When no project `AGENTS.md` exists, default to American English (optimization, behavior, color, etc.).
 
 > **Comparison notes follow different rules.** See [## Comparison Notes](#comparison-notes) below — they prohibit opening definitions and Related Topics sections.
 
