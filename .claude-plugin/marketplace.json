@@ -281,7 +281,7 @@
       "description": "This plugin contains a skill for driving the yt-dlp CLI against YouTube: download videos/audio, enumerate channels/playlists/search results, extract metadata, fetch captions, pull comments, split by chapters, clip by timestamp, wait for livestreams, build JSONL corpora.",
       "source": "./plugins/youtube",
       "strict": false,
-      "version": "1.0.0",
+      "version": "1.0.1",
       "category": "user",
       "keywords": [
         "youtube",
