@@ -43,9 +43,11 @@ These skills can be installed as plugins in Claude Code.
 /plugin install ml-system-design-interviewer@litee-claude-code-plugins
 /plugin install multimedia-tools@litee-claude-code-plugins
 /plugin install obsidian@litee-claude-code-plugins
+/plugin install package-management@litee-claude-code-plugins
 /plugin install podcast-generation@litee-claude-code-plugins
 /plugin install protect-file-system-access@litee-claude-code-plugins
 /plugin install pyspark@litee-claude-code-plugins
+/plugin install youtube@litee-claude-code-plugins
 /plugin install qmd@litee-claude-code-plugins
 /plugin install register-safe-terminal-commands@litee-claude-code-plugins
 /plugin install skill-management@litee-claude-code-plugins
@@ -80,11 +82,13 @@ Each plugin installs a skill that extends Claude's capabilities:
 | `generate-image` | user | Image generation using Amazon Nova Canvas on AWS Bedrock |
 | `local-skill-issues-tracker` (`use-local-skills-issue-tracker`) | developer-tools | Local JSON-based issue tracker for disconnected agents to report skill bugs and feature requests. Includes a filesystem watcher (long-poll-with-exit) for notifications on new issues, status changes, and comments |
 | `ml-system-design-interviewer` | productivity | ML System Design interview framework for Principal/Staff-level candidates |
-| `multimedia-tools` (`convert-audio`, `use-yt-dlp-cli`) | user | Audio format conversion using ffmpeg (MP3, WAV, AAC, FLAC, Opus, OGG), bitrate/speed adjustment, and metadata tagging (ID3 tags); drive yt-dlp against YouTube: download videos/audio, enumerate channels/playlists/search results, extract metadata, fetch captions, pull comments, split by chapters, clip by timestamp, wait for livestreams, build JSONL corpora |
+| `multimedia-tools` (`convert-audio`) | user | Audio format conversion using ffmpeg (MP3, WAV, AAC, FLAC, Opus, OGG), bitrate/speed adjustment, and metadata tagging (ID3 tags) |
 | `obsidian` (`enrich-obsidian-notes-with-best-practices`, `manage-personal-knowledge-in-obsidian`, `use-obsidian-cli`, `use-obsidian-markdown`) | productivity | Four skills: Obsidian CLI operations (CRUD, search, tags, properties, daily notes, templates, tasks); Obsidian Flavored Markdown syntax (wikilinks, embeds, callouts, properties, math, Mermaid); personal knowledge management methodology (atomic notes, PKM workflows, vault health); vault enrichment — adding Best Practices and Anti-Patterns sections to knowledge notes using parallel sub-agents and internet research |
+| `package-management` (`configure-dependency-cooldown`) | developer-tools | Configure dependency cooldowns across all major package managers (npm, pnpm, Yarn, Bun, Deno, uv, pip, Poetry, Bundler) and update tools (Renovate, Dependabot, Snyk) to delay installation of newly published versions and protect against supply-chain attacks |
 | `podcast-generation` | user | AI-powered podcast script generation and audio synthesis using AWS TTS |
 | `protect-file-system-access` | developer-tools | PreToolUse hook blocking direct edits to AWS credentials, SSH keys, shell profiles, and lockfiles |
 | `pyspark` (`use-pyspark`) | developer-tools | PySpark anti-patterns (JSON inference OOM, data skew, shuffle spill, Python UDFs), coding style guide (import aliases, type hints, method chains, join hygiene, null handling), and Spark tuning (AQE, broadcast joins, shuffle partitions) |
+| `youtube` (`use-yt-dlp-cli`) | user | Drive yt-dlp against YouTube: download videos/audio, enumerate channels/playlists/search results, extract metadata, fetch captions, pull comments, split by chapters, clip by timestamp, wait for livestreams, build JSONL corpora |
 | `qmd` (`use-qmd-cli`) | productivity | On-device markdown note search using QMD CLI: hybrid BM25 + vector + LLM re-ranking retrieval, structured query syntax (lex:/vec:/hyde:), document retrieval by path or docid, collection management, and agent-friendly output formats (JSON, CSV, XML) |
 | `register-safe-terminal-commands` | developer-tools | SessionStart hook that auto-syncs safe terminal commands to Claude Code settings; skill available for manual dry-run/verbose sync |
 | `skill-management` (`enrich-skill-via-research`) | developer-tools | Research external sources (official docs, team wikis, post-mortems, code search) to fill gaps in an existing skill's SKILL.md: failure modes, anti-patterns, troubleshooting steps, and operational gotchas. Distinct from skill-creator (creates from scratch) and review-skill (checks compliance) |

@@ -5,7 +5,7 @@
   },
   "metadata": {
     "description": "Collection of AI agent skills for AWS CDK development, AWS documentation search, AWS Athena SQL querying, CloudWatch Logs Insights querying, Anki flashcard management, Obsidian vault management, audio conversion, subtitle/caption conversion, podcast generation, safe terminal command registration, image generation, ML system design interviews, and markdown note search",
-    "version": "1.1.43",
+    "version": "1.1.44",
     "homepage": "https://github.com/Litee/ai-agent-toolkit"
   },
   "plugins": [
@@ -277,6 +277,33 @@
       ]
     },
     {
+      "name": "youtube",
+      "description": "This plugin contains a skill for driving the yt-dlp CLI against YouTube: download videos/audio, enumerate channels/playlists/search results, extract metadata, fetch captions, pull comments, split by chapters, clip by timestamp, wait for livestreams, build JSONL corpora.",
+      "source": "./plugins/youtube",
+      "strict": false,
+      "version": "1.0.0",
+      "category": "user",
+      "keywords": [
+        "youtube",
+        "video",
+        "yt-dlp",
+        "channel",
+        "transcript",
+        "captions",
+        "download",
+        "playlist",
+        "search",
+        "comments",
+        "chapters",
+        "livestream",
+        "metadata",
+        "clip"
+      ],
+      "skills": [
+        "./skills/use-yt-dlp-cli"
+      ]
+    },
+    {
       "name": "qmd",
       "description": "This plugin contains a skill for searching markdown notes on-device using the QMD CLI. QMD combines BM25 full-text search, vector semantic search, and LLM re-ranking for hybrid retrieval across indexed markdown collections. Use for finding information in local knowledge bases, retrieving documents by path or docid, running structured queries with lex:/vec:/hyde: typed lines, and managing indexed collections.",
       "source": "./plugins/qmd",
@@ -329,6 +356,34 @@
       ],
       "skills": [
         "./skills/register-safe-terminal-commands"
+      ]
+    },
+    {
+      "name": "package-management",
+      "description": "This plugin contains a skill for configuring dependency cooldowns across all major package managers (npm, pnpm, Yarn, Bun, Deno, uv, pip, Poetry, Bundler) and update tools (Renovate, Dependabot, Snyk). Use when setting up supply-chain protection by delaying installation of newly published package versions.",
+      "source": "./plugins/package-management",
+      "strict": false,
+      "version": "1.0.0",
+      "category": "developer-tools",
+      "keywords": [
+        "dependency",
+        "cooldown",
+        "supply-chain",
+        "security",
+        "npm",
+        "pnpm",
+        "yarn",
+        "bun",
+        "deno",
+        "uv",
+        "pip",
+        "poetry",
+        "bundler",
+        "renovate",
+        "dependabot"
+      ],
+      "skills": [
+        "./skills/configure-dependency-cooldown"
       ]
     },
     {
@@ -599,39 +654,28 @@
     },
     {
       "name": "multimedia-tools",
-      "description": "This plugin contains skills for multimedia processing: driving the yt-dlp CLI against YouTube (download videos/audio, enumerate channels/playlists/search, extract metadata, fetch captions, pull comments, split by chapters, clip by timestamp, wait for livestreams, build JSONL corpora); and converting audio files between formats using ffmpeg (MP3, WAV, AAC, FLAC, Opus, OGG) with bitrate/speed adjustment and ID3 tag editing.",
+      "description": "This plugin contains a skill for converting audio files between formats using ffmpeg (MP3, WAV, AAC, FLAC, Opus, OGG) with bitrate/speed adjustment and ID3 tag editing.",
       "source": "./plugins/multimedia-tools",
       "strict": false,
       "version": "1.0.21",
       "category": "user",
       "keywords": [
-        "youtube",
-        "video",
-        "multimedia",
-        "yt-dlp",
-        "channel",
-        "transcript",
-        "captions",
-        "subtitles",
-        "vtt",
-        "download",
-        "playlist",
-        "search",
-        "comments",
-        "chapters",
-        "livestream",
-        "metadata",
-        "clip",
         "ffmpeg",
         "audio",
         "conversion",
         "mp3",
         "wav",
-        "flac"
+        "flac",
+        "aac",
+        "openg",
+        "ogg",
+        "metadata",
+        "id3",
+        "bitrate",
+        "speed"
       ],
       "skills": [
-        "./skills/convert-audio",
-        "./skills/use-yt-dlp-cli"
+        "./skills/convert-audio"
       ]
     },
     {
