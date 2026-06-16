@@ -5,7 +5,7 @@
   },
   "metadata": {
     "description": "Collection of AI agent skills for AWS CDK development, AWS documentation search, AWS Athena SQL querying, CloudWatch Logs Insights querying, Anki flashcard management, Obsidian vault management, audio conversion, subtitle/caption conversion, podcast generation, safe terminal command registration, image generation, ML system design interviews, and markdown note search",
-    "version": "1.1.44",
+    "version": "1.1.45",
     "homepage": "https://github.com/Litee/ai-agent-toolkit"
   },
   "plugins": [
@@ -360,10 +360,10 @@
     },
     {
       "name": "package-management",
-      "description": "This plugin contains a skill for configuring dependency cooldowns across all major package managers (npm, pnpm, Yarn, Bun, Deno, uv, pip, Poetry, Bundler) and update tools (Renovate, Dependabot, Snyk). Use when setting up supply-chain protection by delaying installation of newly published package versions.",
+      "description": "This plugin contains two skills: (1) configure-dependency-cooldown for setting up supply-chain protection by delaying installation of newly published package versions across all major package managers; (2) audit-global-tool-updates for scanning globally installed CLI tools, detecting available updates, diffing changes, and providing security-reviewed verdicts before upgrading.",
       "source": "./plugins/package-management",
       "strict": false,
-      "version": "1.0.0",
+      "version": "1.1.0",
       "category": "developer-tools",
       "keywords": [
         "dependency",
@@ -379,11 +379,16 @@
         "pip",
         "poetry",
         "bundler",
+        "cargo",
         "renovate",
-        "dependabot"
+        "dependabot",
+        "global-tools",
+        "update-audit",
+        "security-review"
       ],
       "skills": [
-        "./skills/configure-dependency-cooldown"
+        "./skills/configure-dependency-cooldown",
+        "./skills/audit-global-tool-updates"
       ]
     },
     {
