@@ -662,7 +662,7 @@
       "description": "This plugin contains a skill for converting audio files between formats using ffmpeg (MP3, WAV, AAC, FLAC, Opus, OGG) with bitrate/speed adjustment and ID3 tag editing.",
       "source": "./plugins/multimedia-tools",
       "strict": false,
-      "version": "1.0.21",
+      "version": "1.0.22",
       "category": "user",
       "keywords": [
         "ffmpeg",
