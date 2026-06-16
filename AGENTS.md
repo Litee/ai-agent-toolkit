@@ -19,7 +19,7 @@ When fixing skill issues from the issue tracker:
 
 All changes follow this sequence — do not skip or reorder steps:
 
-1. **Create a worktree**: `git worktree add .claude/worktrees/<branch-name> -b <branch-name>`. Make all changes inside it; keep the main repo clean.
+1. **Create a worktree**: `git worktree add .worktrees/<branch-name> -b <branch-name>`. Make all changes inside it; keep the main repo clean.
 2. **Implement and test** changes inside the worktree.
 3. **Present changes** to the user for review. Do NOT commit yet.
 4. **Commit only after** the user has reviewed the worktree diff and explicitly confirmed it is OK. Do not commit speculatively or "to save progress" — the user's explicit confirmation is required.
