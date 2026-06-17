@@ -1,0 +1,8 @@
+{
+  "name": "ec2-vscode",
+  "description": "Skill for spinning up (or resuming) an EC2 instance and opening VS Code Remote-SSH. Manages the full session lifecycle: create key pair + security group + instance, configure SSH, open VS Code, watch for VS Code close, auto-stop. Teardown destroys all created resources.",
+  "version": "1.0.0",
+  "skills": [
+    "./skills/launch-ec2-vscode"
+  ]
+}
