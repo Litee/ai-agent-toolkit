@@ -1,0 +1,30 @@
+# User Preferences for AI News Digest
+# This file is optional - defaults will be used if not present
+
+# Default time range (days)
+default_time_range: 7  # Options: 1, 7, 30
+
+# Default categories (comma-separated, or "all")
+default_categories: "all"  # Options: all, official, research, community, tech_news, ai_tools
+
+# Default number of top items to show
+default_top_n: 10
+
+# Favorite sources (will boost score by +2)
+favorite_sources:
+  - "OpenAI News"
+  - "Anthropic Engineering (Community)"
+  - "Simon Willison's Weblog"
+
+# Excluded sources (will skip these feeds)
+excluded_sources: []
+
+# Notification preferences
+notifications:
+  show_progress: true
+  show_scores: true
+
+# Performance settings
+performance:
+  max_workers: 5  # Number of parallel workers for fetching feeds
+  cache_ttl_minutes: 30  # Cache time-to-live in minutes

@@ -10,6 +10,25 @@
   },
   "plugins": [
     {
+      "name": "ai-news-digest",
+      "description": "This plugin contains a skill that aggregates the latest AI news from 17+ RSS feeds (OpenAI, DeepMind, Anthropic, ArXiv, Hacker News, Reddit, LangChain, Hugging Face, and more), scores and deduplicates articles by source weight, keyword relevance, and recency, then presents an interactive Top 10 digest in the terminal for selective saving as markdown. Parallel fetching with 30-minute caching and optional trend analysis. Uses no LLM API keys \u2014 the host agent writes all summaries.",
+      "source": "./plugins/ai-news-digest",
+      "strict": false,
+      "version": "2.0.0",
+      "category": "productivity",
+      "keywords": [
+        "ai-news",
+        "rss",
+        "digest",
+        "news-aggregation",
+        "feeds",
+        "trends"
+      ],
+      "skills": [
+        "./skills/ai-news-digest"
+      ]
+    },
+    {
       "name": "aws-documentation",
       "description": "This plugin contains skills for AWS CDK infrastructure development and searching official AWS documentation. Use for CDK guidance, architecture patterns, GenAI constructs, Bedrock agent schemas, CDK Nag rules, documentation search, and AWS architecture recommendations.",
       "source": "./plugins/aws-documentation",

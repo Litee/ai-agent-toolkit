@@ -1,0 +1,175 @@
+# AI News RSS Feed Sources
+# This file defines RSS feeds to monitor for AI news
+
+feeds:
+  # Official Company Blogs (High Priority)
+  official_blogs:
+    - name: "OpenAI News"
+      url: "https://openai.com/news/rss.xml"
+      weight: 10
+      category: "official"
+
+    - name: "DeepMind Blog"
+      url: "https://deepmind.google/blog/rss.xml"
+      weight: 10
+      category: "official"
+
+    - name: "Anthropic Engineering (Community)"
+      url: "https://raw.githubusercontent.com/conoro/anthropic-engineering-rss-feed/main/anthropic_engineering_rss.xml"
+      weight: 9
+      category: "official"
+
+  # Research Papers (High Priority)
+  research:
+    - name: "ArXiv Machine Learning"
+      url: "http://export.arxiv.org/rss/cs.LG"
+      weight: 8
+      category: "research"
+
+    - name: "ArXiv Artificial Intelligence"
+      url: "http://export.arxiv.org/rss/cs.AI"
+      weight: 8
+      category: "research"
+
+    - name: "ArXiv Computation and Language"
+      url: "http://export.arxiv.org/rss/cs.CL"
+      weight: 8
+      category: "research"
+
+  # Community (Medium Priority)
+  community:
+    - name: "Hacker News - AI"
+      url: "https://hnrss.org/newest?q=AI+OR+LLM+OR+ChatGPT+OR+Claude"
+      weight: 6
+      category: "community"
+
+    - name: "Reddit r/MachineLearning"
+      url: "https://old.reddit.com/r/MachineLearning/.rss"
+      weight: 6
+      category: "community"
+
+    - name: "Reddit r/LocalLLaMA"
+      url: "https://old.reddit.com/r/LocalLLaMA/.rss"
+      weight: 6
+      category: "community"
+
+  # AI Tools & Agent Ecosystem (High Priority)
+  # Practical sources for AI product engineers: tools, SDKs, agent frameworks
+  ai_tools:
+    - name: "Simon Willison's Weblog"
+      url: "https://simonwillison.net/atom/everything/"
+      weight: 9
+      category: "ai_tools"
+
+    - name: "LangChain Blog"
+      url: "https://blog.langchain.com/rss/"
+      weight: 9
+      category: "ai_tools"
+
+    - name: "Vercel Blog"
+      url: "https://vercel.com/atom"
+      weight: 8
+      category: "ai_tools"
+
+    - name: "Hugging Face Blog"
+      url: "https://huggingface.co/blog/feed.xml"
+      weight: 8
+      category: "ai_tools"
+
+    - name: "GitHub Blog"
+      url: "https://github.blog/feed/"
+      weight: 7
+      category: "ai_tools"
+
+  # Tech News Sites (Medium Priority)
+  tech_news:
+    - name: "The Verge - AI"
+      url: "https://www.theverge.com/ai-artificial-intelligence/rss/index.xml"
+      weight: 5
+      category: "tech_news"
+
+    - name: "TechCrunch - AI"
+      url: "https://techcrunch.com/category/artificial-intelligence/feed/"
+      weight: 5
+      category: "tech_news"
+
+# Scoring Configuration
+scoring:
+  # Base weights by category
+  category_weights:
+    official: 10
+    ai_tools: 9
+    research: 8
+    community: 6
+    tech_news: 5
+
+  # Keyword boosting (add points if title/description contains these)
+  keyword_boost:
+    high_priority:  # +5 points
+      - "GPT-5"
+      - "Claude 4"
+      - "Claude Code"
+      - "Codex"
+      - "Copilot"
+      - "Gemini"
+      - "AI agent"
+      - "AI SDK"
+      - "MCP"
+      - "Model Context Protocol"
+      - "breakthrough"
+      - "state-of-the-art"
+      - "SOTA"
+
+    medium_priority:  # +3 points
+      - "LLM"
+      - "transformer"
+      - "fine-tuning"
+      - "RLHF"
+      - "multimodal"
+      - "reasoning"
+      - "LangChain"
+      - "LangGraph"
+      - "CrewAI"
+      - "AutoGen"
+      - "tool use"
+      - "function calling"
+      - "RAG"
+      - "retrieval"
+      - "embedding"
+      - "vector"
+      - "prompt engineering"
+      - "agentic"
+      - "plugin"
+      - "Vercel AI"
+      - "Next.js"
+
+    low_priority:  # +1 point
+      - "AI"
+      - "machine learning"
+      - "deep learning"
+      - "neural network"
+      - "API"
+      - "SDK"
+      - "open source"
+
+  # Recency boost (newer = higher score)
+  recency_boost:
+    last_24h: 10
+    last_48h: 5
+    last_week: 2
+    last_month: 0
+
+# Output Configuration
+output:
+  # Number of top items to include
+  top_n: 5
+
+  # Time range to consider
+  default_days: 7
+
+  # Save location (the skill saves to the current working directory by default;
+  # these keys are advisory and not read by fetch_news.py)
+  output_dir: "."
+
+  # Template
+  template: "top-news"  # top-news, detailed, brief

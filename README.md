@@ -22,6 +22,7 @@ These skills can be installed as plugins in Claude Code.
 
 **Direct installation:**
 ```bash
+/plugin install ai-news-digest@litee-claude-code-plugins
 /plugin install anki@litee-claude-code-plugins
 /plugin install aws-athena@litee-claude-code-plugins
 /plugin install aws-cloudwatch@litee-claude-code-plugins
@@ -63,6 +64,7 @@ Each plugin installs a skill that extends Claude's capabilities:
 
 | Plugin (Skill) | Category | Description |
 |--------|----------|-------------|
+| `ai-news-digest` (`ai-news-digest`) | productivity | Aggregates the latest AI news from 17+ RSS feeds (OpenAI, DeepMind, Anthropic, ArXiv, Hacker News, Reddit, LangChain, Hugging Face, etc.), scores and deduplicates by source weight, keyword relevance, and recency, then presents an interactive Top 10 digest in the terminal for selective markdown saving. Parallel fetching, 30-minute caching, optional trend analysis. No LLM API keys — the host agent writes summaries |
 | `anki` | productivity | Anki flashcard management through AnkiConnect API |
 | `aws-athena` (`query-aws-athena`) | developer-tools | AWS Athena SQL queries with S3 result download, parallel execution, and CTE optimization |
 | `aws-cloudwatch` (`query-aws-cloudwatch-logs-insights`, `use-aws-cloudwatch-metrics`) | developer-tools | CloudWatch Log Insights queries with real-time progress tracking, flexible time ranges, multiple output formats (JSON, CSV, table), and multi-log-group support; CloudWatch custom metrics best practices: PutMetricData batching, EMF, GetMetricData, alarms with M-of-N evaluation and missing-data treatment, composite alarms, metric math, dimension cardinality design, high-resolution metrics, metric streams, Contributor Insights, cost optimization |
