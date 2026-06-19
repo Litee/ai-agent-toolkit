@@ -5,7 +5,7 @@
   },
   "metadata": {
     "description": "Collection of AI agent skills for AWS CDK development, AWS documentation search, AWS Athena SQL querying, CloudWatch Logs Insights querying, Anki flashcard management, Obsidian vault management, audio conversion, subtitle/caption conversion, podcast generation, safe terminal command registration, image generation, ML system design interviews, and markdown note search",
-    "version": "1.1.45",
+    "version": "1.1.46",
     "homepage": "https://github.com/Litee/ai-agent-toolkit"
   },
   "plugins": [
@@ -278,10 +278,10 @@
     },
     {
       "name": "youtube",
-      "description": "This plugin contains a skill for driving the yt-dlp CLI against YouTube: download videos/audio, enumerate channels/playlists/search results, extract metadata, fetch captions, pull comments, split by chapters, clip by timestamp, wait for livestreams, build JSONL corpora.",
+      "description": "This plugin contains skills for driving yt-dlp against YouTube: download videos/audio, enumerate channels/playlists/search results, extract metadata, fetch captions, pull comments, split by chapters, clip by timestamp, wait for livestreams, build JSONL corpora. Also includes youtube-cli — a structured CLI for listing channel/playlist videos with filters, listing playlists, fetching video metadata, and downloading captions, with local caching.",
       "source": "./plugins/youtube",
       "strict": false,
-      "version": "1.0.1",
+      "version": "1.0.2",
       "category": "user",
       "keywords": [
         "youtube",
@@ -300,7 +300,8 @@
         "clip"
       ],
       "skills": [
-        "./skills/use-yt-dlp-cli"
+        "./skills/use-yt-dlp-cli",
+        "./skills/youtube-cli"
       ]
     },
     {
