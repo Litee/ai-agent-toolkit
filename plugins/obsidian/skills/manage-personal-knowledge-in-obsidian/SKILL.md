@@ -64,9 +64,17 @@ Consistent hashing distributes keys across a virtual ring of nodes, minimizing k
 - Default to minimalistic cards; expand only when the idea genuinely requires it
 - Use Title Case for note names in wikilinks: `[[Binary-to-Text Encoding]]`
 - Use pipe syntax when display text differs from the canonical name: `[[Consistent Hashing|consistent hashing]]`
+- **Acronym wikilink rules:** when a term has both a full name and an abbreviation:
+  - **First mention in a top-level section:** `[[Full Name]] (ABBR)` — wikilink the full name, abbreviation as plain parenthetical.
+  - **Second mention, or a universally well-known abbreviation (HTTP, JSON, API, UUID, etc.):** `[[Full Name|ABBR]]` — display the abbreviation; link target remains the full name.
+  - **When reordering an acronym phrase**, always check whether the original contained a wikilink and preserve it. Never strip `[[...]]` while reordering.
+  - **Never use:** `[[ABBR|ABBR]]` (redundant), `[[Full Name|Full Name]]` (redundant), or the full expansion inside the target: `[[Full Name (ABBR)]]`.
 - **No section header that repeats the card name at the top of the note.** Obsidian renders the filename as the H1 heading automatically — adding a `# Card Name` header creates a duplicate title.
 - **Section order at the bottom of a card:** if both `## External Resources` and `## Related Topics` are present, External Resources must appear first (immediately before Related Topics).
+- **Keep inline links inline:** a URL that is contextually part of a bullet (context label + URL on the same line, e.g. `- See the [docs](url) for details`) must stay inline. Only bare URLs or standalone reference items belong in `## External Resources`. Never relocate an inline link just because a URL is present.
 - **Spelling convention:** use the convention specified in the project's `AGENTS.md`. When no project `AGENTS.md` exists, default to American English (optimization, behavior, color, etc.).
+
+- **Corrections-only treatment for system design and reference notes:** notes whose title starts with `System Design -` (or is otherwise a cheatsheet / reference sheet) use a deliberately loose format — nested bullets, inline examples, flat lists under broad headers. Apply corrections only (fix errors, spelling, broken links). Do not restructure: no new `##` headers, no converting nested bullets to flat lists, no moving inline examples to `## External Resources`.
 
 > **Comparison notes follow different rules.** See [## Comparison Notes](#comparison-notes) below — they prohibit opening definitions and Related Topics sections.
 
@@ -131,6 +139,7 @@ Links between notes are the core value of Obsidian. Two complementary types:
 - **Related Topics complement, not replace**: a Related Topics entry never substitutes for an inline link. If a notion is meaningfully discussed in the main content, link it there too — Related Topics is for adjacent notes that didn't earn an inline mention.
 - **Avoid acronyms as link names**: don't make the canonical link an acronym unless it is universally well known (e.g. `USA`, `HTTP`). Prefer the spelled-out name: `[[Cache Invalidation]]`, not `[[CI]]`.
 - **Abbreviations are fine once expanded**: it is acceptable to use an abbreviation in a link if the full name is rendered at least once in the document, e.g. introduce `[[Test-Driven Development]] (TDD)` once, then `[[Test-Driven Development|TDD]]` afterwards.
+- **Never strip wikilinks during edits**: when rewriting a phrase for any reason (acronym reorder, grammar fix, spelling correction), check whether the original span was a wikilink and preserve the `[[...]]` in the rewritten form. Losing a link is a regression.
 
 **Quality over quantity**: before creating a link, ask "would this note be useful in the target's backlink panel?" If a term appears in hundreds of notes, linking it everywhere adds noise, not signal. Don't link generic terms that lack their own meaningful note.
 
