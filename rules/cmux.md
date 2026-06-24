@@ -1,0 +1,1 @@
+- When using cmux, you MUST use `caller.workspace_ref` from `cmux identify --json` for self-referential operations — never `focused.workspace_ref`.
