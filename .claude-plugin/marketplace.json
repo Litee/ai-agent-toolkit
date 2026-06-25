@@ -364,7 +364,7 @@
       "description": "This plugin contains two skills: (1) configure-dependency-cooldown for setting up supply-chain protection by delaying installation of newly published package versions across all major package managers; (2) audit-global-tool-updates for scanning globally installed CLI tools, detecting available updates, diffing changes, and providing security-reviewed verdicts before upgrading.",
       "source": "./plugins/package-management",
       "strict": false,
-      "version": "1.1.0",
+      "version": "1.1.1",
       "category": "developer-tools",
       "keywords": [
         "dependency",
