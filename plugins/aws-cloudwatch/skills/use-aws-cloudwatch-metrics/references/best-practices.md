@@ -262,8 +262,8 @@ cloudwatch.put_metric_alarm(
     Threshold=5.0,
     ComparisonOperator='GreaterThanThreshold',
     TreatMissingData='notBreaching',
-    AlarmActions=['arn:aws:sns:us-east-1:123456789012:alerts'],
-    OKActions   =['arn:aws:sns:us-east-1:123456789012:alerts'],
+    AlarmActions=['arn:aws:sns:us-east-1:YOUR_AWS_ACCOUNT_ID:alerts'],
+    OKActions   =['arn:aws:sns:us-east-1:YOUR_AWS_ACCOUNT_ID:alerts'],
 )
 ```
 
@@ -282,8 +282,8 @@ aws cloudwatch put-metric-alarm \
   --threshold 5.0 \
   --comparison-operator GreaterThanThreshold \
   --treat-missing-data notBreaching \
-  --alarm-actions arn:aws:sns:us-east-1:123456789012:alerts \
-  --ok-actions     arn:aws:sns:us-east-1:123456789012:alerts
+  --alarm-actions arn:aws:sns:us-east-1:YOUR_AWS_ACCOUNT_ID:alerts \
+  --ok-actions     arn:aws:sns:us-east-1:YOUR_AWS_ACCOUNT_ID:alerts
 ```
 
 ---
@@ -301,7 +301,7 @@ cloudwatch.put_composite_alarm(
         'AND ALARM("prod-payment-error-rate")'
     ),
     AlarmDescription='Page only when both latency AND errors are elevated',
-    AlarmActions=['arn:aws:sns:us-east-1:123456789012:pagerduty'],
+    AlarmActions=['arn:aws:sns:us-east-1:YOUR_AWS_ACCOUNT_ID:pagerduty'],
 )
 ```
 
@@ -309,7 +309,7 @@ cloudwatch.put_composite_alarm(
 aws cloudwatch put-composite-alarm \
   --alarm-name prod-payment-degraded \
   --alarm-rule 'ALARM("prod-payment-p99-latency") AND ALARM("prod-payment-error-rate")' \
-  --alarm-actions arn:aws:sns:us-east-1:123456789012:pagerduty
+  --alarm-actions arn:aws:sns:us-east-1:YOUR_AWS_ACCOUNT_ID:pagerduty
 ```
 
 Composite alarm rule functions: `ALARM(name)`, `OK(name)`, `INSUFFICIENT_DATA(name)`. Operators: `AND`, `OR`, `NOT`. Parentheses for grouping. Max rule expression length: 10,240 characters. Composite alarms cannot reference metrics directly — only other alarms.
@@ -429,8 +429,8 @@ If you send CloudWatch metrics to Datadog, New Relic, Splunk, Elasticsearch, or 
 # Create a metric stream to a Firehose delivery stream
 aws cloudwatch put-metric-stream \
   --name prod-metrics-stream \
-  --firehose-arn arn:aws:firehose:us-east-1:123456789012:deliverystream/metrics-to-s3 \
-  --role-arn arn:aws:iam::123456789012:role/CloudWatchMetricsStreamRole \
+  --firehose-arn arn:aws:firehose:us-east-1:YOUR_AWS_ACCOUNT_ID:deliverystream/metrics-to-s3 \
+  --role-arn arn:aws:iam::YOUR_AWS_ACCOUNT_ID:role/CloudWatchMetricsStreamRole \
   --output-format json \
   --include-filters '[{"Namespace":"MyService"},{"Namespace":"AWS/Lambda"}]'
 ```

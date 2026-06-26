@@ -834,7 +834,7 @@ Limit access to specific log groups:
         "logs:StartQuery",
         "logs:GetQueryResults"
       ],
-      "Resource": "arn:aws:logs:us-east-1:123456789012:log-group:/aws/lambda/prod-*"
+      "Resource": "arn:aws:logs:us-east-1:YOUR_AWS_ACCOUNT_ID:log-group:/aws/lambda/prod-*"
     }
   ]
 }
