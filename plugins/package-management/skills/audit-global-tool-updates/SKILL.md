@@ -1,19 +1,17 @@
 ---
 name: audit-global-tool-updates
-description: Use when scanning globally installed CLI tools across package managers for available updates, analyzing version diffs, and reviewing security implications before upgrading. Triggers on requests to audit, review, or safely update globally installed CLI tools.
+description: Use when scanning the globally installed CLI tools on a machine (across npm, pnpm, Yarn, Bun, Deno, uv, pip, Poetry, Cargo) for available updates and reviewing each upgrade before applying it. This is the fleet-wide counterpart to a single-app audit — it enumerates what is installed globally, finds which tools are outdated, and produces a per-tool SAFE/REVIEW/BLOCK verdict. Triggers on "what global CLI tools can I update", "audit my globally installed tools", "are my global tools safe to upgrade". Read-only; never updates anything without confirmation.
 ---
 
 # Global Tool Update Auditor
 
-Scans globally installed CLI tools across package managers, detects available updates, diffs changes, and provides security-reviewed verdicts before any upgrade.
+Scans the globally installed CLI tools across package managers, detects which have updates available, and produces a security-reviewed verdict per tool before any upgrade. This is the **fleet-scan** entry point: it answers *"across everything I have installed globally, what's updatable and is each update safe?"* — as opposed to auditing one named application.
 
-> **Rule:** Never auto-update. Always produce a report with a verdict (SAFE / REVIEW / BLOCK) and ask for human confirmation before proceeding.
+> **Rule:** Never auto-update. Always produce a report with a verdict (SAFE / REVIEW / BLOCK) per tool and ask for human confirmation before proceeding.
 
-## Workflow
+## 1. Scan — enumerate globally installed tools
 
-### 1. Scan — Detect Globally Installed Tools
-
-Query the registry for each package manager to find globally installed packages and their versions. See reference files for the exact commands:
+Query each package manager present on the machine for its globally installed packages and versions. See the per-manager reference files for the exact enumerate / check-latest / update commands:
 
 - **npm**: `${SKILL_DIR}/references/npm.md`
 - **pnpm**: `${SKILL_DIR}/references/pnpm.md`
@@ -24,60 +22,47 @@ Query the registry for each package manager to find globally installed packages 
 - **pip**: `${SKILL_DIR}/references/pip.md`
 - **Poetry**: `${SKILL_DIR}/references/poetry.md`
 - **Cargo**: `${SKILL_DIR}/references/cargo.md`
+- **Bundler/RubyGems**: `${SKILL_DIR}/references/bundler.md`
 
-### 2. Check for Updates
+Only probe managers that are actually installed — a missing manager is not a finding.
 
-For each installed tool, query the registry for the latest version. Compare installed version vs. latest.
+## 2. Check for updates
 
-### 3. Diff — Analyze Changes
+For each installed tool, query the registry for the latest version (commands in the reference files) and compare installed vs. latest. Keep only the tools with a newer version available; those are the upgrade candidates.
 
-For tools with new versions, fetch and diff the changes:
-- Extract the registry tarball for both versions
-- Compare `package.json`, `bin/`, `scripts/`, and all source files
-- Use `${SKILL_DIR}/references/security-checks.md` for the security review checklist
+## 3. Review each candidate upgrade
 
-### 4. Report — Produce Verdict
+For each tool with an update available, you have two version points (installed → latest). Review the change between them by **delegating to the dedicated audit skills** rather than re-deriving the checks here:
 
-For each updatable tool, produce a concise report:
+- **Run the `review-supply-chain-risk` skill** (in the `software-management` plugin) over the diff between the installed and latest versions — it flags install hooks, obfuscation, exfiltration, new binaries, weakened release pipelines, and dangerous code patterns, and returns a SAFE/REVIEW/BLOCK score. If you cannot obtain a source diff for a registry-only package, review the published tarball contents (extract both versions and diff) and feed that to the same skill.
+- **Run the `audit-dependency-advisories` skill** (in the `software-management` plugin) on the tool itself and on any dependency it pulls in — it cross-checks GitHub Advisory Database / OSV and flags any version published less than 72 hours ago (`FRESH`).
+
+Do not reconstruct those checklists from memory — invoke the skills so the analysis stays complete and current.
+
+## 4. Report — produce a per-tool verdict
+
+For each updatable tool, produce a concise report combining the two skills' signals:
 
 ```
-📦 <package-name>: <current> → <latest>
-  Changes: <summary of key changes>
-  Verdict: SAFE | REVIEW | BLOCK
-  Reason: <brief explanation>
+📦 <package-name> (<manager>): <current> → <latest>
+  Changes:  <summary of key changes>
+  Advisory: <GHSA/CVE/OSV id or none>  |  Freshness: <age or FRESH>
+  Verdict:  SAFE | REVIEW | BLOCK
+  Reason:   <brief explanation>
 ```
 
 Verdict meanings:
-- **SAFE** — No suspicious changes. Safe to approve.
-- **REVIEW** — Minor changes flagged for human attention (new deps, changed scripts). Approve with caution.
-- **BLOCK** — High-risk changes (new executables, obfuscated code, permission changes). Do not approve.
+- **SAFE** — no suspicious changes, no advisory, not fresh. Safe to approve.
+- **REVIEW** — minor changes flagged for human attention (new deps, changed scripts, a `FRESH` version, a medium-severity issue). Approve with caution.
+- **BLOCK** — high-risk changes (new executables, obfuscated code, permission changes, a critical/high advisory in range). Do not approve.
 
-### 5. Confirm — Ask for Human Approval
+## 5. Confirm — ask for human approval
 
-Present the report. Ask for confirmation per tool. Block BLOCK verdicts automatically. For REVIEW, let the human drill into specifics before approving.
+Present the report. Ask for confirmation per tool. Block `BLOCK` verdicts automatically. For `REVIEW`, let the human drill into specifics before approving. Apply approved updates only after explicit confirmation, using the update commands in the reference files.
 
-## Security Review Checklist
+## Related Skills
 
-Use `${SKILL_DIR}/references/security-checks.md` to examine diffs for:
-
-- New/changed `bin` scripts or entry points
-- New dependencies (especially devDependencies → dependencies)
-- Changes to `package.json` fields (`files`, `main`, `exports`, `scripts`)
-- New files (especially build scripts, pre/post-install hooks)
-- Obfuscated code, eval/exec calls, network requests
-- Permission or environment changes
-
-## Reference Files
-
-For detection commands and update-check queries per package manager:
-
-- **npm**: `${SKILL_DIR}/references/npm.md`
-- **pnpm**: `${SKILL_DIR}/references/pnpm.md`
-- **Yarn**: `${SKILL_DIR}/references/yarn.md`
-- **Bun**: `${SKILL_DIR}/references/bun.md`
-- **Deno**: `${SKILL_DIR}/references/deno.md`
-- **uv**: `${SKILL_DIR}/references/uv.md`
-- **pip**: `${SKILL_DIR}/references/pip.md`
-- **Poetry**: `${SKILL_DIR}/references/poetry.md`
-- **Cargo**: `${SKILL_DIR}/references/cargo.md`
-- **Security checks**: `${SKILL_DIR}/references/security-checks.md` (NEW)
+- **`review-supply-chain-risk`** (`software-management`) — does the per-upgrade malware/tampering/vulnerability review this skill delegates to.
+- **`audit-dependency-advisories`** (`software-management`) — does the advisory + <72h freshness check this skill delegates to.
+- **`audit-software-upgrade`** (`software-management`) — the single-application counterpart: deep audit of one named app's upgrade. Use it when the user names a specific tool; use *this* skill to sweep the whole installed fleet.
+- **`configure-dependency-cooldown`** (`package-management`) — the preventative complement: delays installing newly published versions so `FRESH` releases are never picked up in the first place.

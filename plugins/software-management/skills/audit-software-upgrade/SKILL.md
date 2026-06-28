@@ -26,13 +26,7 @@ The user wants to know whether upgrading a specific installed app (e.g. cmux) to
 
 Resolve the **current** version using this precedence:
 
-1. **Homebrew** — if the app is managed by brew, get everything from brew first:
-   ```bash
-   brew list --versions <app>            # formula
-   brew info --cask <app>                # cask (apps distributed as .app/.dmg)
-   brew info <app>                        # general metadata, homepage, source URL
-   ```
-   `brew info` reveals the upstream source URL — use it to confirm the GitHub repo and whether the artifact is a prebuilt binary/DMG (cask) or built from source (formula `--build-from-source`).
+1. **Homebrew** — if the app is managed by Homebrew, get everything from brew first. See `${SKILL_DIR}/references/homebrew.md` for detection commands and the cask-vs-formula trust signal.
 2. **The app itself** — if not on brew, ask the app for its version:
    ```bash
    <app> --version    # or -v, version, --help
@@ -49,28 +43,27 @@ Resolve the **target** version from the user's request, or query GitHub for the 
 
 ### 3. Fetch the commit range
 
-Resolve the **target** version (from the user's request, or query GitHub for the latest release), map the current/target **versions** to their **git tags** (versions and tags differ — e.g. `<x.y.z>` vs `v<x.y.z>`), and confirm both tags exist. Then fetch the commit range and file changes between them — prefer the GitHub CLI (`gh`), fall back to `git`.
+Map the current/target **versions** to their **git tags** (versions and tags differ — e.g. `<x.y.z>` vs `v<x.y.z>`), confirm both tags exist, then fetch the commit range and file changes between them — prefer the GitHub CLI (`gh`), fall back to `git`.
 
 See `${SKILL_DIR}/references/github-fetch.md` for the exact `gh` / `git` / `curl` commands. Note: the `gh ... compare` API caps at 250 commits and truncates very large diffs — for a big version jump, fall back to a `git clone` and review by path priority.
 
 ### 4. Review every commit for malware and vulnerabilities
 
-Walk the commit range. Use `${SKILL_DIR}/references/security-checks.md` as the checklist. Look for:
-
-- **Malware / supply-chain tampering** — new or modified install/build hooks (`postinstall`, `preinstall`, build scripts, CI release workflows), obfuscated code, base64/hex blobs, `eval`/`exec`/dynamic code loading, unexpected network calls or exfiltration, new binaries/blobs committed to the tree, changes to release/signing workflows.
-- **Critical/high vulnerabilities introduced** — unsafe deserialization, command injection, path traversal, hardcoded secrets, disabled TLS verification, auth/permission downgrades, dangerous new privileges or filesystem/network access.
-- **Maintainership / provenance red flags** — commits from unfamiliar authors touching sensitive paths, force-pushed tags, release pipeline changes.
+**REQUIRED — run the `review-supply-chain-risk` skill** over the commit range. It applies the full malware / supply-chain / vulnerability checklist (install hooks, obfuscation, exfiltration, new binaries, weakened release pipelines, injection/deserialization, provenance red flags) and returns prioritized risk signals plus a per-change SAFE/REVIEW/BLOCK score. Do not reconstruct that checklist from memory here — invoke the skill so the analysis stays complete and current.
 
 Prioritise commits that touch: build/release/CI config, dependency manifests, install hooks, native code, anything dealing with credentials, network, or the filesystem.
 
 ### 5. Audit third-party dependency changes
 
-Diff the dependency manifests/lockfiles between versions and, for each **added, removed, or version-bumped** dependency, run the full audit in `${SKILL_DIR}/references/dependency-audit.md`. That reference covers:
+Diff the dependency manifests/lockfiles between versions. Then, **REQUIRED — run the `audit-dependency-advisories` skill** on the **added, removed, or version-bumped** dependencies: it cross-checks advisory databases (GitHub Advisory Database, OSV, native auditors) and flags any version **published less than 72 hours ago** (`FRESH`). Don't reproduce its lookups from memory — invoke it.
 
-- Cross-checking against advisory databases (GitHub Advisory Database, OSV.dev, and ecosystem auditors such as `npm audit` / `osv-scanner` / `pip-audit` / `cargo audit`) — flag any **critical or high** advisory affecting an introduced or upgraded version.
-- Flagging any introduced/upgraded version **published less than 72 hours ago** (`FRESH`) — too new to have accumulated scrutiny, a common supply-chain attack window. This is at least a `REVIEW` on its own, and a `BLOCK` when combined with any other signal.
+Record every dependency in the per-dependency table (see step 8) with its old→new version and per-dependency verdict, so the result can be reused by a future multi-app sweep.
 
-### 6. Decide trust: prebuilt binary vs build from source
+### 6. Check source-vs-artifact divergence
+
+When the upgrade will install a **prebuilt artifact** (release binary, tarball, DMG, brew cask) rather than building from the reviewed source, compare the artifact against the reviewed source tree and flag anything present in the artifact but absent from / inconsistent with the git source — extra files, unexpected binaries, post-build code injection. This is a classic supply-chain hiding spot: the published artifact contains code not in the repo. If the artifact cannot be directly compared to source (e.g. a compiled binary), say so explicitly and treat unverifiable divergence as at least a `REVIEW`.
+
+### 7. Decide trust: prebuilt binary vs build from source
 
 Each app spec declares a **trust policy**. Honour it; the human may override.
 
@@ -79,7 +72,7 @@ Each app spec declares a **trust policy**. Honour it; the human may override.
 
 If no spec exists, present the evidence (is it signed? reproducible? same provenance as the audited tag?) and recommend a policy, but let the human choose.
 
-### 7. Produce the verdict
+### 8. Produce the verdict
 
 Assemble the report in this format:
 
@@ -89,6 +82,12 @@ Assemble the report in this format:
   Malware / tampering: <none | findings>
   Critical/high vulns: <none | findings>
   3P dependency changes: <summary; advisories found; any FRESH (<72h) versions>
+  Dependencies reviewed:
+    | dependency | ecosystem | old → new | advisory | freshness | verdict |
+    |------------|-----------|-----------|----------|-----------|---------|
+    | <name>     | <eco>     | <a → b>   | <none|GHSA-…> | <age; FRESH?> | SAFE|REVIEW|BLOCK |
+  (Per-dependency verdicts above are reusable by a future multi-app sweep.)
+  Source-vs-artifact: <none | divergence found>
   Trust policy: TRUST_RELEASE_BINARY | BUILD_FROM_SOURCE
   Artifact provenance: <checksum/signature status, or build steps>
   ─────────────────────────────────────────────
@@ -114,9 +113,9 @@ Verdict meanings:
 - **REVIEW** — Minor concerns a human should weigh (new low/medium-risk deps, a freshly-published <72h dependency version, new authors, unverified-but-plausible provenance). Drill into specifics before approving.
 - **BLOCK** — Malware indicators, critical/high vulnerability, compromised release pipeline, or unverifiable provenance. Do **not** upgrade.
 
-### 8. Stop for human confirmation
+### 9. Stop for human confirmation
 
-Always end here. Do not perform the upgrade. Auto-block `BLOCK` verdicts. For `REVIEW`, let the human inspect the flagged items before deciding. Make sure the saved report path from step 7 is surfaced so the human can revisit the full analysis later.
+Always end here. Do not perform the upgrade. Auto-block `BLOCK` verdicts. For `REVIEW`, let the human inspect the flagged items before deciding. Make sure the saved report path from step 8 is surfaced so the human can revisit the full analysis later.
 
 ## App specifications
 
@@ -127,14 +126,21 @@ Per-app config lives in `${SKILL_DIR}/references/apps/`, one markdown file per a
 
 To support a new app, copy the template and fill it in. If no spec exists for the requested app, run the generic workflow and ask the user for the missing details (repo, trust preference, special checks).
 
-## Related skills
+## Related Skills
 
-- **`audit-global-tool-updates`** (package-management plugin) — audits *all* globally installed CLI tools across package managers for available updates, sharing the same SAFE/REVIEW/BLOCK verdict model. Use that for a broad sweep of your package-manager-installed tools; use this skill to deeply audit a *single* GitHub-hosted app upgrade (commit-by-commit review, dependency freshness, trust policy, build-from-source).
+This skill composes two sibling skills in the same plugin — invoke them by name at the steps above:
+
+- **`review-supply-chain-risk`** — applies the malware / supply-chain red-flag checklist to the commit range (step 4). Also usable standalone to review any diff, PR, or tarball.
+- **`audit-dependency-advisories`** — advisory (GHSA/OSV) + <72h freshness checks for changed dependencies (step 5). Also usable standalone to vet a single package or a lockfile.
+
+Related, in the `package-management` plugin:
+- **`configure-dependency-cooldown`** — proactively delays installing newly published dependency versions (the preventative complement to this skill's freshness check).
 
 ## Reference files
 
-- App version detection & GitHub fetch: `${SKILL_DIR}/references/github-fetch.md`
-- Commit security review checklist: `${SKILL_DIR}/references/security-checks.md`
-- Third-party dependency advisory audit: `${SKILL_DIR}/references/dependency-audit.md`
+- Homebrew version detection & trust signal: `${SKILL_DIR}/references/homebrew.md`
+- GitHub target-version & commit-range fetch: `${SKILL_DIR}/references/github-fetch.md`
 - Trust model & build-from-source verification: `${SKILL_DIR}/references/trust-and-build.md`
 - Per-app specs (template + examples): `${SKILL_DIR}/references/apps/`
+
+Delegated analysis lives in sibling skills (see Related skills): `review-supply-chain-risk` and `audit-dependency-advisories`.

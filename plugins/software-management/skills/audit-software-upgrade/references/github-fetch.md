@@ -1,41 +1,6 @@
-# GitHub Fetch & Version Detection
+# GitHub: target version & commit-range fetch
 
-Commands to resolve versions and fetch the commit range between two versions of a GitHub-hosted app. Prefer `gh`; fall back to `git`.
-
-## Detect the current installed version
-
-Precedence: Homebrew → the app itself → ask the user.
-
-### Homebrew (preferred when applicable)
-
-```bash
-# Is it managed by brew at all?
-brew list --versions <app>          # formula: prints "<app> <version>"
-brew list --cask --versions <app>   # cask: prints "<app> <version>"
-
-# Rich metadata — source URL, homepage, whether prebuilt (cask) or buildable (formula)
-brew info <app>
-brew info --cask <app>
-
-# The cask/formula source reveals the upstream GitHub repo and artifact URL
-brew cat --cask <app>     # e.g. url "https://github.com/<owner>/<repo>/releases/download/v#{version}/..."
-brew cat <app>
-```
-
-- A **cask** ships a prebuilt artifact (`.app` / `.dmg` / binary) → trust model is usually `TRUST_RELEASE_BINARY`.
-- A **formula** can build from source (`brew install --build-from-source`) → `BUILD_FROM_SOURCE` is viable.
-
-### From the app itself
-
-```bash
-<app> --version
-<app> -v
-<app> version
-```
-
-### Fall back to the user
-
-If brew doesn't manage it and the binary won't report a version, ask the user for both the current and target versions explicitly.
+Commands to resolve the target version and fetch the commit range between two versions of a GitHub-hosted app. Prefer `gh`; fall back to `git`.
 
 ## Resolve the target version
 

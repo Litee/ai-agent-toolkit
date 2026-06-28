@@ -5,7 +5,7 @@
   },
   "metadata": {
     "description": "Collection of AI agent skills for AWS CDK development, AWS documentation search, AWS Athena SQL querying, CloudWatch Logs Insights querying, Anki flashcard management, Obsidian vault management, audio conversion, subtitle/caption conversion, podcast generation, safe terminal command registration, image generation, ML system design interviews, and markdown note search",
-    "version": "1.1.47",
+    "version": "1.1.48",
     "homepage": "https://github.com/Litee/ai-agent-toolkit"
   },
   "plugins": [
@@ -361,10 +361,10 @@
     },
     {
       "name": "package-management",
-      "description": "This plugin contains two skills: (1) configure-dependency-cooldown for setting up supply-chain protection by delaying installation of newly published package versions across all major package managers; (2) audit-global-tool-updates for scanning globally installed CLI tools, detecting available updates, diffing changes, and providing security-reviewed verdicts before upgrading.",
+      "description": "This plugin manages package-manager-level supply-chain hygiene: configure-dependency-cooldown sets up cooldown windows that delay installing newly published versions, and audit-global-tool-updates scans globally installed CLI tools for available updates and reviews each upgrade. Covers npm, pnpm, Yarn, Bun, Deno, uv, pip, Poetry, Bundler, and Cargo.",
       "source": "./plugins/package-management",
       "strict": false,
-      "version": "1.1.1",
+      "version": "1.1.2",
       "category": "developer-tools",
       "keywords": [
         "dependency",
@@ -382,14 +382,11 @@
         "bundler",
         "cargo",
         "renovate",
-        "dependabot",
-        "global-tools",
-        "update-audit",
-        "security-review"
+        "dependabot"
       ],
       "skills": [
-        "./skills/configure-dependency-cooldown",
-        "./skills/audit-global-tool-updates"
+        "./skills/audit-global-tool-updates",
+        "./skills/configure-dependency-cooldown"
       ]
     },
     {
@@ -605,10 +602,10 @@
     },
     {
       "name": "software-management",
-      "description": "This plugin contains the audit-software-upgrade skill: audit a candidate upgrade of a GitHub-hosted app before installing. Resolves current/target versions (via Homebrew, the app itself, or the user), reviews every commit in the range for malware and critical/high vulnerabilities, audits third-party dependency changes against advisory databases (GitHub Advisory DB, OSV, ecosystem auditors) and flags dependency versions published less than 72 hours ago, and decides whether to trust the provider's prebuilt binaries or build from source per a per-app trust policy. Audit-and-report only (SAFE/REVIEW/BLOCK) \u2014 never installs; saves the full report to a timestamped /tmp file. Ships per-app specifications (template + cmux example).",
+      "description": "This plugin contains three skills: audit-software-upgrade — audit a candidate upgrade of a GitHub-hosted app before installing (resolves versions, reviews every commit via review-supply-chain-risk, audits dependencies via audit-dependency-advisories, evaluates trust model, emits SAFE/REVIEW/BLOCK verdict, saves report to /tmp); review-supply-chain-risk — review any git diff, commit range, PR, or package tarball for malware/supply-chain tampering and critical/high vulnerabilities; audit-dependency-advisories — cross-check dependencies against advisory databases (GitHub Advisory DB, OSV) and flag versions published less than 72 hours ago. Audit-and-report only — never installs. Ships per-app specifications (template + cmux example).",
       "source": "./plugins/software-management",
       "strict": false,
-      "version": "1.0.0",
+      "version": "1.1.0",
       "category": "developer-tools",
       "keywords": [
         "software",
@@ -619,7 +616,10 @@
         "vulnerability",
         "cve",
         "advisory",
+        "osv",
+        "ghsa",
         "supply-chain",
+        "homebrew",
         "github",
         "dependencies",
         "trust",
@@ -628,7 +628,9 @@
         "audit"
       ],
       "skills": [
-        "./skills/audit-software-upgrade"
+        "./skills/audit-dependency-advisories",
+        "./skills/audit-software-upgrade",
+        "./skills/review-supply-chain-risk"
       ]
     },
     {

@@ -58,7 +58,7 @@ git verify-tag v<target-version>      # if the tag is signed
 
 cmux's reach makes these worth extra scrutiny in the commit diff:
 
-- **Dependencies are Swift Package Manager, not npm** — audit `Package.swift` / `Package.resolved`, not `package.json` (which does not exist for the app). SPM deps are GitHub repos pinned by tag/revision; for advisory and freshness checks, resolve each dependency's GitHub repo + version tag (see `dependency-audit.md` §1 Swift/SPM row and §3 Swift/SPM freshness recipe).
+- **Dependencies are Swift Package Manager, not npm** — audit `Package.swift` / `Package.resolved`, not `package.json` (which does not exist for the app). SPM deps are GitHub repos pinned by tag/revision; for advisory and freshness checks, use the **`audit-dependency-advisories`** skill (it covers Swift/SPM advisory lookup and the freshness recipe).
 - **Control socket** — cmux exposes a local unix socket (`CMUX_SOCKET_PATH`, default `/tmp/cmux.sock`) that accepts commands (`set_status`, `set-progress`, browser/markdown panels, etc.). Review any change to socket creation, permissions, peer PID/UID checks, or command parsing for injection or privilege issues.
 - **Hooks** — cmux runs hooks that shell out (sidebar/status updates, CR/task detection, browser auth cookie injection). Scrutinise changes under hook/integration paths for shell injection or unexpected command execution.
 - **Browser panels & auth** — the integration injects SSO/auth cookies into browser panels. Review any change touching cookie handling, auth, or outbound network calls.
