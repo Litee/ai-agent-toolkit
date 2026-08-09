@@ -32,6 +32,9 @@ from pathlib import Path
 from _mlx_shared import (
     log_progress,
     check_ffprobe,
+    check_ffmpeg,
+    measure_loudness,
+    normalize_audio_loudness,
     prompt_install_ffprobe,
     resolve_voices_dir,
     verify_voices,
@@ -302,7 +305,26 @@ Examples:
     parser.add_argument(
         "--voices-dir", default=None,
         help="Directory with custom voice WAV files "
-             "(default: demo voices from VibeVoice repo, then assets/voices/)",
+             "(default: bundled demo voices, then assets/voices/)",
+    )
+    parser.add_argument(
+        "--target-lufs", type=float, default=-16.0,
+        help="Target integrated loudness for the output audio in LUFS "
+             "(default: -16, Apple Podcasts recommendation)",
+    )
+    parser.add_argument(
+        "--target-tp", type=float, default=-1.0,
+        help="Target true peak for the output audio in dBTP (default: -1)",
+    )
+    parser.add_argument(
+        "--normalize-output", dest="normalize_output",
+        action="store_true", default=True,
+        help="Normalize the generated audio to --target-lufs/--target-tp "
+             "(default: enabled; disable with --no-normalize-output)",
+    )
+    parser.add_argument(
+        "--no-normalize-output", dest="normalize_output", action="store_false",
+        help="Skip output loudness normalization",
     )
     parser.add_argument(
         "--model", default=DEFAULT_MODEL,
@@ -348,6 +370,18 @@ Examples:
             log_progress("ffprobe is NOT available.", "WARN")
             prompt_install_ffprobe()
 
+        # Loudness normalization of the output needs the full ffmpeg binary,
+        # not just ffprobe.
+        ffmpeg_available = check_ffmpeg()
+        if ffmpeg_available:
+            log_progress("ffmpeg is available (output loudness normalization OK).")
+        else:
+            log_progress(
+                "ffmpeg is NOT available — output loudness normalization will "
+                "be SKIPPED. Install with: brew install ffmpeg",
+                "WARN",
+            )
+
         # ------------------------------------------------------------------
         # Phase 2: Clone vibevoice-mlx
         # ------------------------------------------------------------------
@@ -382,7 +416,7 @@ Examples:
         # ------------------------------------------------------------------
         log_progress("")
         log_progress("=== Phase 4: Voice Verification ===")
-        skill_dir = Path(__file__).resolve().parent.parent.parent
+        skill_dir = Path(__file__).resolve().parent.parent
         voices_dir = resolve_voices_dir(
             custom_dir=Path(args.voices_dir) if args.voices_dir else None,
             skill_dir=skill_dir,
@@ -452,6 +486,52 @@ Examples:
         file_size = output_path.stat().st_size
         file_size_mb = file_size / (1024 * 1024)
         log_progress(f"Generation complete: {file_size_mb:.1f} MB")
+
+        # ------------------------------------------------------------------
+        # Phase 7: Output loudness normalization
+        # ------------------------------------------------------------------
+        if args.normalize_output and ffmpeg_available:
+            log_progress("")
+            log_progress("=== Phase 7: Output Loudness Normalization ===")
+            before = measure_loudness(
+                output_path, args.target_lufs, args.target_tp
+            )
+            log_progress(
+                f"Before: {before['input_i']} LUFS / {before['input_tp']} dBTP "
+                f"(target {args.target_lufs:g} LUFS / {args.target_tp:g} dBTP)"
+            )
+            tmp_out = output_path.parent / f"{output_path.stem}.loudnorm.tmp"
+            try:
+                after_i, after_tp = normalize_audio_loudness(
+                    output_path,
+                    tmp_out,
+                    target_i=args.target_lufs,
+                    target_tp=args.target_tp,
+                )
+            except Exception as e:
+                log_progress(
+                    f"Output normalization failed ({e}) — keeping the original "
+                    f"un-normalized file.",
+                    "WARN",
+                )
+            else:
+                os.replace(tmp_out, output_path)
+                log_progress(
+                    f"After:  {after_i:.2f} LUFS / {after_tp:.2f} dBTP "
+                    f"(deviation {after_i - args.target_lufs:+.2f} LU)"
+                )
+                if abs(after_i - args.target_lufs) > 1.0:
+                    log_progress(
+                        "Note: loudnorm applies only linear gain, so it will not "
+                        "boost past the true-peak ceiling; a result slightly under "
+                        "target is expected and within the usual +/-1 LU QC "
+                        "tolerance for delivery.",
+                        "WARN",
+                    )
+        elif not args.normalize_output:
+            log_progress("Output loudness normalization skipped (--no-normalize-output)")
+        elif not ffmpeg_available:
+            log_progress("Output loudness normalization skipped (ffmpeg not available)")
 
         # ------------------------------------------------------------------
         # Summary

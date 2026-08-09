@@ -11,6 +11,7 @@ class VoiceEncodingError(FileNotFoundError):
     """Custom exception for voice file encoding errors with detailed instructions."""
     pass
 
+import json
 import os
 import platform
 import re
@@ -67,6 +68,94 @@ def check_ffprobe() -> bool:
     return shutil.which("ffprobe") is not None
 
 
+def check_ffmpeg() -> bool:
+    """Return True if ffmpeg is available on PATH."""
+    return shutil.which("ffmpeg") is not None
+
+
+# ---------------------------------------------------------------------------
+# Loudness normalization (EBU R128 via ffmpeg loudnorm)
+# ---------------------------------------------------------------------------
+
+def measure_loudness(
+    path: Path,
+    target_i: float = -23.0,
+    target_tp: float = -1.0,
+    target_lra: float = 7.0,
+) -> dict:
+    """Measure a file's loudness with an ffmpeg ``loudnorm`` analysis pass.
+
+    Returns the JSON dict printed by loudnorm (``input_i``, ``input_tp``,
+    ``input_lra``, ``input_thresh``, ``output_*``, ``target_offset``).
+
+    Raises ``RuntimeError`` if ffmpeg is missing or the analysis fails.
+    """
+    if not check_ffmpeg():
+        raise RuntimeError("ffmpeg is required for loudness measurement")
+    result = subprocess.run(
+        [
+            "ffmpeg", "-hide_banner", "-i", str(path),
+            "-af", (
+                f"loudnorm=I={target_i}:TP={target_tp}:LRA={target_lra}:"
+                "print_format=json"
+            ),
+            "-f", "null", "-",
+        ],
+        capture_output=True,
+        text=True,
+    )
+    if result.returncode != 0:
+        raise RuntimeError(
+            f"loudnorm measurement failed for {path.name}: "
+            f"{result.stderr.strip()[-500:]}"
+        )
+    m = re.search(r"(\{.*?\})", result.stderr, re.DOTALL)
+    if not m:
+        raise RuntimeError(
+            f"could not parse loudnorm measurement output for {path.name}"
+        )
+    return json.loads(m.group(1))
+
+
+def normalize_audio_loudness(
+    src: Path,
+    dst: Path,
+    target_i: float = -23.0,
+    target_tp: float = -1.0,
+    target_lra: float = 7.0,
+    target_sr: int | None = None,
+) -> tuple[float, float]:
+    """Normalize *src* to a loudness target using a two-pass ffmpeg loudnorm.
+
+    Pass 1 measures the source; pass 2 applies a linear gain with the
+    measured values (``linear=true`` — pure gain, no dynamics processing,
+    so speech stays untouched). If *target_sr* is given the output is also
+    resampled to that rate.
+
+    Returns ``(integrated_lufs, true_peak_dbTP)`` measured on *dst*.
+    """
+    measured = measure_loudness(src, target_i, target_tp, target_lra)
+    filter_args = (
+        f"loudnorm=I={target_i}:TP={target_tp}:LRA={target_lra}:linear=true:"
+        f"measured_I={measured['input_i']}:measured_TP={measured['input_tp']}:"
+        f"measured_LRA={measured['input_lra']}:"
+        f"measured_thresh={measured['input_thresh']}:"
+        f"offset={measured.get('target_offset', '0')}"
+    )
+    cmd = ["ffmpeg", "-hide_banner", "-y", "-i", str(src), "-af", filter_args]
+    if target_sr is not None:
+        cmd += ["-ar", str(target_sr)]
+    cmd.append(str(dst))
+    result = subprocess.run(cmd, capture_output=True, text=True)
+    if result.returncode != 0:
+        raise RuntimeError(
+            f"loudnorm apply failed for {src.name}: "
+            f"{result.stderr.strip()[-500:]}"
+        )
+    out = measure_loudness(dst, target_i, target_tp, target_lra)
+    return float(out["input_i"]), float(out["input_tp"])
+
+
 def prompt_install_ffprobe() -> bool:
     """Ask the user whether to install ffmpeg via brew.
 
@@ -110,7 +199,7 @@ def get_default_voices_dir(skill_dir: Path | None = None) -> Path:
     root of the MLX skill (``generate-podcast-audio-local``).
     """
     if skill_dir is None:
-        skill_dir = Path(__file__).resolve().parent.parent.parent
+        skill_dir = Path(__file__).resolve().parent.parent
     return skill_dir / "assets" / "voices"
 
 

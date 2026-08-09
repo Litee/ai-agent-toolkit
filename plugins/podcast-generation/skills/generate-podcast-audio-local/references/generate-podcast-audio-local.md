@@ -43,7 +43,7 @@ VibeVoice MLX is a local text-to-speech pipeline that leverages Apple's MLX fram
 ### Software
 - **Python 3.10+**: Verify with `python3 --version`
 - **uv**: Python package manager. Install if needed: `curl -LsSf https://astral.sh/uv/install.sh | sh`
-- **ffprobe**: Part of ffmpeg, used for tempo analysis. Install with `brew install ffmpeg`
+- **ffmpeg / ffprobe**: Used for loudness normalization and tempo analysis. Install with `brew install ffmpeg`
 - **vibevoice-mlx**: Clone and install the local MLX pipeline:
   ```bash
   git clone https://github.com/umputun/vibevoice-mlx.git
@@ -76,7 +76,10 @@ python3 -c "import mlx.core as mx; print('MLX available:', mx.metal.is_available
 
 - **--script-path** (required): Path to existing script file
 - **--speaker-names** (required): Space-separated list of speaker voice names in order (first voice = Speaker 1, second = Speaker 2, etc.). Example: `Alice Frank`
-- **--voices-dir** (optional): Path to a local directory containing custom voice WAV files (defaults to `assets/voices/` relative to the skill directory)
+- **--voices-dir** (optional): Path to a local directory containing custom voice WAV files (defaults to the bundled demo voices: Alice, Frank, Carter)
+- **--target-lufs** (optional): Target integrated loudness for the output audio in LUFS (default: `-16`, Apple Podcasts recommendation). Use `-14` for Spotify/YouTube playback normalization
+- **--target-tp** (optional): Target true peak for the output audio in dBTP (default: `-1`)
+- **--normalize-output / --no-normalize-output** (optional): Normalize the generated audio to `--target-lufs`/`--target-tp`. **On by default**; use `--no-normalize-output` to skip
 - **--model-size** (optional): Model size — `7b` (default, higher quality) or `1.5b` (faster, lower quality)
 - **--quantization** (optional): Quantization bits — `4` (smallest, fastest) or `8` (default, balanced quality)
 - **--diffusion** (optional): Enable diffusion for higher quality (adds ~30% generation time)
@@ -100,7 +103,7 @@ python3 -c "import mlx.core as mx; print('MLX available:', mx.metal.is_available
 
 ### Voice File Naming Conventions
 
-Voice files must be placed in the voices directory (default: `assets/voices/` relative to skill root).
+Voice files must be placed in the voices directory (`--voices-dir`, the `LOCAL_TTS_VOICES_DIR` environment variable, or the skill's bundled `assets/voices/`).
 
 **Custom voice naming**: `{speaker_num}_{name}.wav`
 - `speaker_num`: Must match the "Speaker N:" number in the script (1, 2, 3, etc.)
@@ -108,15 +111,30 @@ Voice files must be placed in the voices directory (default: `assets/voices/` re
 
 **Examples:**
 ```
-assets/voices/1_Alice.wav
-assets/voices/2_Frank.wav
-assets/voices/3_Mary.wav
+1_Alice.wav
+2_Frank.wav
+3_Sam.wav
 ```
 
-**Built-in voices** (available without custom voice files):
-- Alice (woman), Carter (man), Frank (man), Mary (woman)
+**Bundled voices** (available without custom voice files — the skill works out of the box):
+- **Alice** (woman), **Carter** (man), **Frank** (man)
+- Sourced from the [vibevoice-community/VibeVoice](https://github.com/vibevoice-community/VibeVoice/tree/main/demo/voices) demo set (`en-Alice_woman.wav`, `en-Carter_man.wav`, `en-Frank_man.wav`)
+- Pre-normalized to **EBU R128** (−23 LUFS integrated, −1 dBTP true peak) and resampled to 24 kHz, so all bundled voices sit at equal volume
 
-If no custom voice files are found in the voices directory, the script uses built-in voices. To use custom voices, place WAV files in the voices directory with the correct naming convention.
+**Custom voices must be normalized first**: VibeVoice clones loudness along with timbre — without matching levels, a loud reference makes that speaker louder for the whole episode (the demo Alice clip is ~10 LU hotter than the male voices and clips at +0.1 dBTP). New voice clips are brought to the same standard as the bundled voices with the bundled `scripts/normalize_voices.py`:
+
+```bash
+# normalize all WAVs in a directory in place
+python3 ${SKILL_DIR}/scripts/normalize_voices.py --voices-dir /path/to/voices
+
+# keep the originals, write normalized copies elsewhere
+python3 ${SKILL_DIR}/scripts/normalize_voices.py --voices-dir /path/to/voices --output-dir /path/to/normalized
+
+# normalize the skill's bundled assets/voices/ in place (no-op on the bundled voices)
+python3 ${SKILL_DIR}/scripts/normalize_voices.py
+```
+
+It applies a two-pass ffmpeg `loudnorm` (linear gain, no compression) targeting **−23 LUFS integrated / −1 dBTP true peak** and resamples to 24 kHz, printing a before/after line per voice. The bundled demo voices are already normalized, so the script only needs to be run when new voices are added.
 
 ### Constraints
 - Script file MUST use "Speaker N:" format for each line (where N is 1, 2, 3, etc.)
@@ -154,8 +172,8 @@ If any prerequisite is missing, install it before proceeding.
 
 ### 2. Prepare Voice Files
 
-**Using built-in voices** (no setup needed):
-- Alice, Carter, Frank, Mary are available by default
+**Using bundled voices** (no setup needed):
+- Alice, Carter, Frank are available by default, pre-normalized to EBU R128
 
 **Using custom voices**:
 1. Record or obtain WAV voice samples (short 5-30 second clips work best)
@@ -168,6 +186,10 @@ If any prerequisite is missing, install it before proceeding.
 4. Verify files are in place:
    ```bash
    ls -la ${SKILL_DIR}/assets/voices/
+   ```
+5. Normalize the new voices to the EBU R128 standard before generating:
+   ```bash
+   python3 ${SKILL_DIR}/scripts/normalize_voices.py --voices-dir ${SKILL_DIR}/assets/voices/
    ```
 
 **Tip:** For multi-speaker podcasts, using a mix of different male and female voices helps create distinct, engaging speaker identities.
@@ -227,10 +249,11 @@ python3 scripts/generate_podcast_audio.py \
 
 **What happens during execution:**
 1. Script format validation
-2. Voice file discovery (custom or built-in)
+2. Voice file discovery (bundled demo voices or custom)
 3. Model loading (downloads ~5GB on first run, cached thereafter)
 4. Audio generation via MLX inference
-5. WAV file output
+5. Output loudness-normalized to −16 LUFS / −1 dBTP (Apple Podcasts target) unless `--no-normalize-output`
+6. WAV file output (normalized in place)
 
 **First run note**: The model download (~5GB) happens on the first run and may take several minutes depending on your internet connection. Subsequent runs are much faster as the model is cached.
 
@@ -405,6 +428,39 @@ speed_factor = target_wpm / actual_wpm
 - **5-30%**: Recommend `convert-audio:convert-audio` with calculated speed factor
 - **> 30%**: Warn the user; large adjustments may produce unnatural audio
 
+## Loudness Normalization
+
+Podcast platforms normalize playback against published loudness targets, so shipping un-normalized audio makes episodes sit at inconsistent levels relative to each other and to everything else in a listener's feed. This skill therefore normalizes both its inputs and its output.
+
+### Reference Standards (Quick Reference)
+
+| Standard | Integrated loudness | True peak | Used by |
+|---|---|---|---|
+| **−16 LUFS** | −16 | −1 dBTP | **Apple Podcasts** (de facto podcast target) |
+| −14 LUFS | −14 | −1 dBTP | Spotify / YouTube playback normalization |
+| −23 LUFS | −23 | −1 dBTP | EBU R128 broadcast (US equivalent: ATSC A/85 at −24 LKFS) |
+
+All are measured with the same EBU R128 algorithm that ffmpeg implements (`loudnorm`).
+
+### Inputs: reference voices
+
+New reference voices must be prepared with the bundled `scripts/normalize_voices.py`, which loudness-matches every clip to **−23 LUFS / −1 dBTP** (EBU R128 broadcast standard) at 24 kHz with a two-pass ffmpeg `loudnorm`:
+
+```bash
+# pass 1: measure
+ffmpeg -i voice.wav -af loudnorm=I=-23:TP=-1:LRA=7:print_format=json -f null -
+# pass 2: apply measured values with linear gain
+ffmpeg -i voice.wav -af loudnorm=I=-23:TP=-1:LRA=7:measured_I=...:measured_TP=...:measured_LRA=...:measured_thresh=...:offset=...:linear=true -ar 24000 out.wav
+```
+
+`linear=true` means pure gain — no compression, so the speech's dynamics are untouched. This matters because VibeVoice clones loudness along with timbre; mismatched references make one speaker audibly louder than the other for the whole episode. The bundled demo voices are already normalized, so this step applies only when adding new voices.
+
+### Output: generated episode
+
+The generated WAV is normalized to **−16 LUFS / −1 dBTP** (Apple Podcasts recommendation) by default, applied as a final two-pass `loudnorm` stage and reported in the run log (achieved loudness vs. target). Override with `--target-lufs` / `--target-tp`; disable with `--no-normalize-output`.
+
+**QC note**: with `linear=true`, `loudnorm` will not apply gain that would breach the true-peak ceiling, so results can land slightly under target (typically within ±1 LU of it, e.g. −16.5 to −16.8 against a −16 target for typical sources). This deviation is reported in the run log rather than silently accepted. Switching to dynamic mode would hit the number more precisely but applies compression, which is usually the wrong trade for spoken word.
+
 ## Metadata Extraction
 
 Use a Task sub-agent to extract metadata from the script file:
@@ -460,6 +516,26 @@ uname -m
 2. Check naming convention: `{speaker_num}_{name}.wav` or `{name}_{speaker_num}.wav`
 3. Ensure speaker numbers match the "Speaker N:" format in the script
 4. Verify the voices directory path is correct with `--voices-dir`
+
+### Loudness Normalization Skipped
+
+**Symptom**: Run log shows "output loudness normalization will be SKIPPED"
+
+**Solution**: The script needs the full `ffmpeg` binary, not just `ffprobe`. Install it:
+```bash
+brew install ffmpeg
+```
+The generation still completes, but the output is left at its natural level.
+
+### Voices Sound Different Volumes
+
+**Symptom**: One speaker is noticeably louder than the other in the finished episode
+
+**Solution**: The reference clips are not loudness-matched. VibeVoice clones loudness along with timbre, so a louder reference makes that speaker louder for the whole episode. Run the bundled normalizer on the voices directory before generating:
+```bash
+python3 ${SKILL_DIR}/scripts/normalize_voices.py --voices-dir ${SKILL_DIR}/assets/voices/
+```
+Then re-run generation.
 
 ### Model Download Slow or Failing
 
@@ -580,9 +656,10 @@ These are rough estimates. Actual times vary based on model size, quantization, 
 
 - **Model caching**: First run downloads model (~5GB), cached by huggingface-hub for subsequent runs
 - **Audio format**: Generated as WAV file only; use `convert-audio:convert-audio` skill for format conversion
+- **Loudness normalization**: New reference voices are prepared with `scripts/normalize_voices.py` (−23 LUFS / −1 dBTP); the output is normalized to −16 LUFS / −1 dBTP by default (see [Loudness Normalization](#loudness-normalization)). Both are linear-gain two-pass `loudnorm`, no compression
 - **Speech tempo analysis**: MANDATORY post-generation analysis using ffprobe to calculate actual WPM and drift percentage
 - **Duration limit**: 60 minutes maximum — validate before generating
-- **Voice files**: Named `{speaker_num}_{name}.wav` (or `{name}_{speaker_num}.wav`) in `assets/voices/` directory
+- **Voice files**: Bundled demo voices (Alice, Frank, Carter) used by default; custom voices named `{speaker_num}_{name}.wav` in `assets/voices/` directory
 - **Output naming**: Always include timestamps to prevent file conflicts
 - **No remote cleanup**: Local execution, no resources to clean up
 - **ffprobe required**: Must be installed for tempo analysis (`brew install ffmpeg`)
