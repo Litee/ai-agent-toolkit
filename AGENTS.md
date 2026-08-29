@@ -26,3 +26,12 @@ All changes follow this sequence — do not skip or reorder steps:
 5. **Rebase onto `main`**: from inside the worktree, run `git rebase origin/main` to keep history linear.
 6. **Merge with fast-forward only**: from the main repo, run `git merge --ff-only`. Never create merge commits.
 7. **Ask for explicit confirmation** before merging any worktree branch into `main`.
+
+## Learned User Preferences
+
+- When uncommitted skill changes already live in `main`, the user may ask to commit directly to `main` instead of via a worktree (e.g. "Directly to main as are already at main"). Treat this as a contextual override of the Git Workflow's worktree-first rule — not a general license to skip worktrees.
+- **Code is the source of truth**: when skill docs/descriptions and the actual code disagree, fix the docs to match the code — never alter code to satisfy docs (User: "Fix the descriptions in skills, the code is the source of truth").
+
+## Learned Workspace Facts
+
+- `.claude-plugin/marketplace.json` has TWO independent version fields: the top-level `metadata.version` (collection / released-toolkit version) and each plugin's `version` (per-plugin). When a skill changes, BOTH must advance — a per-plugin bump alone leaves "no released-version bump" for the toolkit. The AGENTS.md "Skill Maintenance" rule only mentions the per-plugin bump, so also bump `metadata.version`. Evidence: commit `ac4be4d`'s message notes a stale `metadata.version` after a plugin bump gave "no released-version bump".
