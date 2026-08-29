@@ -197,7 +197,9 @@ Rules:
 All search commands support structured output formats suitable for scripting and AI agent pipelines:
 
 > **⚠ Result paths are index identifiers, not filesystem paths.**
-> The `filepath` field in QMD results (e.g. `qmd://obsidian-default-vault/harness-engineering.md` or a relative slug like `harness-engineering.md`) is an internal index key. It does **not** correspond to a real file on disk. Actual vault files may use completely different naming conventions (e.g. Title Case with spaces: `Harness Engineering.md`). Never use a QMD result path directly in wikilinks, `obsidian read`, `ls`, or any filesystem operation. Always resolve the real filename first:
+> The `filepath` field in QMD results (e.g. `qmd://obsidian-default-vault/harness-engineering.md` or a relative slug like `harness-engineering.md`) is an internal index key. It does **not** correspond to a real file on disk.
+>
+> **Kebab-case convention:** QMD always normalizes filenames to kebab-case (lowercase, hyphens instead of spaces) in `qmd://` URLs and result paths — e.g. `Abstraction-and-Reasoning-Corpus.md`. The actual file on disk may use Title Case with spaces — e.g. `Abstraction and Reasoning Corpus.md`. This convention is hardcoded in qmd and cannot be disabled. Never use a QMD result path directly in wikilinks, `obsidian read`, `ls`, or any filesystem operation. Always resolve the real filename first:
 >
 >     ```bash
 >     # Find the real file after a QMD result mentions 'harness-engineering'

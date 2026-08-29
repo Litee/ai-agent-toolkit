@@ -9,6 +9,12 @@ This skill provides opinionated guidance for building and maintaining a personal
 
 Obsidian stores everything as plain Markdown files — notes outlive any app. Favor simplicity and portability over plugin-dependent workflows.
 
+## Quality Review Execution
+
+When performing a quality review (triggered after creating or substantially modifying a card), use the **most capable model available**. In local setups, use the local model (the one running the agent) for sub-agent tasks — free API keys hit rate limits quickly, so relying on external models like Opus for sub-agents is unreliable. If the most capable model fails, fall back to manual review by loading the skill criteria directly and checking each rule yourself. Do not retry with a weaker model; just do the review manually.
+
+**Always verify batch edits actually applied.** When editing multiple files with Python string replacement, `str.replace()` silently returns the original string when the search pattern doesn't match — no exception, no warning. After any batch-edit script, grep for the expected new content in each file to confirm the edits landed. A silent non-match leaves files in a partially-updated state.
+
 For advanced workflows (templates, bulk property updates, vault health analysis, task management, vault gardening), read `${SKILL_DIR}/references/advanced-workflows.md`.
 
 ---
