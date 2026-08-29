@@ -5,7 +5,7 @@
   },
   "metadata": {
     "description": "Collection of AI agent skills for AWS CDK development, AWS documentation search, AWS Athena SQL querying, CloudWatch Logs Insights querying, Anki flashcard management, Obsidian vault management, audio conversion, subtitle/caption conversion, podcast generation, safe terminal command registration, image generation, ML system design interviews, and markdown note search",
-    "version": "1.1.47",
+    "version": "1.1.48",
     "homepage": "https://github.com/Litee/ai-agent-toolkit"
   },
   "plugins": [
@@ -86,7 +86,7 @@
       "description": "This plugin contains four skills for Obsidian: CLI operations (use-obsidian-cli) for creating, reading, searching, and managing notes via the Obsidian CLI; Obsidian Flavored Markdown syntax (use-obsidian-markdown) covering wikilinks, embeds, callouts, properties, math, Mermaid, and more; personal knowledge management methodology (manage-personal-knowledge-in-obsidian) with atomic notes philosophy, linking strategies, tagging conventions, and structured workflows; and vault enrichment (enrich-obsidian-notes-with-best-practices) for adding Best Practices and Anti-Patterns sections to knowledge notes using parallel sub-agents and internet research.",
       "source": "./plugins/obsidian",
       "strict": false,
-      "version": "2.0.17",
+      "version": "2.0.18",
       "category": "productivity",
       "keywords": [
         "obsidian",
@@ -309,7 +309,7 @@
       "description": "This plugin contains a skill for searching markdown notes on-device using the QMD CLI. QMD combines BM25 full-text search, vector semantic search, and LLM re-ranking for hybrid retrieval across indexed markdown collections. Use for finding information in local knowledge bases, retrieving documents by path or docid, running structured queries with lex:/vec:/hyde: typed lines, and managing indexed collections.",
       "source": "./plugins/qmd",
       "strict": false,
-      "version": "1.0.2",
+      "version": "1.0.3",
       "category": "productivity",
       "keywords": [
         "qmd",
