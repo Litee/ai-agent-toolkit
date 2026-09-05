@@ -696,7 +696,7 @@
       "description": "This plugin contains two skills: converting audio files between formats using ffmpeg (MP3, WAV, AAC, FLAC, Opus, OGG) with bitrate/speed adjustment and ID3 tag editing; and generating full songs or instrumentals locally on Apple Silicon with the MiniMax-Music3 MLX port (text-to-music from a prompt + lyrics).",
       "source": "./plugins/multimedia-tools",
       "strict": false,
-      "version": "1.0.24",
+      "version": "1.0.25",
       "category": "user",
       "keywords": [
         "ffmpeg",

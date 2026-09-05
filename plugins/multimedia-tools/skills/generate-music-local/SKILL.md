@@ -93,6 +93,8 @@ symlink needed) or a normal `--local-dir` checkout.
 | `--seed` | — | `7` | `0 … 2**31-1`. Deterministic for the pinned runtime + MLX versions |
 | `--model-dir` | — | auto (HF cache snapshot) | Path to the downloaded repo. **Auto-detected** from the Hugging Face hub cache, so usually omitted; pass it to override (e.g. a `--local-dir` checkout). A normal `--local-dir` checkout or an HF-cache snapshot both work; the helper sets `PYTHONPATH` automatically. Native `generate.py` defaults to its own folder |
 | `--output` | — | `song.wav` | Output WAV path (44.1 kHz / 16-bit / stereo) |
+| `--wait-for-memory` | — | `0` | If free RAM < 48 GB, wait up to this many seconds (re-checking every 10 s) for enough memory before loading the model. `0` = abort immediately with guidance. |
+| `--setup` | — | off | Download weights + create venv + install requirements if missing (idempotent) |
 
 \* Exactly one of `--lyrics` / `--lyrics-file` is required.
 

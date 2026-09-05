@@ -15,10 +15,12 @@ from __future__ import annotations
 
 import argparse
 import os
+import re
 import shlex
 import shutil
 import subprocess
 import sys
+import time
 from pathlib import Path
 
 REPO_ID = "PocketAiHub/MiniMax-Music3-MLX"
@@ -66,6 +68,62 @@ def _resolve_python311() -> str:
         if exe:
             return exe
     raise SystemExit("Python 3.11+ not found on PATH.")
+
+
+# Minimum free RAM required before loading the model. A 180 s @ 30-step clip
+# peaked at ~56 GB on a 64 GB Mac during eval, so below this we refuse/defer
+# to avoid OOM kills.
+REQUIRED_RAM_GB = 48.0
+
+
+def _available_ram_gb() -> float:
+    """Approximate available RAM in GB (free + inactive + speculative) on macOS.
+
+    Returns ``inf`` if it can't be measured (non-macOS or vm_stat unavailable) so
+    the guard never blocks a run it cannot evaluate.
+    """
+    try:
+        out = subprocess.run(["vm_stat"], capture_output=True, text=True, timeout=10).stdout
+    except Exception:
+        return float("inf")
+    page = 4096
+    m = re.search(r"page size of (\d+) bytes", out)
+    if m:
+        page = int(m.group(1))
+
+    def _pages(label: str) -> int:
+        mm = re.search(rf"{label}:\s+(\d+)\.", out)
+        return int(mm.group(1)) if mm else 0
+
+    free = _pages("Pages free")
+    inactive = _pages("Pages inactive")
+    speculative = _pages("Pages speculative")
+    return (free + inactive + speculative) * page / (1024 ** 3)
+
+
+def _ensure_memory(required_gb: float, wait_seconds: int) -> None:
+    """Abort (or wait) if there isn't enough free RAM to load the model safely."""
+    avail = _available_ram_gb()
+    if avail >= required_gb:
+        return
+    if wait_seconds and wait_seconds > 0:
+        deadline = time.time() + wait_seconds
+        print(f"[mem] only {avail:.1f} GB free (< {required_gb:.0f} GB); "
+              f"waiting up to {wait_seconds}s (re-check every 10s)…", flush=True)
+        while time.time() < deadline:
+            time.sleep(10)
+            avail = _available_ram_gb()
+            if avail >= required_gb:
+                print(f"[mem] {avail:.1f} GB free — proceeding.", flush=True)
+                return
+        raise SystemExit(
+            f"Timed out after {wait_seconds}s: only {avail:.1f} GB free RAM "
+            f"(< {required_gb:.0f} GB required). Aborting to avoid OOM."
+        )
+    raise SystemExit(
+        f"Only {avail:.1f} GB RAM free (< {required_gb:.0f} GB required to load "
+        f"the model safely). Free memory or pass --wait-for-memory <seconds> to wait."
+    )
 
 
 def ensure_model(model_dir: Path, do_setup: bool) -> None:
@@ -152,6 +210,9 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--output", type=Path, default=Path("song.wav"), help="Output WAV path")
     p.add_argument("--setup", action="store_true",
                    help="Download weights + create venv + install requirements if missing")
+    p.add_argument("--wait-for-memory", type=int, default=0, metavar="SECONDS",
+                   help="If free RAM < 48 GB, wait up to SECONDS (re-checking every 10s) "
+                        "for enough memory before loading the model. 0 = abort immediately (default).")
     return p
 
 
@@ -160,6 +221,7 @@ def main() -> None:
     model_dir = args.model_dir or _default_model_dir()
     ensure_model(model_dir, args.setup)
     venv = ensure_venv(model_dir, args.setup)
+    _ensure_memory(REQUIRED_RAM_GB, args.wait_for_memory)
     out = run_generate(model_dir, venv, args)
     print(f"[done] {out.resolve()}")
 
