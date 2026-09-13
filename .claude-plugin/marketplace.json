@@ -5,7 +5,7 @@
   },
   "metadata": {
     "description": "Collection of AI agent skills for AWS CDK development, AWS documentation search, AWS Athena SQL querying, CloudWatch Logs Insights querying, Anki flashcard management, Obsidian vault management, audio conversion, subtitle/caption conversion, podcast generation, safe terminal command registration, image generation, ML system design interviews, and markdown note search",
-    "version": "1.1.48",
+    "version": "1.1.49",
     "homepage": "https://github.com/Litee/ai-agent-toolkit"
   },
   "plugins": [
@@ -610,7 +610,7 @@
     },
     {
       "name": "software-management",
-      "description": "This plugin contains the audit-software-upgrade skill: audit a candidate upgrade of a GitHub-hosted app before installing. Resolves current/target versions (via Homebrew, the app itself, or the user), reviews every commit in the range for malware and critical/high vulnerabilities, audits third-party dependency changes against advisory databases (GitHub Advisory DB, OSV, ecosystem auditors) and flags dependency versions published less than 72 hours ago, and decides whether to trust the provider's prebuilt binaries or build from source per a per-app trust policy. Audit-and-report only (SAFE/REVIEW/BLOCK) \u2014 never installs; saves the full report to a timestamped /tmp file. Ships per-app specifications (template + cmux example).",
+      "description": "This plugin contains the audit-software-upgrade skill: audit a candidate upgrade of a GitHub-hosted app before installing. Resolves current/target versions (via Homebrew, the app itself, or the user), reviews every commit in the range for malware and critical/high vulnerabilities, audits third-party dependency changes against advisory databases (GitHub Advisory DB, OSV, ecosystem auditors) and flags dependency versions published less than 72 hours ago, and decides whether to trust the provider's prebuilt binaries or build from source per a per-app trust policy. Audit-and-report only (SAFE/REVIEW/BLOCK) — never installs; saves the full report to a timestamped /tmp file. Ships per-app specifications (template + cmux example).",
       "source": "./plugins/software-management",
       "strict": false,
       "version": "1.0.0",
@@ -678,7 +678,7 @@
     },
     {
       "name": "update-versioned-permissions",
-      "description": "This plugin contains a SessionStart hook that auto-clones stale versioned plugin path entries in Claude Code permissions when plugins are upgraded. For each permission entry referencing an old plugin version, it adds a matching entry for the currently installed version. Additive-only \u2014 never removes existing entries. Also updates statusLine.command to the latest installed version if stale.",
+      "description": "This plugin contains a SessionStart hook that auto-clones stale versioned plugin path entries in Claude Code permissions when plugins are upgraded. For each permission entry referencing an old plugin version, it adds a matching entry for the currently installed version. Additive-only — never removes existing entries. Also updates statusLine.command to the latest installed version if stale.",
       "source": "./plugins/update-versioned-permissions",
       "strict": false,
       "version": "1.0.1",
@@ -694,10 +694,10 @@
     },
     {
       "name": "multimedia-tools",
-      "description": "This plugin contains two skills: converting audio files between formats using ffmpeg (MP3, WAV, AAC, FLAC, Opus, OGG) with bitrate/speed adjustment and ID3 tag editing; and generating full songs or instrumentals locally on Apple Silicon with the MiniMax-Music3 MLX port (text-to-music from a prompt + lyrics).",
+      "description": "This plugin contains three skills: converting audio files between formats using ffmpeg (MP3, WAV, AAC, FLAC, Opus, OGG) with bitrate/speed adjustment and ID3 tag editing; generating full songs or instrumentals locally on Apple Silicon with the MiniMax-Music3 MLX port (text-to-music from a prompt + lyrics); and authoring structured music prompts + lyrics for directed iteration (generate-music-prompts).",
       "source": "./plugins/multimedia-tools",
       "strict": false,
-      "version": "1.0.25",
+      "version": "1.0.26",
       "category": "user",
       "keywords": [
         "ffmpeg",
@@ -717,13 +717,17 @@
         "music-generation",
         "text-to-music",
         "song",
+        "lyrics",
+        "songwriting",
+        "prompt",
         "minimax",
         "mlx",
         "apple-silicon"
       ],
       "skills": [
         "./skills/convert-audio",
-        "./skills/generate-music-local"
+        "./skills/generate-music-local",
+        "./skills/generate-music-prompts"
       ]
     },
     {
