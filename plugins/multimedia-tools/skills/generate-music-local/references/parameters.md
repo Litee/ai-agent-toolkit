@@ -1,4 +1,8 @@
-# MiniMax-Music3 MLX — Parameter Reference
+# MiniMax-Music3 MLX / YuE2 — Parameter Reference
+
+_Documents the `minimax-mlx` backend (MiniMax-Music3 MLX). The default backend is
+`yue2` (YuE2-3B on MPS) — see SKILL.md → Backends for its extra flags
+`--yue2-model`, `--vae`, `--cot`, `--memory-budget`._
 
 Detailed guidance for the `generate.py` arguments used by the `generate-music-local`
 skill. The native CLI is:
@@ -164,6 +168,35 @@ in the 2–4 min window, request `--seconds 300` (the max) with a fresh seed (me
 → 197.2 s), then check the actual duration and re-roll the seed if it's still short.
 Duration swings heavily with seed even for lyricized tracks, so always verify the real
 duration with ffprobe before calling a track done.
+
+### `--seconds` / `--min-seconds` on `yue2-mlx` (duration is not a switch)
+
+`yue2-mlx` has **no native duration flag**. Length is decided by the model from
+the lyrics, bounded by a token budget at **25 latent frames per second**
+(48000 Hz / 1920 samples per frame). The backend converts your flags:
+
+| Flag | Maps to | Meaning |
+|---|---|---|
+| `--seconds N` | `semantic.max_tokens = N × 25` | hard ceiling — generation stops here |
+| `--min-seconds N` | `semantic.min_tokens = N × 25` | floor — suppresses the end token until reached |
+
+Measured scaling for English lyrics: roughly **17 semantic tokens per lyric word**
+(a 524-word lyric produced 8,931 tokens ≈ 357 s; a 598-word lyric reached the
+10,400-token floor). Practical consequences:
+
+- **Lyrics drive length.** A short lyric will not fill a long `--seconds`; the
+  model ends when it decides the song is done. To reach 3–4 minutes, write a full
+  multi-section lyric (Verse/Pre-Chorus/Chorus ×2–3 + Bridge/Outro, ~250–450 words).
+- For instrumentals, `[Instrumental]` carries almost no words, so length must come
+  from `--min-seconds` or from wordless-syllable filler.
+- The score stage has its own budget. `--cot full`/`melody` generate a symbolic
+  score first, and the backend lifts `abc.max_tokens` for long requests (a ~175 s
+  song used 1,904 score tokens; a 416 s song used 3,280).
+- Long requests also hold more attention context, so throughput declines across a
+  render: measured 45.6 → 41.3 tokens/s by ~14k context on a 7-minute song.
+
+Check the tail of the log: `Finished (generation limit reached)` means the
+`--seconds` ceiling was hit; no such note means the model ended the song itself.
 
 ## `--steps` (default 30, range 1–30)
 
