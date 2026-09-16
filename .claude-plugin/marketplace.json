@@ -5,7 +5,7 @@
   },
   "metadata": {
     "description": "Collection of AI agent skills for AWS CDK development, AWS documentation search, AWS Athena SQL querying, CloudWatch Logs Insights querying, Anki flashcard management, Obsidian vault management, audio conversion, subtitle/caption conversion, podcast generation, safe terminal command registration, image generation, ML system design interviews, and markdown note search",
-    "version": "1.1.49",
+    "version": "1.1.50",
     "homepage": "https://github.com/Litee/ai-agent-toolkit"
   },
   "plugins": [
@@ -697,7 +697,7 @@
       "description": "This plugin contains three skills: converting audio files between formats using ffmpeg (MP3, WAV, AAC, FLAC, Opus, OGG) with bitrate/speed adjustment and ID3 tag editing; generating full songs or instrumentals locally on Apple Silicon with three engines — YuE2-3B on native MLX from audio.cpp GGUF weights (torch-free), YuE2-3B on PyTorch MPS, and the MiniMax-Music3 MLX port (text-to-music from a style prompt + lyrics); and authoring structured music prompts + lyrics for directed iteration (generate-music-prompts).",
       "source": "./plugins/multimedia-tools",
       "strict": false,
-      "version": "1.0.26",
+      "version": "1.0.27",
       "category": "user",
       "keywords": [
         "ffmpeg",

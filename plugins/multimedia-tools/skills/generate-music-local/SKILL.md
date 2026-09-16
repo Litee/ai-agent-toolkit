@@ -1,6 +1,6 @@
 ---
 name: generate-music-local
-description: Use when generating full songs or instrumental tracks locally on Apple Silicon from a text prompt and lyrics (text-to-music). Triggers on "generate music", "create a song", "make a track", "AI music generation", "compose music", "music from lyrics", "text-to-music", "instrumental music", "local music model", "MiniMax music", "YuE2", "yue2-mlx", or "GGUF music". Multi-backend: YuE2-3B via native MLX from GGUF weights (torch-free), YuE2-3B via PyTorch MPS, and MiniMax-Music3 MLX.
+description: Use when generating full songs or instrumental tracks locally on Apple Silicon from a text prompt and lyrics (text-to-music). Triggers on "generate music", "create a song", "make a track", "AI music generation", "compose music", "music from lyrics", "text-to-music", "instrumental music", "local music model", "MiniMax music", "YuE2", "yue2-mlx", or "GGUF music". Multi-backend — YuE2-3B via native MLX from GGUF weights (torch-free), YuE2-3B via PyTorch MPS, and MiniMax-Music3 MLX.
 ---
 
 # Generate Music (multi-backend, Apple Silicon)
