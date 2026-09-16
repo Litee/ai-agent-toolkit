@@ -694,7 +694,7 @@
     },
     {
       "name": "multimedia-tools",
-      "description": "This plugin contains three skills: converting audio files between formats using ffmpeg (MP3, WAV, AAC, FLAC, Opus, OGG) with bitrate/speed adjustment and ID3 tag editing; generating full songs or instrumentals locally on Apple Silicon with the MiniMax-Music3 MLX port (text-to-music from a prompt + lyrics); and authoring structured music prompts + lyrics for directed iteration (generate-music-prompts).",
+      "description": "This plugin contains three skills: converting audio files between formats using ffmpeg (MP3, WAV, AAC, FLAC, Opus, OGG) with bitrate/speed adjustment and ID3 tag editing; generating full songs or instrumentals locally on Apple Silicon with three engines — YuE2-3B on native MLX from audio.cpp GGUF weights (torch-free), YuE2-3B on PyTorch MPS, and the MiniMax-Music3 MLX port (text-to-music from a style prompt + lyrics); and authoring structured music prompts + lyrics for directed iteration (generate-music-prompts).",
       "source": "./plugins/multimedia-tools",
       "strict": false,
       "version": "1.0.26",
@@ -720,6 +720,9 @@
         "lyrics",
         "songwriting",
         "prompt",
+        "yue2",
+        "yue2-mlx",
+        "gguf",
         "minimax",
         "mlx",
         "apple-silicon"

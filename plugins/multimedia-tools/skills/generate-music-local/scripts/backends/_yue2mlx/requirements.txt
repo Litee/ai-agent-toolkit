@@ -1,0 +1,22 @@
+# Torch-free runtime requirements for the yue2-mlx backend.
+#
+# The vendored runtime imports no torch and no vLLM: it needs MLX, and
+# mlx-lm's Qwen3 implementation for the AR backbone. transformers is a real
+# dependency of mlx-lm (and probes for torch via importlib.util.find_spec, which
+# answers "not found" gracefully here).
+#
+# Versions are pinned to the combination the vendored runtime was validated
+# against. mlx-lm's Qwen3 modules are the AR backbone, so a bump there is a
+# behavioural change, not just a dependency bump.
+#
+# huggingface_hub is deliberately NOT pinned: transformers 5.10.4 requires
+# >=1.5.0, and the runtime only imports it function-locally (weight downloads go
+# through the `hf` CLI, which is installed separately). Pinning mlx-Yue's 0.36.2
+# makes the set unsatisfiable.
+mlx==0.32.2
+mlx-lm==0.31.3
+transformers==5.10.4
+numpy==2.2.6
+soundfile==0.13.1
+tiktoken==0.12.0
+psutil==7.2.2

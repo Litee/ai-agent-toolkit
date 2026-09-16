@@ -1,18 +1,22 @@
 ---
 name: generate-music-local
-description: Use when generating full songs or instrumental tracks locally on Apple Silicon from a text prompt and lyrics (text-to-music). Triggers on "generate music", "create a song", "make a track", "AI music generation", "compose music", "music from lyrics", "text-to-music", "instrumental music", "local music model", or "MiniMax music". Uses the MiniMax-Music3 MLX port (PocketAiHub/MiniMax-Music3-MLX).
+description: Use when generating full songs or instrumental tracks locally on Apple Silicon from a text prompt and lyrics (text-to-music). Triggers on "generate music", "create a song", "make a track", "AI music generation", "compose music", "music from lyrics", "text-to-music", "instrumental music", "local music model", "MiniMax music", "YuE2", "yue2-mlx", or "GGUF music". Multi-backend: YuE2-3B via native MLX from GGUF weights (torch-free), YuE2-3B via PyTorch MPS, and MiniMax-Music3 MLX.
 ---
 
-# Generate Music (MiniMax-Music3 MLX)
+# Generate Music (multi-backend, Apple Silicon)
 
-Generate complete songs and instrumentals **locally on Apple Silicon** using the
-[MiniMax-Music3 MLX port](https://huggingface.co/PocketAiHub/MiniMax-Music3-MLX)
-(PocketAiHub). The port runs the full autoregressive → flow-DiT → DAV synthesis
-path with MLX — no CUDA, no ComfyUI, no cloud API. Output is a 44.1 kHz, 16-bit
-stereo WAV.
+Generate complete songs and instrumentals **locally on Apple Silicon** from a text
+prompt and lyrics. Three engines are available through one entry point:
 
-This is an **independent community port**, not an official MiniMax release. The
-bundled weights are unchanged copies of the pinned Comfy-Org INT8 repack.
+| `--backend` | Engine | Runtime | Output |
+|---|---|---|---|
+| `yue2-mlx` | YuE2-3B (audio.cpp **GGUF** Q8_0 + F16 VAE) | **native MLX**, torch-free (vendored) | 48 kHz stereo |
+| `yue2` *(default)* | YuE2-3B (m-a-p) + YuE2-Vae | PyTorch **MPS** (`yue2_infer` wheel) | 48 kHz stereo |
+| `minimax-mlx` | [MiniMax-Music3 MLX](https://huggingface.co/PocketAiHub/MiniMax-Music3-MLX) port | MLX | 44.1 kHz 16-bit stereo |
+
+All three run on-device — no CUDA, no cloud API. Each is an independent
+community port with its own licences; weights are the binding constraint, not
+the code (see each backend and **Licences** below).
 
 ## ⚠️ License — read before generating
 
@@ -30,7 +34,7 @@ This port targets **Apple Silicon macOS only**:
 - Apple Silicon Mac (M1/M2/M3/M4/M5)
 - macOS 14 (Sonoma) or newer
 - Python 3.11–3.13 (3.11 recommended)
-- **Memory: 32 GB works only for short clips; 48 GB is the practical minimum for full 2–4 min songs, and 64 GB is recommended.** Measured during eval: a 180 s @ 30 steps clip peaked at **~56 GB system memory used** (8 GB free on a 64 GB Mac) with no OOM. Generation is memory-heavy, batch size 1.
+- **Memory: 32 GB works only for short clips; 48 GB is the practical minimum for full 2–4 min songs, and 64 GB is recommended.** Measured during eval: a 180 s @ 30 steps clip peaked at **~56 GB system memory used** (8 GB free on a 64 GB Mac) with no OOM. Generation is memory-heavy, batch size 1. Backend memory guards: `minimax-mlx` refuses to load below **48 GB** free, `yue2` below **8 GB**, `yue2-mlx` below **16 GB** (see Backends); all can wait via `--wait-for-memory`.
 - ~12 GB free disk for the repo + weights
 
 Intel Macs, Linux, Windows, and CPU-only execution are **not** supported.
@@ -50,16 +54,21 @@ prefer an explicit path.
 ### Option A — helper (recommended)
 
 ```bash
-# One-time setup: download weights into the HF cache + create venv + install MLX deps
+# YuE2 backend (default): style prompt + lyrics -> 48 kHz song
 python3.11 ${SKILL_DIR}/scripts/generate_music.py --setup \
+  --prompt "Pop rock, driving guitars, 126 BPM, male lead" \
+  --lyrics-file song.lyrics.txt --cot full --seed 20260815 \
+  --output ./song.wav
+
+# MiniMax-Music3 backend: pass --backend minimax-mlx explicitly
+python3.11 ${SKILL_DIR}/scripts/generate_music.py --setup --backend minimax-mlx \
   --prompt "Lo-fi hip hop, mellow piano, soft vinyl crackle, 84 BPM" \
   --lyrics "[Instrumental]" \
   --seconds 30 --steps 30 --seed 20260815 \
   --output ./song.wav
 
 # Later runs (weights + venv already present) omit --setup.
-# --model-dir is auto-detected from the HF cache; pass it only to override.
-python3.11 ${SKILL_DIR}/scripts/generate_music.py \
+python3.11 ${SKILL_DIR}/scripts/generate_music.py --backend minimax-mlx \
   --prompt "..." --lyrics-file lyrics.txt --seconds 60 --output ./song.wav
 ```
 
@@ -81,6 +90,39 @@ The helper runs `generate.py` with `PYTHONPATH` set to the resolved model dir, s
 works whether `--model-dir` is an HF-cache snapshot (auto-detected by default — no
 symlink needed) or a normal `--local-dir` checkout.
 
+## Backends
+
+`--backend` selects the model engine. **Default: `yue2`.** Common flags (`--prompt`, `--lyrics`/`--lyrics-file`, `--seed`, `--output`, `--setup`, `--wait-for-memory`) apply to all backends; each backend registers its own extra flags.
+
+### `yue2` (default)
+
+- **YuE2-3B** (m-a-p) + YuE2-Vae, run via the official `yue2_infer-0.1.5` wheel on PyTorch **MPS** (experimental — officially CUDA-only; works on Apple Silicon, ~30–35 min per ~3-min song on M-class).
+- Example: `python3.11 generate_music.py --prompt "Pop rock, driving guitars, 126 BPM, male lead" --lyrics-file song.lyrics.txt --cot full --output song.wav` (omitting --backend uses yue2).
+- Extra flags: `--yue2-model`, `--vae`, `--cot` (`full`|`melody`|`off`, default `full`), `--memory-budget` (default 12).
+- Memory guard: refuses to load below **8 GB** free RAM.
+- Output: 48 kHz stereo WAV. Weights: **CC BY-NC 4.0** (non-commercial). Venv at `~/Models/YuE2/.venv` (`--setup` installs pinned torch 2.10.0 / transformers 4.57.6 / the reviewed wheel).
+
+### `minimax-mlx`
+
+- **MiniMax-Music3 MLX** (PocketAiHub) — weights auto-detected from the HF hub cache; `python3.11 generate_music.py --backend minimax-mlx --prompt "…" --lyrics "…" --seconds 180 --steps 30 --output song.wav`.
+- Extra flags: `--model-dir`, `--seconds` (10–300), `--steps` (1–30).
+- Memory guard: refuses to load below **48 GB** free RAM (measured ~56 GB peak for a 180 s clip on a 64 GB Mac).
+- Output: 44.1 kHz / 16-bit stereo WAV.
+
+### `yue2-mlx`
+
+- **YuE2-3B** from the [audio.cpp GGUF repack](https://huggingface.co/audio-cpp/Yue2-3B-GGUF) (`yue2-3b-q8_0.gguf` + `yue2-vae-f16.gguf`), run on **native MLX** by a **vendored, torch-free** runtime that ships inside this skill. No PyTorch, no MPS fallback, and no clone or patch step at setup.
+- Example: `python3.11 generate_music.py --backend yue2-mlx --prompt "Melodic alt-rock, warm baritone, driving guitars, 92 BPM" --lyrics-file song.lyrics.txt --seconds 180 --min-seconds 170 --output song.wav`
+- Extra flags: `--seconds`, `--min-seconds`, `--cot` (`full`|`melody`|`off`, default `full`), `--precision` (`8bit`|`bf16`, default `8bit`), `--memory-budget` (GiB, default 16), `--vae-core-frames`, `--query-chunk-size`, `--work-dir`, `--resource-log`, `--reconvert`.
+- **Duration**: this model has no native duration flag. Length comes from the lyrics and a token budget at **25 frames/s**, which `--seconds`/`--min-seconds` convert to. `--min-seconds` sets the floor that suppresses the end token; omit it to let the song end naturally. Lyrics are the real length driver — a short lyric will not fill a long `--seconds`.
+- Memory guard: refuses to load below **16 GB** free RAM (measured peak *physical footprint* **11.05 GiB** for a 7-minute song). Running with less free RAM still completes but is markedly slower — measured **~6x** (13.8 vs 81.9 tokens/s) with zero swapping.
+- Setup: `--setup` builds a **torch-free Python 3.12** venv (via `uv`), fetches the GGUFs (~4.5 GB) plus pinned provenance files, and converts them into runtime artifacts (~10 GB, a few minutes) under `~/Models/Yue2-MLX-GGUF`. Setup is idempotent.
+- Output: 48 kHz stereo, WAV (float32) or FLAC — prefer `.flac` for long songs. Weights: **CC BY-NC 4.0** (non-commercial).
+- Reported at the end of each run: duration, sample rate, channels, peak, RMS and **clipped-sample count** (a clipped render is a defect).
+- **Upstream provenance:** the MLX runtime is a pinned, pre-patched vendor. `scripts/backends/_yue2mlx/VENDORED.md` records the upstream revisions, every local change (99 lines), the licence inventory and the re-vendor procedure; licence texts ship in `scripts/backends/_yue2mlx/licenses/`. Use it to pull upstream improvements or to fork.
+
+Adding a backend = drop a module into `scripts/backends/` exposing `NAME`, `DESCRIPTION`, `REQUIRED_RAM_GB`, `add_arguments()`, `run()` (plus an optional `ensure_venv()`), then register it in `BACKENDS`.
+
 ## Core Parameters
 
 | Parameter | Required | Default | Range / Notes |
@@ -88,13 +130,14 @@ symlink needed) or a normal `--local-dir` checkout.
 | `--prompt` | ✅ | — | Musical direction / caption. Use a **Structured Caption** (Global Metadata / Vocal Details / Arrangement) for precise control — see `references/parameters.md` |
 | `--lyrics` | ✅* | — | Lyrics text. Use `[Instrumental]` for no vocals. Mutually exclusive with `--lyrics-file` |
 | `--lyrics-file` | ✅* | — | UTF-8 file with lyrics (supports `[Verse]`/`[Chorus]` section tags). Mutually exclusive with `--lyrics` |
-| `--seconds` | — | `60` | **10–300** (float). Duration of the generated clip |
-| `--steps` | — | `30` | **1–30** (int). Flow-DiT sampling steps. 30 = best quality; 10–15 is fine for drafts |
+| `--seconds` | — | `60` | **10–300** (float). Duration of the generated clip (MiniMax backend only) |
+| `--steps` | — | `30` | **1–30** (int). Flow-DiT sampling steps. 30 = best quality; 10–15 is fine for drafts (MiniMax backend only) |
 | `--seed` | — | `7` | `0 … 2**31-1`. Deterministic for the pinned runtime + MLX versions |
 | `--model-dir` | — | auto (HF cache snapshot) | Path to the downloaded repo. **Auto-detected** from the Hugging Face hub cache, so usually omitted; pass it to override (e.g. a `--local-dir` checkout). A normal `--local-dir` checkout or an HF-cache snapshot both work; the helper sets `PYTHONPATH` automatically. Native `generate.py` defaults to its own folder |
 | `--output` | — | `song.wav` | Output WAV path (44.1 kHz / 16-bit / stereo) |
-| `--wait-for-memory` | — | `0` | If free RAM < 48 GB, wait up to this many seconds (re-checking every 10 s) for enough memory before loading the model. `0` = abort immediately with guidance. |
+| `--wait-for-memory` | — | `0` | If free RAM is below the backend's threshold (48 GB `minimax-mlx` / 8 GB `yue2` / 16 GB `yue2-mlx`), wait up to this many seconds (re-checking every 10 s) before loading the model. `0` = abort immediately with guidance. |
 | `--setup` | — | off | Download weights + create venv + install requirements if missing (idempotent) |
+| `--backend` | — | `yue2` | Model engine: `yue2` (default), `yue2-mlx`, or `minimax-mlx`. Each backend adds its own flags — see **Backends** below |
 
 \* Exactly one of `--lyrics` / `--lyrics-file` is required.
 
@@ -187,6 +230,14 @@ ffmpeg -i song.wav 2>&1 | grep -E "Duration|Hz"      # expect ~44.1 kHz, stereo
 python -m unittest tests/test_minimax_mlx_model.py   # repo's lightweight self-tests
 ```
 
+The helper emits **WAV only**. To deliver MP3s, prefer the sibling **`convert-audio`**
+skill if present (same `multimedia-tools` plugin) — it covers format, bitrate and
+ID3 options (`-b:a 320k` = max-quality MP3). Fallback one-liner:
+
+```bash
+ffmpeg -n -i song.wav -b:a 320k song.mp3 && rm song.wav   # yue2: 48 kHz, minimax-mlx: 44.1 kHz
+```
+
 For a real signal check (channel RMS, peak, stereo correlation, clipped samples),
 load the WAV with `wave`/`numpy` or run the repo's `examples/rock-and-roll-60s.json`
 reference. A healthy render has: channel peaks < 1.0, non-trivial stereo correlation,
@@ -199,7 +250,11 @@ requested duration.
 
 - Apple Silicon macOS only (no Intel/Linux/Windows/CUDA/CPU).
 - Memory-intensive, batch size 1.
-- Uses the pinned Comfy-Org **INT8** weight set, not upstream full-precision Diffusers.
+- **Per-backend differences:**
+  - `minimax-mlx` uses the pinned Comfy-Org **INT8** weight set, not upstream full-precision Diffusers.
+  - `yue2-mlx` has no duration flag: length is driven by lyric length plus the token budget (25 frames/s). A short lyric will not fill a long `--seconds`.
+  - `yue2-mlx` writes 48 kHz stereo **float32 WAV** (or FLAC). Prefer `.flac` for songs over ~2 minutes; convert with the `convert-audio` skill (320 kbps one-liner below).
+  - `yue2-mlx` renders can run hot at long durations: a 7-minute render measured **70 samples at 0 dBFS** (hard-limited by the decoder, RMS −14.2 dB) while 60-second renders came back clean. Every run reports its clipped-sample count — treat non-zero as a defect and re-seed.
 - Prompts and section tags are generative guidance, not guarantees — lyrics, tempo,
   instrumentation, and structure may vary.
 - Seeded output is deterministic **for the pinned runtime + MLX versions** but will
@@ -231,10 +286,10 @@ requested duration.
 
 ## Summary
 
-- Local, on-device music generation for Apple Silicon only.
-- One-time: `hf download` (~12 GB) + Python 3.11 venv + `pip install -r requirements.txt`.
+- Local, on-device music generation for Apple Silicon only. Three backends behind one CLI: `yue2-mlx` (native MLX, torch-free, GGUF weights), `yue2` (PyTorch MPS, default), `minimax-mlx` (MiniMax-Music3 MLX).
 - Required: `--prompt` and exactly one of `--lyrics` / `--lyrics-file`.
-- `--seconds` 10–300 (standard songs 120–240 / 2–4 min), `--steps` 1–30 (30 = best), `--seed` for reproducibility.
-- Output: 44.1 kHz / 16-bit / stereo WAV.
-- Save the prompt (`<slug>.prompt.txt`) and lyrics (`<slug>.lyrics.txt`) next to the output `.wav` so each song is reproducible.
-- Review the MiniMax-Music3 Community License before use.
+- Output: 48 kHz stereo for both YuE2 backends, 44.1 kHz/16-bit for `minimax-mlx`.
+- `--seconds` 10–300 for `minimax-mlx`; for `yue2-mlx`, `--seconds`/`--min-seconds` set the token budget (length is really lyric-driven); `yue2` takes no duration flag.
+- One-time `--setup` per backend: `yue2-mlx` builds a torch-free Python 3.12 venv and converts the GGUFs (~10 GB); `yue2` installs the reviewed wheel; `minimax-mlx` downloads ~12 GB.
+- Save the prompt and lyrics next to the output so each song is reproducible, and report the output path.
+- **Review the licences before use.** YuE2 weights (both `yue2` and `yue2-mlx`) are **CC BY-NC 4.0 — non-commercial**; MiniMax-Music3 is under its Community License. Licence texts ship with each backend, and `yue2-mlx`'s upstream provenance is recorded in `scripts/backends/_yue2mlx/VENDORED.md`.

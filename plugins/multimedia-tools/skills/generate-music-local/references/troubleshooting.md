@@ -132,6 +132,77 @@ Repo self-tests (lightweight, no generation):
 python -m unittest tests/test_minimax_mlx_model.py
 ```
 
+## `yue2-mlx` (GGUF weights on native MLX)
+
+These are the failures actually observed while bringing this backend up on an
+M5 Pro / 64 GB / macOS 26.6.2, in the order they appeared.
+
+### `mise ERROR No version is set for shim: python3.12`
+
+The backend needs Python **3.12** exactly (the MLX runtime is validated on 3.12).
+`shutil.which("python3.12")` can return a **mise/asdf/pyenv shim** that exists on
+PATH but exits 1 — so the backend now prefers `uv`, which fetches a real 3.12
+itself, and only falls back to a PATH interpreter after proving it reports 3.12.
+Fix: `brew install uv`, or `brew install python@3.12` and check `python3.12 -V`
+directly.
+
+### `No solution found when resolving dependencies` (huggingface-hub conflict)
+
+`transformers==5.10.4` requires `huggingface-hub>=1.5.0`, but the upstream MLX port
+pins `0.36.2`. The backend's `requirements.txt` deliberately does **not** pin
+`huggingface_hub` (the runtime only imports it function-locally, and weight
+downloads go through the `hf` CLI). If you re-add the pin, the set becomes
+unsatisfiable.
+
+### `ModuleNotFoundError: No module named 'yue2'`
+
+Would mean the vendor is broken: the runtime is meant to be self-contained. Two
+latent `yue2` dependencies were found and fixed during bring-up (an
+`__import__("yue2")` provenance hash, and a `version("mlx-yue")` probe for a
+distribution that is vendored rather than installed). See `VENDORED.md` change 5.
+
+### `Converted artifacts not found under ~/Models/Yue2-MLX-GGUF`
+
+Run with `--setup`. First-run setup creates the venv, fetches the GGUFs (~4.5 GB)
+and converts them (~10 GB, a few minutes). It is idempotent — re-running skips
+whatever already exists. Use `--reconvert` to force a rebuild.
+
+### `MemoryError: Process footprint X.XX GiB exceeds 16 GiB budget`
+
+This is the runtime's guard reporting **true memory usage** (the process's own
+physical footprint, the quantity `footprint -p` reports) — not a system-wide
+pressure heuristic. Measured peak is ~11 GiB for a 7-minute song.
+Options: raise `--memory-budget`, or free memory. Note the guard deliberately
+ignores ambient signals: macOS memory-pressure level and swap growth are recorded
+as evidence but never abort a run.
+
+### A render that is far slower than expected (~6x)
+
+Memory pressure, not the model. Identical weights/request/seed measured **13.8
+tokens/s at 23.9 GiB free vs 81.9 tokens/s at 47.5 GiB** — with **zero swapping**
+in both cases. Oversubscribing the GPU (a second generator on the same Mac) has
+the same effect. Free memory and re-run rather than waiting it out.
+
+### Expected render times
+
+Long renders are dominated by the **NAR** stage, not the VAE. Measured: a 60 s
+song in 57.5 s (RTF 0.96 — abc 9.2 s, semantic 16.6 s, NAR 29.6 s, VAE 2.0 s); a
+175 s song in 267.5 s (RTF 1.53); a 7-minute song in 1642 s (RTF 3.9 — semantic
+at ~17-41 tokens/s depending on context length, NAR 834 s). Long-form costs more
+per second of audio.
+
+### `Finished (generation limit reached)` and a short song
+
+The token budget (`--seconds` × 25 frames/s) capped it. Raise `--seconds`. If the
+song ends early *only* on long requests, the **lyrics** are too short — length is
+lyric-driven, and `--min-seconds` sets the floor.
+
+### Reported `clipped samples: N` (N > 0)
+
+A defect, not a preference: the decoder hard-limits at full scale. Observed on a
+7-minute render (70 samples at exactly 0 dBFS, RMS −14.2 dB) while 60-second
+renders came back clean. Re-render with a different `--seed`, or shorten.
+
 ## Platform / capability checks
 
 - **Not Apple Silicon / not macOS 14+**: this port will not run. There is no
