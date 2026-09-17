@@ -41,6 +41,17 @@ PROVENANCE_FILES = ("config.json", "qwen.tiktoken", "LICENSE", "THIRD_PARTY_NOTI
                     "licenses/SnakeBeta-NVIDIA-MIT.txt", "licenses/stable-audio-tools-MIT.txt")
 
 FRAMES_PER_SECOND = 25          # 48000 Hz / 1920 samples per latent frame
+# This model has no duration conditioning: it ends when it decides to, by emitting
+# its end token. Treating --seconds as a hard cap therefore CUTS songs mid-phrase
+# (measured: renders that hit the cap ended at 58-138% of the song's own RMS, i.e.
+# at full energy, and stopped at exactly the requested second). So --seconds is a
+# *target* and the cap gets headroom, letting the model reach a real ending.
+SECONDS_HEADROOM = 1.5
+# `len(prefix) + max_tokens <= CONTEXT` is enforced by the runtime, so the cap has
+# to leave room for the lyrics + generated score. Measured prefixes: 49 (cot=off),
+# 896 (60 s cot=full), 2380 (175 s), ~4200 (416 s) -- 8192 is comfortably above all.
+CONTEXT_TOKENS = 24576
+PREFIX_RESERVE_TOKENS = 8192
 VENDOR_DIR = Path(__file__).resolve().parent / "_yue2mlx"
 DEFAULT_WORK_DIR = Path.home() / "Models" / "Yue2-MLX-GGUF"
 
@@ -64,8 +75,13 @@ def _hf_cache_snapshot(slug: str) -> Path | None:
 def add_arguments(p: argparse.ArgumentParser) -> None:
     p.add_argument("--seconds", type=float, default=None,
                    help="target song length in seconds (default 180). This model has no "
-                        "native duration flag: length comes from the lyrics and a token "
-                        "budget at 25 frames/s, which this converts to.")
+                        "native duration flag: it ends when it decides to, driven by the "
+                        "lyrics. --seconds is a target, not a guarantee, and the token cap "
+                        "gets 1.5x headroom so the model can reach a real ending.")
+    p.add_argument("--max-seconds", type=float, default=None,
+                   help="explicit hard cap in seconds, replacing the 1.5x headroom. A render "
+                        "that reaches this cap is cut off mid-phrase; use only when you "
+                        "need to bound cost.")
     p.add_argument("--min-seconds", type=float, default=None,
                    help="guaranteed minimum length in seconds (sets the token floor that "
                         "suppresses the end token). Omit to let the model end naturally.")
@@ -270,6 +286,31 @@ if clipped:
     print(f"[audio] WARNING: {clipped} sample(s) at or above full scale -- the render "
           f"clipped and was hard-limited by the decoder.", flush=True)
 print(f"[timing] {json.dumps(result.timing)}", flush=True)
+
+# Independent tail check: a natural ending decays toward silence, a cap-truncated
+# one stops at full energy. This catches abrupt endings whatever their cause.
+tail = audio[-max(1, int(result.sample_rate * 0.5)):]
+tail_rms = float(np.sqrt((tail ** 2).mean()))
+ratio = tail_rms / max(rms, 1e-9)
+print(f"[audio] tail RMS {tail_rms:.4f} vs overall {rms:.4f} (ratio {ratio:.2f})", flush=True)
+trunc = result.truncated or {}
+if trunc.get("semantic") or trunc.get("abc"):
+    print("[audio] WARNING: generation hit its token cap -- the ending is abrupt, not "
+          "musical. Raise --seconds, or shorten the lyrics.", flush=True)
+elif ratio > 0.5:
+    print(f"[audio] WARNING: the render ends at {ratio:.0%} of its average energy, which "
+          "usually means it was cut off rather than resolved.", flush=True)
+
+# The floor is the mirror problem: min_tokens suppresses the end token, so a song
+# that wanted to finish earlier is held open and then ends at the first opportunity.
+n_sem = len(result.semantic.tokens)
+floor = cfg.get("generation", {}).get("semantic", {}).get("min_tokens", 0)
+if floor and n_sem <= floor + 40:
+    print(f"[audio] WARNING: the song ran only {n_sem - floor} tokens past the "
+          f"--min-seconds floor ({floor} tokens), so the model was held open and then "
+          f"ended at the first opportunity -- a forced ending. Lower --min-seconds, or "
+          f"lengthen the lyrics.", flush=True)
+print(f"[tokens] semantic {n_sem} (floor {floor or 0})", flush=True)
 """
 
 
@@ -285,12 +326,24 @@ def run(args: argparse.Namespace) -> Path:
         lyrics = Path(args.lyrics_file).read_text(encoding="utf-8")
 
     seconds = 180.0 if args.seconds is None else float(args.seconds)
-    generation = {"semantic": {"max_tokens": int(round(seconds * FRAMES_PER_SECOND))}}
+    if args.max_seconds is not None:
+        cap_seconds = float(args.max_seconds)
+    else:
+        cap_seconds = seconds * SECONDS_HEADROOM
+    abc_budget = max(4096, int(round(seconds * 9)))
+    # Clamp so that prefix + budget still fits the 24576 context.
+    ceiling = CONTEXT_TOKENS - PREFIX_RESERVE_TOKENS
+    max_tokens = int(round(cap_seconds * FRAMES_PER_SECOND))
+    if max_tokens > ceiling:
+        print(f"[run] note: cap clamped from {max_tokens} to {ceiling} tokens "
+              f"({ceiling / FRAMES_PER_SECOND:.0f}s) to fit the context window", flush=True)
+        max_tokens = ceiling
+    generation = {"semantic": {"max_tokens": max_tokens}}
     if args.min_seconds is not None:
         generation["semantic"]["min_tokens"] = int(round(float(args.min_seconds) * FRAMES_PER_SECOND))
     # A long song needs a long score; the runtime's default abc cap (4096) is what
     # a ~8 token/second score needs, so only lift it for very long requests.
-    generation["abc"] = {"max_tokens": max(4096, int(round(seconds * 9)))}
+    generation["abc"] = {"max_tokens": abc_budget}
 
     output = Path(args.output).resolve()
     resource_log = args.resource_log
