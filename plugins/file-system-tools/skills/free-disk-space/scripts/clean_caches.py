@@ -132,6 +132,7 @@ def build_cli_targets() -> list[dict]:
             "name": "npm",
             "description": "npm cache (~/.npm)",
             "cmd": "npm",
+            "size_cmds": [["npm", "config", "get", "cache"]],
             "size_paths": [Path.home() / ".npm"],
             "clean_cmds": [["npm", "cache", "clean", "--force"]],
         },
@@ -140,6 +141,7 @@ def build_cli_targets() -> list[dict]:
             "name": "pip",
             "description": "pip cache (~/.cache/pip or ~/Library/Caches/pip)",
             "cmd": "pip",
+            "size_cmds": [["pip", "cache", "dir"]],
             "size_paths": [
                 Path.home() / "Library" / "Caches" / "pip" if is_mac
                 else Path.home() / ".cache" / "pip"
@@ -164,12 +166,15 @@ def build_cli_targets() -> list[dict]:
         },
         {
             # https://pkg.go.dev/cmd/go#hdr-Remove_cached_files
+            # Two independent caches: GOCACHE (build) and GOMODCACHE (modules).
             "name": "go",
-            "description": "Go build and module caches (~/.cache/go)",
+            "description": "Go build + module caches (GOCACHE, GOMODCACHE)",
             "cmd": "go",
+            "size_cmds": [["go", "env", "GOCACHE", "GOMODCACHE"]],
             "size_paths": [
-                Path.home() / "Library" / "Caches" / "go" if is_mac
-                else Path.home() / ".cache" / "go"
+                Path.home() / "Library" / "Caches" / "go-build" if is_mac
+                else Path.home() / ".cache" / "go-build",
+                Path.home() / "go" / "pkg" / "mod",
             ],
             "clean_cmds": [
                 ["go", "clean", "-cache"],
@@ -181,6 +186,7 @@ def build_cli_targets() -> list[dict]:
             "name": "brew",
             "description": "Homebrew cache (~/Library/Caches/Homebrew)",
             "cmd": "brew",
+            "size_cmds": [["brew", "--cache"]],
             "size_paths": [Path.home() / "Library" / "Caches" / "Homebrew"],
             "clean_cmds": [["brew", "cleanup", "--prune=all"]],
         },
@@ -207,12 +213,16 @@ def build_cli_targets() -> list[dict]:
         },
         {
             # https://docs.astral.sh/uv/concepts/cache/
+            # uv follows XDG on every platform, macOS included, so its cache is
+            # ~/.cache/uv -- NOT ~/Library/Caches/uv. Ask the tool; the static
+            # paths below are a fallback only.
             "name": "uv",
-            "description": "uv cache (~/.cache/uv or ~/Library/Caches/uv)",
+            "description": "uv cache (~/.cache/uv)",
             "cmd": "uv",
+            "size_cmds": [["uv", "cache", "dir"]],
             "size_paths": [
-                Path.home() / "Library" / "Caches" / "uv" if platform.system() == "Darwin"
-                else Path.home() / ".cache" / "uv"
+                Path.home() / ".cache" / "uv",
+                Path.home() / "Library" / "Caches" / "uv",
             ],
             "clean_cmds": [["uv", "cache", "clean"]],
         },
@@ -370,6 +380,9 @@ def print_report(
 
     print(sep)
     print(f"{'TOTAL':<{name_col}} {format_size(total):>{size_col}}")
+    print("\nNote: sizes are estimates. CLI targets measure the cache path the")
+    print("tool reports (a lower bound if a tool cannot report it); directory")
+    print("targets sum apparent file size (an upper bound on reclaimable).")
     print(f"\nCurrent free disk space: {format_size(free_before)}")
     print()
 
@@ -378,13 +391,49 @@ def print_report(
 # Measurement
 # ---------------------------------------------------------------------------
 
+def resolve_size_paths(t: dict) -> list[Path]:
+    """Return a target's cache paths, preferring what the tool reports itself.
+
+    ``size_cmds`` are authoritative: each command prints one cache location per
+    line (e.g. ``uv cache dir``, ``go env GOCACHE GOMODCACHE``). ``size_paths``
+    are a fallback for when the tool is absent, too old, or the command fails.
+
+    Static paths must never be trusted alone: tools move their caches. uv
+    follows XDG on every platform including macOS, so its cache is
+    ``~/.cache/uv`` and never ``~/Library/Caches/uv`` -- a stale guess measures
+    0 bytes and silently under-reports.
+    """
+    paths: list[Path] = []
+    seen: set[str] = set()
+
+    def add(path: Path) -> None:
+        key = os.path.realpath(path)
+        if key not in seen:
+            seen.add(key)
+            paths.append(path)
+
+    for cmd in t.get("size_cmds", []):
+        if not which(cmd[0]):
+            continue
+        result = run_cli(cmd, capture=True)
+        if result.returncode != 0:
+            continue
+        for line in result.stdout.splitlines():
+            line = line.strip()
+            if line.startswith(("/", "~")):
+                add(Path(line).expanduser())
+    for path in t.get("size_paths", []):
+        add(path)
+    return paths
+
+
 def measure_cli_rows(targets: list[dict]) -> list[tuple]:
     rows = []
     for t in targets:
         if not which(t["cmd"]):
             rows.append((t["name"], t["description"], 0, "not installed"))
             continue
-        size = sum(get_dir_size(p) for p in t.get("size_paths", []) if p.exists())
+        size = sum(get_dir_size(p) for p in resolve_size_paths(t) if p.exists())
         manual_note = t.get("manual_note", "")
         rows.append((t["name"], t["description"], size, manual_note))
     return rows

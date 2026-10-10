@@ -33,6 +33,13 @@ du -sh ~/* | sort -rh | head -20
 - NEVER run raw `rm -rf` on cache directories manually; the script handles safety checks
 - The manual CLI commands in this file are for reference only — the script invokes them internally
 
+### Reported sizes are estimates
+
+The two error directions differ, so do not read the total as exact:
+
+- **CLI-managed caches** are measured at the path the tool reports for itself (`uv cache dir`, `go env GOCACHE GOMODCACHE`, `npm config get cache`, `brew --cache`, `pip cache dir`), falling back to static paths only when the tool cannot answer. A tool that reports no location gets **under**-reported, so treat this column as a **lower bound**. Never trust a hardcoded path: uv follows XDG on macOS too, so its cache is `~/.cache/uv` and never `~/Library/Caches/uv`.
+- **Directory caches** sum apparent file size (`st_size`) with no block or hardlink accounting, so they can overstate what deletion frees — an **upper bound**. Compare with `du -sh` when the number matters.
+
 ## The Cleanup Script
 
 `${SKILL_DIR}/scripts/clean_caches.py` is the primary cleanup tool. It covers all cache types — CLI-managed (npm, pip, yarn, pnpm, go, brew, docker, etc.), directory-based (Maven, Gradle, JetBrains, etc.), and scan-based (node_modules under a given root).
@@ -48,7 +55,7 @@ python3 ${SKILL_DIR}/scripts/clean_caches.py --apply
 python3 ${SKILL_DIR}/scripts/clean_caches.py --apply --target maven gradle
 ```
 
-The script reports sizes and then confirms before deleting. The `--target` flag is for special cases where only specific caches need cleaning.
+The script reports sizes and then deletes immediately — there is no second confirmation prompt, so always read the dry-run output before passing `--apply`. The `--target` flag is for special cases where only specific caches need cleaning.
 
 ### Scan-based targets (require `--scan-root`)
 
@@ -121,11 +128,11 @@ The scanner does not descend into matched directories (so nested `node_modules` 
 | `pip` | `pip cache purge` | pip cache (`~/.cache/pip` or `~/Library/Caches/pip`) |
 | `yarn` | `yarn cache clean` | Yarn cache |
 | `pnpm` | `pnpm store prune` | pnpm store |
-| `go` | `go clean -cache && go clean -modcache` | Go build and module caches |
+| `go` | `go clean -cache && go clean -modcache` | Go build cache (`GOCACHE`) and module cache (`GOMODCACHE`) |
 | `brew` | `brew cleanup --prune=all` | Homebrew cache (`~/Library/Caches/Homebrew`) |
 | `rustup` | manual only | Lists unused toolchains — must remove manually with `rustup toolchain remove <name>` |
 | `docker` | `docker system prune --force` | Stopped containers, dangling images, build cache |
-| `uv` | `uv cache clean` | uv package manager cache (`~/.cache/uv` or `~/Library/Caches/uv`) |
+| `uv` | `uv cache clean` | uv package manager cache (`~/.cache/uv` — XDG on macOS too) |
 
 ### Directory caches (deleted directly by the script)
 
