@@ -177,8 +177,26 @@ the lyrics, bounded by a token budget at **25 latent frames per second**
 
 | Flag | Maps to | Meaning |
 |---|---|---|
-| `--seconds N` | `semantic.max_tokens = N × 25` | hard ceiling — generation stops here |
+| `--seconds N` | `semantic.max_tokens = N × 25 × 1.5` | **target** — the cap gets 50% headroom so the model can finish |
 | `--min-seconds N` | `semantic.min_tokens = N × 25` | floor — suppresses the end token until reached |
+| `--max-seconds N` | `semantic.max_tokens = N × 25` | explicit hard cap, replacing the 1.5× headroom |
+
+**Why the headroom exists (measured, not theoretical).** Treating `--seconds` as a hard
+cap cut songs mid-phrase. Across a 137-render batch: **31% stopped at exactly the cap**,
+and **86% of those cap-hits ended at full energy** (a hard cut) versus **23% of renders
+that ended naturally**. Overall **55% of all abrupt endings were attributable to the
+cap** — versus 23% baseline for the model itself, which also hard-stops ~35% of the time
+on the PyTorch/MPS reference backend. With headroom, renders reach their end token
+normally.
+
+Each run now reports both failure modes, so you can tell which one bit:
+
+- `Finished (generation limit reached)` + a loud tail → **hit the cap**; raise `--seconds`.
+- ending only a few tokens past `--min-seconds` → **the floor was binding**; the model
+  was held open and ended at the first opportunity. Lower `--min-seconds`, or lengthen
+  the lyrics so there is more song to write.
+- `tail RMS … (ratio …)` near 0 → the render decayed; a ratio above 0.5 means it stopped
+  at close to full energy.
 
 Measured scaling for English lyrics: roughly **17 semantic tokens per lyric word**
 (a 524-word lyric produced 8,931 tokens ≈ 357 s; a 598-word lyric reached the
